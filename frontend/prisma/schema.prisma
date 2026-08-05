@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,37 +8,82 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  name      String?
-  password  String
-  role      Role      @default(USER)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  talents   Talent[]
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String?
+  image         String?
+  company       String?
+  role          String    @default("USER")
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  employees     Employee[]
+  posts         Post[]
+  comments      Comment[]
+  subscriptions Subscription?
 }
 
-model Talent {
-  id        String    @id @default(cuid())
-  name      String
-  email     String    @unique
-  skills    String[]
-  level     Int
-  status    Status    @default(ACTIVE)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+model Employee {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  role        String
+  department  String?
+  hireDate    DateTime
+  riskScore   Int      @default(0)
+  status      String   @default("STABLE")
+  salary      Float?
+  skills      String[] @default([])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  predictedTurnover Boolean @default(false)
+  predictedTurnoverProbability Float @default(0)
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String?
+  content   String
   userId    String
-  user      User      @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  comments  Comment[]
+  likes     Like[]
+  tags      String[] @default([])
 }
 
-enum Role {
-  ADMIN
-  USER
-  MANAGER
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
 
-enum Status {
-  ACTIVE
-  INACTIVE
-  PENDING
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@unique([userId, postId])
+}
+
+model Subscription {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  plan        String   @default("FREE")
+  status      String   @default("ACTIVE")
+  stripeId    String?
+  currentPeriodEnd DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
