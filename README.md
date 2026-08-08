@@ -243,3 +243,101 @@ MIT
 **Made with ❤️ for HR professionals**
 
 *TalentPulse - Transformez votre gestion des talents*
+
+## 📜 Script de configuration Baserow
+
+Pour configurer automatiquement Baserow, exécutez le script suivant :
+
+```bash
+cd scripts
+python setup_baserow.py
+```
+
+**Prérequis** :
+- Avoir un compte Baserow et une clé API valide.
+- Ajouter les variables d'environnement dans un fichier `.env` :
+  ```env
+  BASEROW_API_KEY=your-api-key
+  BASEROW_BASE_URL=https://api.baserow.io
+  ```
+
+Le script va :
+1. Créer une base de données nommée "TalentPulse".
+2. Créer les tables nécessaires (Users, Talents, Predictions).
+3. Afficher les IDs pour que vous puissiez les ajouter à votre configuration.
+
+## 🚀 Déploiement complet
+
+### Option 1 : Vercel (Frontend + Backend)
+1. **Frontend** :
+   - Netlify est déjà configuré avec `netlify.toml`.
+   - Déployez via GitHub.
+
+2. **Backend** :
+   - Vercel supporte Python avec Serverless Functions.
+   - Ajoutez un projet Vercel pour le dossier `backend/`.
+   - Configurez les variables d'environnement.
+
+### Option 2 : Railway (Backend) + Netlify (Frontend)
+1. **Backend** :
+   - Déployez le dossier `backend/` sur Railway.
+   - Configurez les variables d'environnement.
+
+2. **Frontend** :
+   - Déployez sur Netlify.
+   - Ajoutez `NEXT_PUBLIC_BACKEND_URL` = URL de votre backend Railway.
+
+## 🔗 Intégration Zapier
+
+Vous pouvez connecter TalentPulse à Zapier pour automatiser des workflows. Voici quelques exemples :
+
+### Exemple 1 : Envoyer un email quand un talent est à risque
+1. **Déclencheur** : Nouvelle prédiction avec `score > 0.7`.
+2. **Action** : Envoyer un email via Gmail.
+
+### Exemple 2 : Créer une tâche dans Trello
+1. **Déclencheur** : Nouveau talent ajouté.
+2. **Action** : Créer une carte Trello.
+
+### Exemple 3 : Notifier Slack
+1. **Déclencheur** : Nouvelle prédiction.
+2. **Action** : Envoyer un message Slack.
+
+Pour configurer ces workflows, utilisez le connecteur Zapier avec votre compte Baserow.
+
+## 📊 Exemple de données Baserow
+
+### Table Users
+| ID | Email | Name | Role | Company | Is Active |
+|----|-------|------|------|---------|-----------|
+| 1 | admin@talentpulse.com | Admin | ADMIN | TalentPulse | true |
+| 2 | user@talentpulse.com | User | EMPLOYEE | TalentPulse | true |
+
+### Table Talents
+| ID | First Name | Last Name | Email | Position | Department | Performance Score | Engagement Score | Satisfaction Score | Turnover Risk | Status |
+|----|-------------|-----------|-------|----------|------------|-------------------|------------------|--------------------|---------------|--------|
+| 1 | John | Doe | john@talentpulse.com | Developer | IT | 0.9 | 0.8 | 0.7 | 0.1 | ACTIVE |
+| 2 | Jane | Smith | jane@talentpulse.com | Manager | HR | 0.6 | 0.5 | 0.4 | 0.8 | AT_RISK |
+
+### Table Predictions
+| ID | Talent ID | Score | Confidence | Recommendation |
+|----|-----------|-------|------------|----------------|
+| 1 | 2 | 0.8 | 0.9 | HIGH RISK: Jane Smith has a 80.0% turnover risk... |
+
+## 🎯 Prochaines étapes
+
+1. **Déployez le frontend** sur Netlify.
+2. **Déployez le backend** sur Railway ou Vercel.
+3. **Configurez Baserow** avec le script `setup_baserow.py`.
+4. **Testez l'intégration complète**.
+5. **Automatisez avec Zapier** pour des workflows avancés.
+
+## 💬 Support
+
+Si vous avez des questions ou des problèmes, n'hésitez pas à ouvrir une issue sur GitHub ou à me contacter directement.
+
+---
+
+**Made with ❤️ for HR professionals**
+
+*TalentPulse - Transformez votre gestion des talents*
