@@ -10,9 +10,10 @@ export default function EmployeesPage() {
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    name: '',
+    first_name: '',
+    last_name: '',
     email: '',
-    role: '',
+    position: '',
     department: ''
   });
 
@@ -26,13 +27,10 @@ export default function EmployeesPage() {
 
   const fetchEmployees = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/employees`, {
-        headers: {
-          'Authorization': `Bearer ${session?.accessToken}`
-        }
-      });
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://talentpulse-backend.up.railway.app';
+      const response = await fetch(`${backendUrl}/api/talents/`);
       const data = await response.json();
-      setEmployees(data.employees || []);
+      setEmployees(data || []);
     } catch (error) {
       console.error("Error fetching employees:", error);
     } finally {
@@ -43,7 +41,8 @@ export default function EmployeesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/employees`, {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://talentpulse-backend.up.railway.app';
+      const response = await fetch(`${backendUrl}/api/talents/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +51,7 @@ export default function EmployeesPage() {
         body: JSON.stringify(formData)
       });
       if (response.ok) {
-        setFormData({ name: '', email: '', role: '', department: '' });
+        setFormData({ first_name: '', last_name: '', email: '', position: '', department: '' });
         fetchEmployees();
       }
     } catch (error) {
@@ -72,11 +71,21 @@ export default function EmployeesPage() {
         <h2 className="text-xl font-semibold mb-4">Ajouter un employé</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
+            <label className="block mb-1">Prénom</label>
+            <input
+              type="text"
+              value={formData.first_name}
+              onChange={(e) => setFormData({...formData, first_name: e.target.value})}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div>
             <label className="block mb-1">Nom</label>
             <input
               type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              value={formData.last_name}
+              onChange={(e) => setFormData({...formData, last_name: e.target.value})}
               className="w-full p-2 border rounded"
               required
             />
@@ -95,13 +104,13 @@ export default function EmployeesPage() {
             <label className="block mb-1">Poste</label>
             <input
               type="text"
-              value={formData.role}
-              onChange={(e) => setFormData({...formData, role: e.target.value})}
+              value={formData.position}
+              onChange={(e) => setFormData({...formData, position: e.target.value})}
               className="w-full p-2 border rounded"
               required
             />
           </div>
-          <div>
+          <div className="md:col-span-2">
             <label className="block mb-1">Département</label>
             <input
               type="text"
@@ -128,15 +137,21 @@ export default function EmployeesPage() {
                 <th className="p-2 border">Email</th>
                 <th className="p-2 border">Poste</th>
                 <th className="p-2 border">Département</th>
+                <th className="p-2 border">Risque de turnover</th>
               </tr>
             </thead>
             <tbody>
               {employees.map(employee => (
                 <tr key={employee.id} className="border">
-                  <td className="p-2">{employee.name}</td>
+                  <td className="p-2">{employee.first_name} {employee.last_name}</td>
                   <td className="p-2">{employee.email}</td>
-                  <td className="p-2">{employee.role}</td>
+                  <td className="p-2">{employee.position || '-'}</td>
                   <td className="p-2">{employee.department || '-'}</td>
+                  <td className="p-2">
+                    <span className={`px-2 py-1 rounded text-white ${employee.turnover_risk > 0.7 ? 'bg-red-500' : employee.turnover_risk > 0.4 ? 'bg-yellow-500' : 'bg-green-500'}`}>
+                      {(employee.turnover_risk * 100).toFixed(1)}%
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
