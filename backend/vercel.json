@@ -2,18 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "backend/main.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxDuration": 30
-      }
+      "src": "main.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "backend/main.py",
-      "methods": ["GET", "POST", "PUT", "DELETE"]
+      "src": "/(.*)",
+      "dest": "main.py"
     }
   ]
 }
