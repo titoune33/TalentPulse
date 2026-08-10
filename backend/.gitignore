@@ -44,8 +44,7 @@ coverage/
 *.sqlite
 *.sqlite3
 
-# Models & ML artifacts
-models/
+# ML artifacts (models/ is a Python package and must be committed)
 data/
 
 # Environment
