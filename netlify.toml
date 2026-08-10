@@ -1,0 +1,13 @@
+[build]
+  command = "cd frontend && npm install && npm run build"
+  publish = "frontend/.next"
+  base = "frontend"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NEXT_PUBLIC_BACKEND_URL = "https://talentpulse-backend.vercel.app"
+
+[[redirects]]
+  from = "/*"
+  to = "/"
+  status = 200

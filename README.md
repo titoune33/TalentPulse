@@ -67,6 +67,9 @@ La base est pré-remplie avec 14 talents réalistes et 13 semaines d'historique 
 ## 🏃‍♂️ Setup local
 
 ### Prérequis
+1. Un compte Netlify
+2. Un compte Railway pour le backend
+3. Une base de données Supabase ou Baserow
 
 - Node.js 18+ et npm
 - Python 3.12+ (ou `uv`)
@@ -221,7 +224,7 @@ curl -X POST http://localhost:8000/api/auth/token \
   -d "username=demo@talentpulse.app&password=demo1234"
 ```
 
-## 📄 Licence
+## 📜 Licence
 
 MIT
 
