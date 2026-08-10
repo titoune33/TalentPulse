@@ -1,24 +1,39 @@
-"use client"
+import { forwardRef, type ButtonHTMLAttributes } from "react";
+import { Loader2 } from "lucide-react";
 
-import React from 'react'
+type Variant = "primary" | "secondary" | "ghost" | "danger";
+type Size = "sm" | "md" | "lg";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger'
-  children: React.ReactNode
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: Variant;
+  size?: Size;
+  loading?: boolean;
 }
 
-export default function Button({ variant = 'primary', children, ...props }: ButtonProps) {
-  const baseClasses = 'px-4 py-2 rounded-lg font-medium transition-colors'
-  
-  const variantClasses = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
-  }
+const sizes: Record<Size, string> = {
+  sm: "h-8 px-3 text-xs",
+  md: "h-10 px-4 text-sm",
+  lg: "h-11 px-6 text-sm",
+};
 
-  return (
-    <button className={`${baseClasses} ${variantClasses[variant]}`} {...props}>
+const variants: Record<Variant, string> = {
+  primary: "btn-primary",
+  secondary: "btn-secondary",
+  ghost: "btn-ghost",
+  danger: "btn-danger",
+};
+
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ variant = "primary", size = "md", loading, className = "", children, disabled, ...props }, ref) => (
+    <button
+      ref={ref}
+      className={`${variants[variant]} ${sizes[size]} ${className}`}
+      disabled={disabled || loading}
+      {...props}
+    >
+      {loading && <Loader2 className="h-4 w-4 animate-spin" />}
       {children}
     </button>
   )
-}
+);
+Button.displayName = "Button";

@@ -44,8 +44,9 @@ coverage/
 *.sqlite
 *.sqlite3
 
-# Models
+# Models & ML artifacts
 models/
+data/
 
 # Environment
 .env

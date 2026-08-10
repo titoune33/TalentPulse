@@ -1,0 +1,6 @@
+[build]
+  command = "npm install && npm run build"
+  publish = "out"
+
+[build.environment]
+  NEXT_PUBLIC_BACKEND_URL = "https://talentpulse-backend.onrender.com"

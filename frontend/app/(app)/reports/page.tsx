@@ -1,0 +1,197 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { FileText, Download, Printer, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/Button";
+import { Badge, riskTone } from "@/components/Badge";
+import { Spinner } from "@/components/Spinner";
+import { useTalents } from "@/hooks/useTalents";
+import { usePredictions } from "@/hooks/usePredictions";
+import { dateFR, pct } from "@/lib/format";
+
+export default function ReportsPage() {
+  const { talents, stats, loading } = useTalents();
+  const { predictions } = usePredictions();
+  const [generated, setGenerated] = useState(false);
+
+  const report = useMemo(() => {
+    if (!stats || talents.length === 0) return null;
+    const atRisk = talents.filter((t) => t.turnover_risk >= 0.7).sort(
+      (a, b) => b.turnover_risk - a.turnover_risk
+    );
+    const moderate = talents.filter(
+      (t) => t.turnover_risk >= 0.4 && t.turnover_risk < 0.7
+    );
+    const avgRisk = talents.reduce((s, t) => s + t.turnover_risk, 0) / talents.length;
+    return { atRisk, moderate, avgRisk };
+  }, [talents, stats]);
+
+  if (loading) return <Spinner />;
+
+  if (!report) {
+    return (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-600">
+        Impossible de générer le rapport : aucune donnée disponible.
+      </div>
+    );
+  }
+
+  const download = () => {
+    const lines = [
+      "RAPPORT DE RISQUE DE TURNOVER - TalentPulse",
+      `Généré le ${new Date().toLocaleDateString("fr-FR")}`,
+      "=".repeat(60),
+      "",
+      `Effectif total : ${stats?.total}`,
+      `Risque moyen : ${pct(report.avgRisk)}`,
+      `Talents à risque élevé (>= 70%) : ${report.atRisk.length}`,
+      `Talents à risque modéré (40-70%) : ${report.moderate.length}`,
+      `Prédictions disponibles : ${predictions.length}`,
+      "",
+      "TALENTS PRIORITAIRES",
+      "-".repeat(60),
+      ...report.atRisk.map(
+        (t, i) =>
+          `${i + 1}. ${t.first_name} ${t.last_name} (${t.position ?? "—"}, ${t.department ?? "—"}) - risque ${pct(t.turnover_risk)}`
+      ),
+      "",
+      "RECOMMANDATIONS",
+      "-".repeat(60),
+      ...report.atRisk.map((t, i) => `${i + 1}. ${t.first_name} ${t.last_name} : ${t.turnover_risk >= 0.8 ? "entretien individuel + revue de rémunération" : "entretien de carrière + reconnaissance"}`),
+    ];
+    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `rapport-turnover-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-extrabold text-slate-900">Rapports</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Générez un rapport exécutif du risque de turnover de vos équipes.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" />
+            Imprimer
+          </Button>
+          <Button onClick={download}>
+            <Download className="h-4 w-4" />
+            Télécharger (.txt)
+          </Button>
+        </div>
+      </div>
+
+      {!generated ? (
+        <div className="card flex flex-col items-center gap-4 p-10 text-center">
+          <div className="rounded-2xl bg-primary-50 p-4">
+            <FileText className="h-10 w-10 text-primary-600" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-slate-900">
+              Rapport de risque de turnover
+            </h3>
+            <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
+              Synthèse de {stats?.total} collaborateurs, {predictions.length}{" "}
+              prédictions et {report.atRisk.length} talents prioritaires.
+            </p>
+          </div>
+          <Button onClick={() => setGenerated(true)}>Générer le rapport</Button>
+        </div>
+      ) : (
+        <div className="card space-y-6 p-6 sm:p-8" id="print-area">
+          <div className="border-b border-slate-200 pb-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary-600">
+              TalentPulse · Rapport exécutif
+            </p>
+            <h3 className="mt-1 text-2xl font-extrabold text-slate-900">
+              Rapport de risque de turnover
+            </h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Généré le {new Date().toLocaleDateString("fr-FR")} ·{" "}
+              {new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[
+              { label: "Effectif", value: String(stats?.total ?? 0) },
+              { label: "Risque moyen", value: pct(report.avgRisk) },
+              { label: "À risque élevé", value: String(report.atRisk.length) },
+              { label: "Prédictions", value: String(predictions.length) },
+            ].map((kpi) => (
+              <div key={kpi.label} className="rounded-xl bg-slate-50 p-4">
+                <p className="text-xs font-medium text-slate-500">{kpi.label}</p>
+                <p className="mt-1 text-xl font-extrabold text-slate-900">
+                  {kpi.value}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div>
+            <h4 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900">
+              <AlertTriangle className="h-4 w-4 text-red-500" />
+              Talents prioritaires ({report.atRisk.length})
+            </h4>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-400">
+                    <th className="py-2 pr-4 font-semibold">#</th>
+                    <th className="py-2 pr-4 font-semibold">Collaborateur</th>
+                    <th className="py-2 pr-4 font-semibold">Poste</th>
+                    <th className="py-2 pr-4 font-semibold">Département</th>
+                    <th className="py-2 pr-4 font-semibold">Embauche</th>
+                    <th className="py-2 font-semibold">Risque</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {report.atRisk.map((t, i) => (
+                    <tr key={t.id} className="border-b border-slate-100 last:border-0">
+                      <td className="py-2.5 pr-4 font-bold text-slate-400">{i + 1}</td>
+                      <td className="py-2.5 pr-4 font-semibold text-slate-800">
+                        {t.first_name} {t.last_name}
+                      </td>
+                      <td className="py-2.5 pr-4 text-slate-600">{t.position ?? "—"}</td>
+                      <td className="py-2.5 pr-4 text-slate-600">{t.department ?? "—"}</td>
+                      <td className="py-2.5 pr-4 text-slate-600">{dateFR(t.hire_date)}</td>
+                      <td className="py-2.5">
+                        <Badge tone={riskTone(t.turnover_risk)}>{pct(t.turnover_risk)}</Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="mb-2 text-sm font-bold text-slate-900">Synthèse</h4>
+            <p className="rounded-xl bg-primary-50 p-4 text-sm leading-relaxed text-slate-700">
+              {report.atRisk.length > 0 ? (
+                <>
+                  {report.atRisk.length} talent{report.atRisk.length > 1 ? "s" : ""} présente
+                  {report.atRisk.length > 1 ? "nt" : ""} un risque de départ supérieur à 70%.
+                  Le risque moyen de l&apos;équipe est de {pct(report.avgRisk)}. Nous
+                  recommandons un entretien individuel sous 15 jours pour{" "}
+                  {report.atRisk[0].first_name} {report.atRisk[0].last_name} (
+                  {pct(report.atRisk[0].turnover_risk)} de risque), en priorité absolue.
+                </>
+              ) : (
+                "Aucun talent ne présente un risque critique. Poursuivez les pratiques actuelles de fidélisation."
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

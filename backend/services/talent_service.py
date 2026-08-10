@@ -73,18 +73,20 @@ class TalentService:
         return True
 
     def search_talents(self, db: Session, query: str, limit: int = 50) -> List[Talent]:
-        """Search talents by name or email"""
+        """Search talents by name, email, position, or department"""
+        like = f"%{query}%"
         return db.query(Talent).filter(
-            (Talent.first_name.ilike(f"%{query}%")) |
-            (Talent.last_name.ilike(f"%{query}%")) |
-            (Talent.email.ilike(f"%{query}%"))
-        ).limit(limit).all()
+            (Talent.first_name.ilike(like)) |
+            (Talent.last_name.ilike(like)) |
+            (Talent.email.ilike(like)) |
+            (Talent.position.ilike(like)) |
+            (Talent.department.ilike(like))
+        ).order_by(Talent.turnover_risk.desc()).limit(limit).all()
 
     def get_talents_at_risk(self, db: Session, min_risk: float = 0.7) -> List[Talent]:
-        """Get talents with high turnover risk"""
+        """Get talents with high turnover risk, most at risk first"""
         return db.query(Talent).filter(
-            Talent.turnover_risk >= min_risk,
-            Talent.status == TalentStatus.ACTIVE
+            Talent.turnover_risk >= min_risk
         ).order_by(Talent.turnover_risk.desc()).all()
 
 

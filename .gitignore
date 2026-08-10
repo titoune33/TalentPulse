@@ -46,3 +46,7 @@ prisma/dev.db-journal
 
 # OS
 Thumbs.db
+.DS_Store
+
+# Local app data (Freebuff desktop)
+.freebuff/
