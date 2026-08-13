@@ -11,10 +11,11 @@ services:
   # ===== API FastAPI =====
   - type: web
     name: talentpulse-backend
-    runtime: docker
+    runtime: python
     repo: https://github.com/titoune33/TalentPulse
     rootDir: backend
-    dockerfilePath: ./Dockerfile
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn main:app --bind 0.0.0.0:$PORT
     plan: free
     healthCheckPath: /api/health
     envVars:
@@ -42,6 +43,7 @@ services:
     repo: https://github.com/titoune33/TalentPulse
     buildCommand: npm install && npm run build
     rootDir: frontend
+    staticPublishPath: ./out
     envVars:
       - key: NEXT_PUBLIC_BACKEND_URL
         value: https://talentpulse-backend.onrender.com
