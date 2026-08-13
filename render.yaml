@@ -40,8 +40,8 @@ services:
     name: talentpulse-frontend
     runtime: static
     repo: https://github.com/titoune33/TalentPulse
-    buildCommand: cd frontend && npm install && npm run build
-    publishPath: frontend/out
+    buildCommand: npm install && npm run build
+    rootDir: frontend
     envVars:
       - key: NEXT_PUBLIC_BACKEND_URL
         value: https://talentpulse-backend.onrender.com
