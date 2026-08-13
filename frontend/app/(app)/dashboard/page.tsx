@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, AlertTriangle, Gauge, HeartHandshake, Sparkles } from "lucide-react";
+import { Users, AlertTriangle, Gauge, HeartHandshake, Sparkles, TrendingUp, Calendar } from "lucide-react";
 import Link from "next/link";
 import { StatsCard } from "@/components/StatsCard";
 import { Chart } from "@/components/Chart";
@@ -8,7 +8,7 @@ import { TalentTable } from "@/components/TalentTable";
 import { Spinner } from "@/components/Spinner";
 import { useTalents } from "@/hooks/useTalents";
 import { usePredictions } from "@/hooks/usePredictions";
-import { pct } from "@/lib/format";
+import { pct, eur } from "@/lib/format";
 import type { Talent } from "@/lib/types";
 
 export default function DashboardPage() {
@@ -47,29 +47,28 @@ export default function DashboardPage() {
     .slice(0, 5);
 
   const atRiskCount = talents.filter((t) => t.turnover_risk >= 0.7).length;
+  const moderateCount = talents.filter(
+    (t) => t.turnover_risk >= 0.4 && t.turnover_risk < 0.7
+  ).length;
+
+  // Score moyen de risque
+  const avgRisk = talents.length > 0
+    ? talents.reduce((s, t) => s + t.turnover_risk, 0) / talents.length
+    : 0;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-extrabold text-slate-900">
-            Bonjour 👋
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Voici l&apos;état de vos équipes et les risques de départ détectés.
-          </p>
-        </div>
-        <Link
-          href="/talents"
-          className="btn-primary h-10 px-4 text-sm"
-        >
-          <Users className="h-4 w-4" />
-          Gérer les talents
-        </Link>
+    <div className="space-y-8">
+      {/* Header premium */}
+      <div className="flex flex-col gap-1">
+        <h2 className="text-2xl font-extrabold text-slate-900">
+          Bonjour 👋
+        </h2>
+        <p className="text-sm text-slate-500">
+          Voici l'état de vos équipes et les risques de départ détectés aujourd'hui.
+        </p>
       </div>
 
-      {/* Stats */}
+      {/* Stats cards premium */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatsCard
           title="Talents suivis"
@@ -79,47 +78,81 @@ export default function DashboardPage() {
           sub={`${stats.active} actifs · ${stats.departments ? Object.keys(stats.departments).length : 0} départements`}
         />
         <StatsCard
-          title="À risque"
+          title="À risque élevé"
           value={atRiskCount}
           icon={<AlertTriangle className="h-5 w-5" />}
           tone="red"
-          sub={`${stats.at_risk} signalés à risque`}
+          sub={`${stats.at_risk} signalés`}
         />
         <StatsCard
-          title="Performance moy."
-          value={pct(stats.avg_performance)}
+          title="Risque modéré"
+          value={moderateCount}
           icon={<Gauge className="h-5 w-5" />}
-          tone="green"
-          sub="sur 0–100"
+          tone="amber"
+          sub="40–70% de risque"
         />
         <StatsCard
-          title="Engagement moy."
-          value={pct(stats.avg_engagement)}
-          icon={<HeartHandshake className="h-5 w-5" />}
+          title="Risque moyen"
+          value={pct(avgRisk)}
+          icon={<TrendingUp className="h-5 w-5" />}
           tone="violet"
-          sub="indicateur clé du turnover"
+          sub="de toute l'équipe"
         />
       </div>
 
-      {/* Charts */}
+      {/* Alertes premium */}
+      {atRiskCount > 0 && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-5 w-5 text-red-600" />
+            <div>
+              <p className="font-semibold text-red-900">
+                {atRiskCount} talent{atRiskCount > 1 ? "s" : ""} à risque élevé
+              </p>
+              <p className="mt-0.5 text-sm text-red-700">
+                Un entretien prioritaire est recommandé pour les talents en rouge.
+                Consultez la page{" "}
+                <Link href="/predictions" className="underline">
+                  Prédictions
+                </Link>
+                .
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Charts area */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <div className="card p-6 lg:col-span-2">
           <h3 className="mb-4 text-sm font-bold text-slate-900">
-            Répartition des risques de départ
+            Répartition des risques
           </h3>
           <Chart type="doughnut" data={riskDistribution} height={240} />
         </div>
         <div className="card p-6 lg:col-span-3">
-          <h3 className="mb-4 text-sm font-bold text-slate-900">
-            Top 5 des talents les plus à risque
-          </h3>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-900">
+              Top 5 des talents les plus à risque
+            </h3>
+            <Link
+              href="/talents?sort=risk&order=desc"
+              className="text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+            >
+              Voir tous les talents →
+            </Link>
+          </div>
           <div className="space-y-3">
             {recent.map((t: Talent, i: number) => (
-              <div key={t.id} className="flex items-center gap-3">
+              <div key={t.id} className="flex items-center gap-4">
                 <span className="w-6 text-center text-sm font-bold text-slate-400">
-                  {i + 1}
+                  #{i + 1}
                 </span>
-                <div className="min-w-0 flex-1">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">
+                  {t.first_name[0]}
+                  {t.last_name[0]}
+                </div>
+                <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-2">
                     <p className="truncate text-sm font-semibold text-slate-800">
                       {t.first_name} {t.last_name}
@@ -148,9 +181,12 @@ export default function DashboardPage() {
                       style={{ width: `${t.turnover_risk * 100}%` }}
                     />
                   </div>
-                  <p className="mt-1 text-xs text-slate-400">
-                    {t.position ?? "—"} · {t.department ?? "—"}
-                  </p>
+                  <div className="mt-1 flex items-center gap-2 text-xs text-slate-400">
+                    <span>{t.position ?? "—"}</span>
+                    <span>·</span>
+                    <span>{t.department ?? "—"}</span>
+                    {t.salary && <span>· {eur(t.salary)}</span>}
+                  </div>
                 </div>
               </div>
             ))}
@@ -158,18 +194,18 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Recent talents */}
+      {/* Recent talents table */}
       <div className="card overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <h3 className="text-sm font-bold text-slate-900">
-            Talents les plus à risque
+            Tous les talents (par risque)
           </h3>
           <Link
-            href="/predictions"
-            className="flex items-center gap-1 text-sm font-semibold text-primary-600 hover:text-primary-700"
+            href="/talents"
+            className="flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
           >
             <Sparkles className="h-4 w-4" />
-            Voir les prédictions
+            Gérer les talents
           </Link>
         </div>
         <TalentTable talents={recent} />

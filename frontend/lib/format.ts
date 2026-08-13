@@ -39,6 +39,17 @@ export function dateTimeFR(value: string | null | undefined): string {
   }).format(d);
 }
 
+/** Format a duration in days as "Xj" */
+export function daysFR(value: number): string {
+  return `${value}j`;
+}
+
+/** Format a number with thousand separator */
+export function num(value: number | null | undefined): string {
+  if (value == null) return "—";
+  return new Intl.NumberFormat("fr-FR").format(value);
+}
+
 export function riskLabel(score: number): { label: string; color: string } {
   if (score >= 0.7) return { label: "Risque élevé", color: "red" };
   if (score >= 0.4) return { label: "Risque modéré", color: "amber" };

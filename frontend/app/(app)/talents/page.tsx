@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { UserPlus, Search, Sparkles, AlertTriangle } from "lucide-react";
+import { UserPlus, Search, Sparkles, AlertTriangle, Save, X } from "lucide-react";
 import { TalentTable } from "@/components/TalentTable";
 import { Modal } from "@/components/Modal";
 import { Button } from "@/components/Button";
@@ -154,6 +154,34 @@ export default function TalentsPage() {
     }
   };
 
+  const ScoreSlider = ({
+    label,
+    value,
+    onChange,
+  }: {
+    label: string;
+    value: number;
+    onChange: (v: number) => void;
+  }) => (
+    <Field label={label} hint={`${Math.round(value * 100)}%`}>
+      <div className="space-y-2">
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={Math.round(value * 100)}
+          onChange={(e) => onChange(Number(e.target.value) / 100)}
+          className="w-full cursor-pointer"
+        />
+        <div className="flex justify-between text-xs text-slate-400">
+          <span>0%</span>
+          <span>50%</span>
+          <span>100%</span>
+        </div>
+      </div>
+    </Field>
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -181,7 +209,7 @@ export default function TalentsPage() {
         </div>
       )}
 
-      {/* Filters */}
+      {/* Filters premium */}
       <div className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -225,7 +253,7 @@ export default function TalentsPage() {
         </div>
       )}
 
-      {/* Create / Edit modal */}
+      {/* Create / Edit modal premium */}
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -247,6 +275,7 @@ export default function TalentsPage() {
             {notice.text}
           </div>
         )}
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Prénom *">
             <Input
@@ -312,40 +341,29 @@ export default function TalentsPage() {
               placeholder="Python, React, SQL"
             />
           </Field>
-          <Field label="Performance (0–1)">
-            <Input
-              type="number"
-              step="0.05"
-              min={0}
-              max={1}
-              value={form.performance_score ?? ""}
-              onChange={(e) => set("performance_score", e.target.value)}
-            />
-          </Field>
-          <Field label="Engagement (0–1)">
-            <Input
-              type="number"
-              step="0.05"
-              min={0}
-              max={1}
-              value={form.engagement_score ?? ""}
-              onChange={(e) => set("engagement_score", e.target.value)}
-            />
-          </Field>
-          <Field label="Satisfaction (0–1)">
-            <Input
-              type="number"
-              step="0.05"
-              min={0}
-              max={1}
-              value={form.satisfaction_score ?? ""}
-              onChange={(e) => set("satisfaction_score", e.target.value)}
-            />
-          </Field>
+        </div>
+
+        {/* Score sliders premium */}
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <ScoreSlider
+            label="Performance"
+            value={form.performance_score ?? 0}
+            onChange={(v) => set("performance_score", v)}
+          />
+          <ScoreSlider
+            label="Engagement"
+            value={form.engagement_score ?? 0}
+            onChange={(v) => set("engagement_score", v)}
+          />
+          <ScoreSlider
+            label="Satisfaction"
+            value={form.satisfaction_score ?? 0}
+            onChange={(v) => set("satisfaction_score", v)}
+          />
         </div>
       </Modal>
 
-      {/* Delete confirmation */}
+      {/* Delete confirmation modal */}
       <Modal
         open={!!deleting}
         onClose={() => setDeleting(null)}
@@ -370,14 +388,14 @@ export default function TalentsPage() {
         </p>
       </Modal>
 
-      {/* Prediction feedback modal */}
+      {/* Prediction modal */}
       <Modal
         open={!!predicting}
         onClose={() => setPredicting(null)}
         title="Prédiction en cours"
       >
         <div className="flex items-center gap-3">
-          <Sparkles className="h-6 w-6 animate-pulse text-primary-600" />
+          <Sparkles className="h-6 w-6 animate-pulse text-indigo-600" />
           <p className="text-sm text-slate-600">
             Calcul du risque de départ pour{" "}
             <strong>

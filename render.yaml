@@ -28,6 +28,12 @@ services:
         value: https://talentpulse-frontend.onrender.com
       - key: PORT
         value: "8000"
+      - key: STRIPE_SECRET_KEY
+        value: ""
+      - key: STRIPE_WEBHOOK_SECRET
+        value: ""
+      - key: FRONTEND_URL
+        value: https://talentpulse-frontend.onrender.com
 
   # ===== Frontend statique (Next.js export) =====
   - type: web

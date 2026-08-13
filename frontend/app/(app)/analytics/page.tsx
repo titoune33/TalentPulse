@@ -4,10 +4,11 @@ import { useMemo } from "react";
 import { Chart } from "@/components/Chart";
 import { Spinner } from "@/components/Spinner";
 import { EmptyState } from "@/components/EmptyState";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, BarChart3, Users, TrendingUp, Calendar } from "lucide-react";
 import { useTalents } from "@/hooks/useTalents";
 import { usePredictions } from "@/hooks/usePredictions";
 import { pct } from "@/lib/format";
+import { Badge, riskTone } from "@/components/Badge";
 
 export default function AnalyticsPage() {
   const { talents, stats, loading, error } = useTalents();
@@ -28,7 +29,6 @@ export default function AnalyticsPage() {
   }, [talents]);
 
   const trend = useMemo(() => {
-    // Group predictions by ISO week over the last 13 weeks
     const now = new Date();
     const weeks: { label: string; avg: number }[] = [];
     for (let w = 12; w >= 0; w--) {
@@ -69,7 +69,7 @@ export default function AnalyticsPage() {
       {
         label: "Talents",
         data: byDepartment.map((d) => d.total),
-        backgroundColor: "#c7d2fe",
+        backgroundColor: "#cbd5e1",
         borderRadius: 6,
       },
       {
@@ -114,7 +114,7 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-extrabold text-slate-900">Analytics</h2>
         <p className="mt-1 text-sm text-slate-500">
           Tendances du risque de turnover et répartition par équipe.
@@ -123,31 +123,33 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="card p-6">
-          <h3 className="mb-4 text-sm font-bold text-slate-900">
-            Évolution du risque moyen (13 semaines)
-          </h3>
+          <div className="mb-4 flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-slate-400" />
+            <h3 className="text-sm font-bold text-slate-900">
+              Évolution du risque moyen (13 semaines)
+            </h3>
+          </div>
           <Chart type="line" data={trendData} height={260} />
         </div>
         <div className="card p-6">
-          <h3 className="mb-4 text-sm font-bold text-slate-900">
-            Indicateurs clés de l&apos;équipe
-          </h3>
+          <div className="mb-4 flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 text-slate-400" />
+            <h3 className="text-sm font-bold text-slate-900">
+              Indicateurs clés de l'équipe
+            </h3>
+          </div>
           <Chart type="bar" data={perfData} height={260} />
         </div>
       </div>
 
       <div className="card p-6">
-        <h3 className="mb-4 text-sm font-bold text-slate-900">
-          Risque par département
-        </h3>
-        <Chart
-          type="bar"
-          data={deptData}
-          height={280}
-          options={{
-            scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
-          }}
-        />
+        <div className="mb-4 flex items-center gap-2">
+          <Users className="h-4 w-4 text-slate-400" />
+          <h3 className="text-sm font-bold text-slate-900">Risque par département</h3>
+        </div>
+        <Chart type="bar" data={deptData} height={280} options={{
+          scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+        }} />
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -165,13 +167,9 @@ export default function AnalyticsPage() {
                   <td className="py-2.5 text-slate-600">{d.total}</td>
                   <td className="py-2.5 text-slate-600">{d.atRisk}</td>
                   <td className="py-2.5">
-                    <span
-                      className={`font-semibold ${
-                        d.ratio >= 0.5 ? "text-red-600" : d.ratio >= 0.25 ? "text-amber-600" : "text-emerald-600"
-                      }`}
-                    >
+                    <Badge tone={d.ratio >= 0.5 ? "red" : d.ratio >= 0.25 ? "amber" : "green"}>
                       {pct(d.ratio)}
-                    </span>
+                    </Badge>
                   </td>
                 </tr>
               ))}

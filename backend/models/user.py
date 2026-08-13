@@ -27,5 +27,10 @@ class User(Base):
     role = Column(Enum(UserRole, values_callable=lambda e: [m.value for m in e]), default=UserRole.EMPLOYEE)
     company_id = Column(Integer, nullable=True)
     is_active = Column(Boolean, default=True)
+    
+    # Stripe billing
+    stripe_customer_id = Column(String(255), nullable=True)
+    subscription_status = Column(String(50), default="free")
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

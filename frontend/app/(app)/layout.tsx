@@ -23,14 +23,14 @@ export default function AppLayout({
 
   if (loading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <Spinner label="Connexion en cours…" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-slate-50">
       <Sidebar />
       <div className="lg:pl-64">
         <Topbar />

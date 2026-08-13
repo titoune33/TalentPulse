@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Trash2, Sparkles, SearchX } from "lucide-react";
+import { Pencil, Trash2, Sparkles, SearchX, Mail, Calendar } from "lucide-react";
 import type { Talent } from "@/lib/types";
 import { Badge, riskTone, statusLabel, statusTone } from "./Badge";
 import { eur, pct } from "@/lib/format";
@@ -32,23 +32,22 @@ export function TalentTable({
     return (
       <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-300 py-12 text-center">
         <SearchX className="h-8 w-8 text-slate-300" />
-        <p className="text-sm font-medium text-slate-500">
-          Aucun talent trouvé
-        </p>
+        <p className="text-sm font-medium text-slate-500">Aucun talent trouvé</p>
       </div>
     );
   }
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[820px] text-left text-sm">
+      <table className="w-full min-w-[900px] text-left text-sm">
         <thead>
           <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-400">
             <th className="px-4 py-3 font-semibold">Collaborateur</th>
             <th className="px-4 py-3 font-semibold">Poste</th>
             <th className="px-4 py-3 font-semibold">Département</th>
             <th className="px-4 py-3 font-semibold">Salaire</th>
-            <th className="px-4 py-3 font-semibold">Perf.</th>
+            <th className="px-4 py-3 font-semibold">Exp.</th>
+            <th className="px-4 py-3 font-semibold">Compétences</th>
             <th className="px-4 py-3 font-semibold">Risque</th>
             <th className="px-4 py-3 font-semibold">Statut</th>
             <th className="px-4 py-3 text-right font-semibold">Actions</th>
@@ -62,7 +61,7 @@ export function TalentTable({
             >
               <td className="px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-700">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">
                     {t.first_name[0]}
                     {t.last_name[0]}
                   </div>
@@ -74,15 +73,23 @@ export function TalentTable({
                   </div>
                 </div>
               </td>
-              <td className="px-4 py-3 text-slate-600">
-                {t.position ?? "—"}
-              </td>
+              <td className="px-4 py-3 text-slate-600">{t.position ?? "—"}</td>
               <td className="px-4 py-3">
                 <Badge tone="slate">{t.department ?? "Non défini"}</Badge>
               </td>
               <td className="px-4 py-3 text-slate-600">{eur(t.salary)}</td>
-              <td className="px-4 py-3 text-slate-600">
-                {pct(t.performance_score)}
+              <td className="px-4 py-3 text-slate-600">{t.experience_years} an{t.experience_years > 1 ? "s" : ""}</td>
+              <td className="px-4 py-3">
+                <div className="flex flex-wrap gap-1">
+                  {t.skills.slice(0, 3).map((skill) => (
+                    <span key={skill} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                      {skill}
+                    </span>
+                  ))}
+                  {t.skills.length > 3 && (
+                    <span className="text-xs text-slate-400">+{t.skills.length - 3}</span>
+                  )}
+                </div>
               </td>
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
@@ -114,7 +121,7 @@ export function TalentTable({
                     <button
                       onClick={() => onPredict(t)}
                       title="Lancer une prédiction"
-                      className="rounded-lg p-2 text-primary-600 hover:bg-primary-50"
+                      className="rounded-lg p-2 text-indigo-600 hover:bg-indigo-50"
                     >
                       <Sparkles className="h-4 w-4" />
                     </button>

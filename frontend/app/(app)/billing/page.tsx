@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Check, CreditCard, Sparkles } from "lucide-react";
+import { Check, CreditCard, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/Button";
+import { api, errorMessage } from "@/lib/api";
+import type { Plan } from "@/lib/types";
 
-const plans = [
+const plans: Plan[] = [
   {
     name: "Starter",
     price: 29,
@@ -30,7 +32,7 @@ const plans = [
       "Support prioritaire",
     ],
     highlighted: true,
-    cta: "Passer au Pro",
+    cta: "Essayer gratuitement",
   },
   {
     name: "Entreprise",
@@ -38,7 +40,7 @@ const plans = [
     description: "Sur mesure pour les grands comptes",
     features: [
       "Talents illimités",
-      "SSO & rôles avancés",
+      "SSO & rôles avancées",
       "API dédiée",
       "Accompagnement dédié",
     ],
@@ -47,8 +49,42 @@ const plans = [
   },
 ];
 
+// Map plan name to Stripe price IDs (set via env vars at build time)
+const PRICE_IDS: Record<string, string | undefined> = {
+  Starter: process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER,
+  Pro: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO,
+  Entreprise: process.env.NEXT_PUBLIC_STRIPE_PRICE_ENTERPRISE,
+};
+
 export default function BillingPage() {
   const [toast, setToast] = useState<string | null>(null);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const handleSubscribe = async (planName: string) => {
+    const priceId = PRICE_IDS[planName];
+    if (!priceId) {
+      setToast(
+        `Le paiement pour le plan ${planName} n'est pas encore configuré. Contactez-nous.`
+      );
+      return;
+    }
+
+    setLoadingPlan(planName);
+    setToast(null);
+    try {
+      const { data } = await api.post("/api/billing/create-checkout-session", {
+        price_id: priceId,
+      });
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (e) {
+      setToast(errorMessage(e, "Erreur lors de la redirection vers le paiement."));
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -69,17 +105,30 @@ export default function BillingPage() {
         {plans.map((plan) => (
           <div
             key={plan.name}
-            className={`card relative flex flex-col p-6 ${
-              plan.highlighted ? "border-primary-500 ring-2 ring-primary-500/30" : ""
+            className={`relative flex flex-col rounded-xl border bg-white p-6 shadow-card ${
+              plan.highlighted
+                ? "border-indigo-500 ring-1 ring-indigo-500/30"
+                : "border-slate-200"
             }`}
           >
             {plan.highlighted && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary-600 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-4 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
                 Recommandé
               </span>
             )}
-            <h3 className="font-bold text-slate-900">{plan.name}</h3>
-            <p className="mt-0.5 text-xs text-slate-500">{plan.description}</p>
+            <div className="mb-4 flex items-center gap-3">
+              <div
+                className={`rounded-xl p-2.5 ${
+                  plan.highlighted
+                    ? "bg-indigo-50 text-indigo-600"
+                    : "bg-slate-50 text-slate-600"
+                }`}
+              >
+                {plan.price ? <CreditCard className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">{plan.name}</h3>
+            </div>
+            <p className="mt-1 text-sm text-slate-500">{plan.description}</p>
             <div className="mt-4 flex items-baseline gap-1">
               {plan.price ? (
                 <>
@@ -103,13 +152,14 @@ export default function BillingPage() {
             <Button
               variant={plan.highlighted ? "primary" : "secondary"}
               className="mt-6 w-full"
-              onClick={() =>
-                setToast(
-                  `Redirection vers le paiement sécurisé pour le plan ${plan.name}… (démo)`
-                )
-              }
+              loading={loadingPlan === plan.name}
+              onClick={() => handleSubscribe(plan.name)}
             >
-              <CreditCard className="h-4 w-4" />
+              {loadingPlan === plan.name ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <CreditCard className="h-4 w-4" />
+              )}
               {plan.cta}
             </Button>
           </div>
@@ -117,17 +167,17 @@ export default function BillingPage() {
       </div>
 
       <div className="card flex items-start gap-4 p-5">
-        <div className="rounded-xl bg-primary-50 p-2.5">
-          <Sparkles className="h-5 w-5 text-primary-600" />
+        <div className="rounded-xl bg-indigo-50 p-2.5">
+          <Sparkles className="h-5 w-5 text-indigo-600" />
         </div>
         <div>
           <h3 className="text-sm font-bold text-slate-900">
             Paiements en ligne bientôt disponibles
           </h3>
           <p className="mt-1 text-sm text-slate-500">
-            L&apos;intégration Stripe est en cours de finalisation. En attendant,
-            tous les plans sont accessibles gratuitement pendant la phase de
-            démonstration.
+            L'intégration Stripe est prête. Rendez-vous sur la page Stripe pour
+            configurer vos produits et prix, puis connectez-les via nos variables
+            d'environnement.
           </p>
         </div>
       </div>

@@ -29,7 +29,7 @@ async def predict_talent_turnover(
     if not talent:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Talent not found",
+            detail="Talent introuvable",
         )
 
     return prediction_service.create_prediction(db, talent_id, "turnover")
@@ -52,7 +52,7 @@ async def get_talent_predictions(
     if not predictions:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No predictions found for this talent",
+            detail="Aucune prédiction trouvée pour ce talent",
         )
     return predictions
 

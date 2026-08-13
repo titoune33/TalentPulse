@@ -30,7 +30,7 @@ api.interceptors.response.use(
     ) {
       window.localStorage.removeItem("tp_token");
       window.localStorage.removeItem("tp_user");
-      if (!window.location.pathname.startsWith("/login")) {
+      if (!window.location.pathname.startsWith("/auth/login")) {
         window.location.href = "/auth/login";
       }
     }
@@ -49,6 +49,18 @@ export function errorMessage(err: unknown, fallback = "Une erreur est survenue")
         .filter(Boolean)
         .join(", ");
     }
+    if (err.code === "ERR_NETWORK") {
+      return "Impossible de contacter le serveur. Vérifiez votre connexion ou que le backend est démarré.";
+    }
+    if (err.code === "ECONNABORTED") {
+      return "La requête a expiré. Réessayez dans quelques instants.";
+    }
+    if (err.response?.status === 400) return "Données invalides. Vérifiez les champs du formulaire.";
+    if (err.response?.status === 403) return "Accès refusé. Vous n'avez pas les droits nécessaires.";
+    if (err.response?.status === 404) return "Ressource introuvable.";
+    if (err.response?.status === 409) return "Conflit de données. Cette ressource existe peut-être déjà.";
+    if (err.response?.status === 429) return "Trop de requêtes. Veuillez réessayer dans quelques minutes.";
+    if (err.response?.status && err.response?.status >= 500) return "Erreur serveur. Nos équipes ont été notifiées.";
   }
   if (err instanceof Error && err.message) return err.message;
   return fallback;

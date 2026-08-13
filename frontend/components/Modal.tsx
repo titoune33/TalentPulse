@@ -41,7 +41,7 @@ export function Modal({
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative w-full ${wide ? "max-w-3xl" : "max-w-lg"} animate-fadeUp rounded-2xl bg-white shadow-2xl`}
+        className={`relative w-full ${wide ? "max-w-3xl" : "max-w-lg"} animate-fadeUp rounded-2xl border border-slate-200 bg-white shadow-2xl`}
       >
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
           <h3 className="text-lg font-bold text-slate-900">{title}</h3>

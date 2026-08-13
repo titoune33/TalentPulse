@@ -72,17 +72,15 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      {/* Profile */}
+      {/* Profile premium */}
       <div className="card p-6">
         <div className="mb-5 flex items-center gap-3">
-          <div className="rounded-xl bg-primary-50 p-2.5">
-            <UserRound className="h-5 w-5 text-primary-600" />
+          <div className="rounded-xl bg-indigo-50 p-2.5">
+            <UserRound className="h-5 w-5 text-indigo-600" />
           </div>
           <div>
             <h3 className="font-bold text-slate-900">Profil</h3>
-            <p className="text-xs text-slate-500">
-              Vos informations personnelles
-            </p>
+            <p className="text-xs text-slate-500">Vos informations personnelles</p>
           </div>
         </div>
 
@@ -118,7 +116,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Security */}
+      {/* Security premium */}
       <div className="card p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="rounded-xl bg-violet-50 p-2.5">

@@ -24,6 +24,10 @@ export default function RegisterPage() {
       setError("Le mot de passe doit contenir au moins 8 caractères.");
       return;
     }
+    if (!email.includes("@")) {
+      setError("Veuillez saisir un email valide.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -37,23 +41,25 @@ export default function RegisterPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white">
           <Zap className="h-5 w-5" />
         </div>
         <span className="text-lg font-extrabold text-slate-900">TalentPulse</span>
       </div>
 
-      <h1 className="text-2xl font-extrabold text-slate-900">
-        Créer votre compte
-      </h1>
-      <p className="mt-1 text-sm text-slate-500">
-        Commencez à protéger vos talents dès aujourd&apos;hui.
-      </p>
+      <div>
+        <h1 className="text-2xl font-extrabold text-slate-900">
+          Créer votre compte
+        </h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Commencez à protéger vos talents dès aujourd'hui.
+        </p>
+      </div>
 
       {error && (
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
           {error}
         </div>
       )}
@@ -82,6 +88,7 @@ export default function RegisterPage() {
           <Input
             type="password"
             required
+            minLength={8}
             autoComplete="new-password"
             placeholder="••••••••"
             value={password}
@@ -98,7 +105,7 @@ export default function RegisterPage() {
         Déjà inscrit ?{" "}
         <Link
           href="/auth/login"
-          className="font-semibold text-primary-600 hover:text-primary-700"
+          className="font-semibold text-indigo-600 hover:text-indigo-700"
         >
           Se connecter
         </Link>

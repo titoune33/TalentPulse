@@ -46,24 +46,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Mobile logo */}
       <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white">
           <Zap className="h-5 w-5" />
         </div>
         <span className="text-lg font-extrabold text-slate-900">TalentPulse</span>
       </div>
 
-      <h1 className="text-2xl font-extrabold text-slate-900">
-        Connexion à votre espace
-      </h1>
-      <p className="mt-1 text-sm text-slate-500">
-        Accédez à votre tableau de bord RH.
-      </p>
+      <div>
+        <h1 className="text-2xl font-extrabold text-slate-900">
+          Connexion à votre espace
+        </h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Accédez à votre tableau de bord RH.
+        </p>
+      </div>
 
       {error && (
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
           {error}
         </div>
       )}
@@ -107,12 +109,13 @@ export default function LoginPage() {
         onClick={demo}
         loading={demoLoading}
       >
-        <Sparkles className="h-4 w-4 text-primary-600" />
+        <Sparkles className="h-4 w-4 text-indigo-600" />
         Explorer la démo
       </Button>
 
       <p className="mt-4 text-center text-xs text-slate-400">
-        Compte démo : <code className="rounded bg-slate-100 px-1.5 py-0.5">demo@talentpulse.app</code> /{" "}
+        Compte démo :{" "}
+        <code className="rounded bg-slate-100 px-1.5 py-0.5">demo@talentpulse.app</code> /{" "}
         <code className="rounded bg-slate-100 px-1.5 py-0.5">demo1234</code>
       </p>
 
@@ -120,7 +123,7 @@ export default function LoginPage() {
         Pas encore de compte ?{" "}
         <Link
           href="/auth/register"
-          className="font-semibold text-primary-600 hover:text-primary-700"
+          className="font-semibold text-indigo-600 hover:text-indigo-700"
         >
           Créer un compte
         </Link>

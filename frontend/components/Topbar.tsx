@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LogOut, Menu, X, ChevronDown, Zap } from "lucide-react";
+import { LogOut, Menu, X, ChevronDown, Brain } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { usePathname } from "next/navigation";
@@ -45,8 +45,8 @@ export function Topbar() {
     <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white/80 px-4 backdrop-blur sm:px-6">
       {/* Mobile: logo + hamburger */}
       <div className="flex items-center gap-3 lg:hidden">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white">
-          <Zap className="h-4 w-4" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
+          <Brain className="h-4 w-4" />
         </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -72,7 +72,7 @@ export function Topbar() {
               onClick={() => setMobileOpen(false)}
               className={`block rounded-lg px-3 py-2.5 text-sm font-medium ${
                 pathname === item.href
-                  ? "bg-primary-50 text-primary-700"
+                  ? "bg-indigo-50 text-indigo-700"
                   : "text-slate-600 hover:bg-slate-50"
               }`}
             >
@@ -88,7 +88,7 @@ export function Topbar() {
           onClick={() => setMenuOpen(!menuOpen)}
           className="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-2 hover:bg-slate-100"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
             {initials}
           </div>
           <div className="hidden text-left sm:block">

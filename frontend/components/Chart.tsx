@@ -33,6 +33,15 @@ const defaults: Record<string, any> = {
   color: "#64748b",
   borderColor: "#e2e8f0",
   font: { family: "inherit", size: 12 },
+  plugins: {
+    legend: {
+      labels: {
+        usePointStyle: true,
+        color: "#475569",
+        padding: 20,
+      },
+    },
+  },
 };
 
 export function Chart({

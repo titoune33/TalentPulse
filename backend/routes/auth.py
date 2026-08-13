@@ -34,7 +34,7 @@ async def register_user(
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email already exists",
+            detail="Un utilisateur avec cet email existe déjà",
         )
 
     hashed_password = auth_service.hash_password(user_data.password)
@@ -98,7 +98,7 @@ async def refresh_token(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
+            detail="Utilisateur introuvable",
         )
 
     access_token = auth_service.create_access_token(
@@ -126,7 +126,7 @@ async def update_me(
         if existing:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User with this email already exists",
+                detail="Un utilisateur avec cet email existe déjà",
             )
         current_user.email = user_data.email
 
@@ -148,9 +148,9 @@ async def change_password(
     if not auth_service.verify_password(data.current_password, current_user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Current password is incorrect",
+            detail="Le mot de passe actuel est incorrect",
         )
 
     current_user.hashed_password = auth_service.hash_password(data.new_password)
     db.commit()
-    return {"message": "Password updated successfully"}
+    return {"message": "Mot de passe mis à jour avec succès"}

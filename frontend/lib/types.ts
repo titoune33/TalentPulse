@@ -99,3 +99,12 @@ export interface AuthResponse {
   token_type: string;
   user: User;
 }
+
+export interface Plan {
+  name: string;
+  price: number | null;
+  description: string;
+  features: string[];
+  highlighted: boolean;
+  cta: string;
+}

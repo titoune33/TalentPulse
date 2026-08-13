@@ -105,7 +105,7 @@ async def get_talent_by_id(
     if not talent:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Talent not found",
+            detail="Talent introuvable",
         )
     return talent
 
@@ -148,6 +148,6 @@ async def delete_talent(
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Talent not found",
+            detail="Talent introuvable",
         )
     return None

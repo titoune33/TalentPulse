@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FileText, Download, Printer, AlertTriangle } from "lucide-react";
+import { FileText, Download, Printer, AlertTriangle, Send, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Badge, riskTone } from "@/components/Badge";
 import { Spinner } from "@/components/Spinner";
@@ -13,12 +13,13 @@ export default function ReportsPage() {
   const { talents, stats, loading } = useTalents();
   const { predictions } = usePredictions();
   const [generated, setGenerated] = useState(false);
+  const [sent, setSent] = useState(false);
 
   const report = useMemo(() => {
     if (!stats || talents.length === 0) return null;
-    const atRisk = talents.filter((t) => t.turnover_risk >= 0.7).sort(
-      (a, b) => b.turnover_risk - a.turnover_risk
-    );
+    const atRisk = talents
+      .filter((t) => t.turnover_risk >= 0.7)
+      .sort((a, b) => b.turnover_risk - a.turnover_risk);
     const moderate = talents.filter(
       (t) => t.turnover_risk >= 0.4 && t.turnover_risk < 0.7
     );
@@ -57,7 +58,14 @@ export default function ReportsPage() {
       "",
       "RECOMMANDATIONS",
       "-".repeat(60),
-      ...report.atRisk.map((t, i) => `${i + 1}. ${t.first_name} ${t.last_name} : ${t.turnover_risk >= 0.8 ? "entretien individuel + revue de rémunération" : "entretien de carrière + reconnaissance"}`),
+      ...report.atRisk.map(
+        (t, i) =>
+          `${i + 1}. ${t.first_name} ${t.last_name} : ${
+            t.turnover_risk >= 0.8
+              ? "entretien individuel + revue de rémunération"
+              : "entretien de carrière + reconnaissance"
+          }`
+      ),
     ];
     const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -91,24 +99,27 @@ export default function ReportsPage() {
 
       {!generated ? (
         <div className="card flex flex-col items-center gap-4 p-10 text-center">
-          <div className="rounded-2xl bg-primary-50 p-4">
-            <FileText className="h-10 w-10 text-primary-600" />
+          <div className="rounded-2xl bg-indigo-50 p-4">
+            <FileText className="h-10 w-10 text-indigo-600" />
           </div>
           <div>
             <h3 className="text-lg font-bold text-slate-900">
               Rapport de risque de turnover
             </h3>
             <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
-              Synthèse de {stats?.total} collaborateurs, {predictions.length}{" "}
-              prédictions et {report.atRisk.length} talents prioritaires.
+              Synthèse de {stats?.total} collaborateurs, {predictions.length} prédictions et {report.atRisk.length} talents prioritaires.
             </p>
           </div>
-          <Button onClick={() => setGenerated(true)}>Générer le rapport</Button>
+          <Button onClick={() => setGenerated(true)}>
+            <FileText className="h-4 w-4" />
+            Générer le rapport
+          </Button>
         </div>
       ) : (
         <div className="card space-y-6 p-6 sm:p-8" id="print-area">
+          {/* Header premium */}
           <div className="border-b border-slate-200 pb-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-primary-600">
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600">
               TalentPulse · Rapport exécutif
             </p>
             <h3 className="mt-1 text-2xl font-extrabold text-slate-900">
@@ -120,27 +131,34 @@ export default function ReportsPage() {
             </p>
           </div>
 
+          {/* KPIs premium */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[
-              { label: "Effectif", value: String(stats?.total ?? 0) },
-              { label: "Risque moyen", value: pct(report.avgRisk) },
-              { label: "À risque élevé", value: String(report.atRisk.length) },
-              { label: "Prédictions", value: String(predictions.length) },
+              { label: "Effectif", value: String(stats?.total ?? 0), icon: <FileText className="h-4 w-4 text-slate-400" /> },
+              { label: "Risque moyen", value: pct(report.avgRisk), icon: <AlertTriangle className="h-4 w-4 text-slate-400" /> },
+              { label: "À risque élevé", value: String(report.atRisk.length), icon: <AlertTriangle className="h-4 w-4 text-red-500" /> },
+              { label: "Prédictions", value: String(predictions.length), icon: <FileText className="h-4 w-4 text-slate-400" /> },
             ].map((kpi) => (
-              <div key={kpi.label} className="rounded-xl bg-slate-50 p-4">
+              <div key={kpi.label} className="rounded-xl bg-slate-50 p-4 text-center">
+                <div className="mb-1 flex justify-center">{kpi.icon}</div>
                 <p className="text-xs font-medium text-slate-500">{kpi.label}</p>
-                <p className="mt-1 text-xl font-extrabold text-slate-900">
-                  {kpi.value}
-                </p>
+                <p className="mt-1 text-xl font-extrabold text-slate-900">{kpi.value}</p>
               </div>
             ))}
           </div>
 
+          {/* Priority talents */}
           <div>
-            <h4 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900">
-              <AlertTriangle className="h-4 w-4 text-red-500" />
-              Talents prioritaires ({report.atRisk.length})
-            </h4>
+            <div className="mb-3 flex items-center justify-between">
+              <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900">
+                <AlertTriangle className="h-4 w-4 text-red-500" />
+                Talents prioritaires ({report.atRisk.length})
+              </h4>
+              <Button variant="ghost" size="sm" onClick={download}>
+                <Download className="h-3.5 w-3.5" />
+                CSV
+              </Button>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
@@ -173,23 +191,42 @@ export default function ReportsPage() {
             </div>
           </div>
 
+          {/* Summary */}
           <div>
             <h4 className="mb-2 text-sm font-bold text-slate-900">Synthèse</h4>
-            <p className="rounded-xl bg-primary-50 p-4 text-sm leading-relaxed text-slate-700">
+            <div className="rounded-xl bg-indigo-50 p-4 text-sm leading-relaxed text-slate-700">
               {report.atRisk.length > 0 ? (
                 <>
                   {report.atRisk.length} talent{report.atRisk.length > 1 ? "s" : ""} présente
                   {report.atRisk.length > 1 ? "nt" : ""} un risque de départ supérieur à 70%.
-                  Le risque moyen de l&apos;équipe est de {pct(report.avgRisk)}. Nous
-                  recommandons un entretien individuel sous 15 jours pour{" "}
-                  {report.atRisk[0].first_name} {report.atRisk[0].last_name} (
-                  {pct(report.atRisk[0].turnover_risk)} de risque), en priorité absolue.
+                  Le risque moyen de l'équipe est de {pct(report.avgRisk)}. Nous recommandons
+                  un entretien individuel sous 15 jours pour{" "}
+                  <strong>
+                    {report.atRisk[0].first_name} {report.atRisk[0].last_name}
+                  </strong>{" "}
+                  ({pct(report.atRisk[0].turnover_risk)} de risque), en priorité absolue.
                 </>
               ) : (
                 "Aucun talent ne présente un risque critique. Poursuivez les pratiques actuelles de fidélisation."
               )}
-            </p>
+            </div>
           </div>
+
+          {/* Send to direction */}
+          {!sent && (
+            <div className="border-t border-slate-200 pt-5">
+              <Button variant="secondary" onClick={() => setSent(true)}>
+                <Send className="h-4 w-4" />
+                Envoyer à la direction
+              </Button>
+              {sent && (
+                <p className="mt-2 text-xs text-emerald-600 flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" />
+                  Rapport envoyé par email.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

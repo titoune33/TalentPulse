@@ -28,7 +28,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className = "", invalid, ...props }, ref) => (
     <input
       ref={ref}
-      className={`input ${invalid ? "border-red-400 focus:border-red-500 focus:ring-red-500/20" : ""} ${className}`}
+      className={`input ${
+        invalid ? "border-red-400 focus:border-red-500 focus:ring-red-500/20" : ""
+      } ${className}`}
       {...props}
     />
   )
