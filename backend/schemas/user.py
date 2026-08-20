@@ -1,5 +1,5 @@
 """
-User schemas for TalentPulse
+User schemas TalentPulse
 """
 
 from pydantic import BaseModel, EmailStr, Field
@@ -32,6 +32,10 @@ class UserResponse(UserBase):
 
     class Config:
         from_attributes = True
+
+
+class UserListResponse(BaseModel):
+    users: list[UserResponse]
 
 
 class UserLogin(BaseModel):

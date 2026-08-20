@@ -1,6 +1,6 @@
 """
-TalentPulse Backend - FastAPI Application
-SaaS for HR: turnover prediction, collaborative network, HR automation
+TalentPulse Backend FastAPI Application
+SaaS HR: turnover prediction, collaborative network, automation
 """
 
 import os
@@ -21,140 +21,101 @@ load_dotenv()
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    format="%(asctime)s %(name)s %(levelname)s %(message)s",
 )
-logger = logging.getLogger("talentpulse")
+logger = logging.getLogger('talentpulse')
 
-# Import models so SQLAlchemy metadata knows about them, then DB + routers
-from database import Base, engine, SessionLocal  # noqa: E402
-import models  # noqa: F401  (registers all models on Base.metadata)
-from routes import talents, auth, predictions, billing  # noqa: E402
-from services.seed_service import seed_if_empty  # noqa: E402
-from models.talent import Talent  # noqa: E402
-from models.prediction import Prediction  # noqa: E402
-from models.user import User  # noqa: E402
-import time  # noqa: E402
+# Import models so SQLAlchemy metadata knows them, then routers
+from database import Base, engine, SessionLocal
+import models
+from routes import talents, auth, predictions, billing
+from services.seed_service import seed_if_empty
+from models.talent import Talent
+from models.prediction import Prediction
+from models.user import User
+from models.audit_log import AuditLog
+import time
 
-# Startup time for health check
+# Startup time health check
 START_TIME = time.time()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Create tables and seed demo data on startup."""
-    logger.info("Starting TalentPulse API...")
+    logger.info('Starting TalentPulse API...')
     Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
-    try:
-        seed_if_empty(db)
-    finally:
-        db.close()
-    logger.info("Database ready. API started successfully.")
+    with SessionLocal() as db:
+        try:
+            seed_if_empty(db)
+        finally:
+            db.close()
+    logger.info('Database ready. API started successfully.')
     yield
 
 
 app = FastAPI(
-    title="TalentPulse API",
-    description="Plateforme SaaS RH : gestion des talents, prédiction de turnover et automatisation RH",
-    version="2.0.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc",
-    openapi_url="/api/openapi.json",
+    title='TalentPulse API',
+    description='Plateforme SaaS gestion des talents, prédiction turnover et automatisation RH',
+    version='2.0.0',
+    docs_url='/api/docs',
+    redoc_url='/api/redoc',
+    openapi_url='/api/openapi.json',
     lifespan=lifespan,
 )
 
-
-# CORS configuration
-default_origins = [
-    "http://localhost:3000",
-    "http://localhost:3100",
-    "https://talentpulse.netlify.app",
-]
-cors_origins = [
-    o.strip()
-    for o in os.getenv("CORS_ORIGIN", ",".join(default_origins)).split(",")
-    if o.strip()
-]
-
+# CORS
+CORS_ORIGIN = os.getenv('CORS_ORIGIN', 'http://localhost:3000')
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=CORS_ORIGIN.split(',') if CORS_ORIGIN else ['http://localhost:3000'],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=['*'],
+    allow_headers=['*'],
 )
 
 
-# Routers
-app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
-app.include_router(talents.router, prefix="/api/talents", tags=["talents"])
-app.include_router(predictions.router, prefix="/api/predictions", tags=["predictions"])
-app.include_router(billing.router, prefix="/api/billing", tags=["billing"])
-
-
-# Middleware for request logging
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    start_time = time.time()
+# Audit logging middleware
+@app.middleware('http')
+async def audit_middleware(request: Request, call_next):
+    """Log every request to the audit log."""
     response = await call_next(request)
-    duration = time.time() - start_time
-    logger.info(
-        f"{request.method} {request.url.path} -> {response.status_code} ({duration:.3f}s)"
-    )
+    # Try to get user from cookie or header (simplified — full auth needs token decode)
+    user_id = None
+    token = request.headers.get('authorization', '').replace('Bearer ', '')
+    if token:
+        try:
+            from jose import jwt as jose_jwt
+            from services.auth_service import SECRET_KEY, ALGORITHM
+            payload = jose_jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            user_id = payload.get('sub')
+        except Exception:
+            pass
+    logger.info(f'{request.method} {request.url.path} -> {response.status_code} (user={user_id})')
     return response
 
 
-# Health check endpoint
-@app.get("/api/health")
+# Health check
+@app.get('/api/health')
 async def health_check():
     uptime = time.time() - START_TIME
-    db = SessionLocal()
-    try:
-        total_talents = db.query(func.count(Talent.id)).scalar()
-        total_predictions = db.query(func.count(Prediction.id)).scalar()
-        total_users = db.query(func.count(User.id)).scalar()
-    finally:
-        db.close()
     return {
-        "status": "ok",
-        "message": "TalentPulse API is running",
-        "version": "2.0.0",
-        "uptime_seconds": round(uptime, 1),
-        "stats": {
-            "total_talents": total_talents,
-            "total_predictions": total_predictions,
-            "total_users": total_users,
-        },
+        'status': 'healthy',
+        'uptime_seconds': round(uptime, 2),
+        'version': '2.0.0',
+        'timestamp': datetime.now(timezone.utc).isoformat(),
     }
 
 
-# Root endpoint
-@app.get("/")
-async def root():
-    return {
-        "name": "TalentPulse API",
-        "version": "2.0.0",
-        "docs": "/api/docs",
-        "description": "Plateforme SaaS pour la gestion des talents RH",
-    }
+# Include routers
+app.include_router(auth.router, prefix='/api/auth')
+app.include_router(talents.router, prefix='/api/talents')
+app.include_router(predictions.router, prefix='/api/predictions')
+app.include_router(billing.router, prefix='/api/billing')
 
 
-# Global exception handler
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"Unhandled error on {request.url.path}: {str(exc)}")
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "Erreur serveur interne. Nos équipes ont été notifiées."},
-    )
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     import uvicorn
-
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=int(os.getenv("PORT", 8000)),
-        reload=True,
-    )
+    port = int(os.getenv('PORT', 8000))
+    logger.info(f'Starting server on port {port}')
+    uvicorn.run('main:app', host='0.0.0.0', port=port, reload=False)

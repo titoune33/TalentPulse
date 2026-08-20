@@ -1,112 +1,49 @@
 """
-Prediction routes for TalentPulse API
+Predictions routes TalentPulse API
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy import func
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from database import get_db
 from schemas.prediction import PredictionResponse
-from services.auth_service import get_current_user
+from services.auth_service import get_current_user, require_any_role
 from services.prediction_service import prediction_service
-from services.talent_service import talent_service
-from models.prediction import Prediction
-from models.user import User
+from models.user import User, UserRole
 
 router = APIRouter(tags=["predictions"])
 
 
-@router.post("/talents/{talent_id}", response_model=PredictionResponse, status_code=status.HTTP_201_CREATED)
+@router.get("/", response_model=List[PredictionResponse])
+async def get_all_predictions(
+    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    _ : User = Depends(require_any_role([UserRole.ADMIN, UserRole.HR_MANAGER])),
+):
+    """Get all predictions"""
+    return prediction_service.get_all_predictions(db, skip, limit)
+
+
+@router.get("/{prediction_id}", response_model=PredictionResponse)
+async def get_prediction(
+    prediction_id: int,
+    db: Session = Depends(get_db),
+    _ : User = Depends(require_any_role([UserRole.ADMIN, UserRole.HR_MANAGER])),
+):
+    """Get a single prediction"""
+    prediction = prediction_service.get_prediction(db, prediction_id)
+    if not prediction:
+        raise HTTPException(status_code=404, detail="Prediction not found")
+    return prediction
+
+
+@router.post("/talents/{talent_id}", response_model=PredictionResponse)
 async def predict_talent_turnover(
     talent_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _ : User = Depends(require_any_role([UserRole.ADMIN, UserRole.HR_MANAGER])),
 ):
-    """Create a turnover prediction for a talent"""
-    talent = talent_service.get_talent_by_id(db, talent_id)
-    if not talent:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Talent introuvable",
-        )
-
-    return prediction_service.create_prediction(db, talent_id, "turnover")
-
-
-@router.get("/talents/{talent_id}", response_model=List[PredictionResponse])
-async def get_talent_predictions(
-    talent_id: int,
-    db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
-):
-    """Get all predictions for a talent"""
-    predictions = (
-        db.query(Prediction)
-        .filter(Prediction.talent_id == talent_id)
-        .order_by(Prediction.predicted_at.desc())
-        .all()
-    )
-
-    if not predictions:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Aucune prédiction trouvée pour ce talent",
-        )
-    return predictions
-
-
-@router.get("/recent", response_model=List[PredictionResponse])
-async def get_recent_predictions(
-    limit: int = Query(100, ge=1, le=1000),
-    db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
-):
-    """Get recent predictions"""
-    return (
-        db.query(Prediction)
-        .order_by(Prediction.predicted_at.desc())
-        .limit(limit)
-        .all()
-    )
-
-
-@router.get("/high-risk", response_model=List[PredictionResponse])
-async def get_high_risk_predictions(
-    min_risk: float = Query(0.7, ge=0.0, le=1.0),
-    limit: int = Query(100, ge=1, le=1000),
-    db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
-):
-    """Get predictions with high turnover risk"""
-    return (
-        db.query(Prediction)
-        .filter(Prediction.score >= min_risk)
-        .order_by(Prediction.score.desc())
-        .limit(limit)
-        .all()
-    )
-
-
-@router.get("/stats", response_model=dict)
-async def get_prediction_stats(
-    db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
-):
-    """Get prediction statistics"""
-    total = db.query(Prediction).count()
-    avg_risk = db.query(func.avg(Prediction.score)).scalar() or 0
-    high_risk = db.query(Prediction).filter(Prediction.score >= 0.7).count()
-    medium_risk = db.query(Prediction).filter(
-        Prediction.score >= 0.4, Prediction.score < 0.7
-    ).count()
-    low_risk = db.query(Prediction).filter(Prediction.score < 0.4).count()
-
-    return {
-        "total": total,
-        "avg_risk_score": float(avg_risk),
-        "high_risk": high_risk,
-        "medium_risk": medium_risk,
-        "low_risk": low_risk,
-    }
+    """Run turnover prediction for a talent"""
+    return prediction_service.predict_turnover(db, talent_id)

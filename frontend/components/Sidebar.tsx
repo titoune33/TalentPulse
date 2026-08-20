@@ -12,23 +12,26 @@ import {
   CreditCard,
   Zap,
   Brain,
+  Shield,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 const nav = [
-  { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
-  { href: "/talents", label: "Talents", icon: Users },
-  { href: "/predictions", label: "Prédictions", icon: Sparkles },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/reports", label: "Rapports", icon: FileText },
+  { href: "/dashboard", label: "Tableau bord", icon: LayoutDashboard, roles: [] },
+  { href: "/talents", label: "Talents", icon: Users, roles: [] },
+  { href: "/predictions", label: "Prédictions", icon: Sparkles, roles: [] },
+  { href: "/analytics", label: "Analytics", icon: BarChart3, roles: ["admin", "hr_manager"] },
+  { href: "/reports", label: "Rapports", icon: FileText, roles: ["admin", "hr_manager"] },
 ];
 
 const secondary = [
-  { href: "/billing", label: "Abonnement", icon: CreditCard },
-  { href: "/settings", label: "Paramètres", icon: Settings },
+  { href: "/billing", label: "Abonnement", icon: CreditCard, roles: [] },
+  { href: "/settings", label: "Paramètres", icon: Settings, roles: ["admin"] },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user, hasAnyRole } = useAuth();
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
@@ -40,6 +43,9 @@ export function Sidebar() {
         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
     }`;
 
+  const visibleNav = nav.filter((item) => item.roles.length === 0 || hasAnyRole(item.roles));
+  const visibleSecondary = secondary.filter((item) => item.roles.length === 0 || hasAnyRole(item.roles));
+
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col overflow-y-auto border-r border-slate-200 bg-white lg:flex">
       <div className="flex h-16 items-center gap-2.5 border-b border-slate-200 px-6">
@@ -49,39 +55,54 @@ export function Sidebar() {
         <div>
           <p className="text-base font-extrabold text-slate-900">TalentPulse</p>
           <p className="text-[10px] font-medium uppercase tracking-widest text-slate-400">
-            RH Intelligence
+            Intelligence
           </p>
         </div>
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">
         <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-          Pilotage
+          Principal
         </p>
-        {nav.map((item) => (
-          <Link key={item.href} href={item.href} className={itemCls(item.href)}>
-            <item.icon className="h-[18px] w-[18px]" />
-            {item.label}
+        {visibleNav.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={itemCls(item.href)}
+          >
+            <item.icon className="h-5 w-5 shrink-0" />
+            <span>{item.label}</span>
           </Link>
         ))}
 
-        <p className="px-3 pb-2 pt-6 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-          Compte
+        <p className="mt-6 px-3 pb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+          Pilotage
         </p>
-        {secondary.map((item) => (
-          <Link key={item.href} href={item.href} className={itemCls(item.href)}>
-            <item.icon className="h-[18px] w-[18px]" />
-            {item.label}
+        {visibleSecondary.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={itemCls(item.href)}
+          >
+            <item.icon className="h-5 w-5 shrink-0" />
+            <span>{item.label}</span>
           </Link>
         ))}
       </nav>
 
       <div className="border-t border-slate-200 p-4">
-        <div className="rounded-xl bg-indigo-50 p-3">
-          <p className="text-xs font-semibold text-indigo-900">Plan Pro</p>
-          <p className="mt-0.5 text-[11px] text-indigo-600">
-            Prédictions illimitées
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 text-sm font-bold">
+            {(user?.name || "?")[0].toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-slate-900">
+              {user?.name}
+            </p>
+            <p className="truncate text-xs text-slate-500">
+              {user?.role === "admin" ? "Administrateur" : user?.role === "hr_manager" ? "RH Manager" : "Employé"}
+            </p>
+          </div>
         </div>
       </div>
     </aside>

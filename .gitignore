@@ -50,3 +50,6 @@ Thumbs.db
 
 # Local app data (Freebuff desktop)
 .freebuff/
+
+# OpenCode secrets vault (never commit)
+.opencode/secrets.env

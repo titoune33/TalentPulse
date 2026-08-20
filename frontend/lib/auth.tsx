@@ -26,6 +26,8 @@ interface AuthContextValue {
   demoLogin: () => Promise<void>;
   logout: () => void;
   updateUser: (user: User) => void;
+  hasRole: (role: string) => boolean;
+  hasAnyRole: (roles: string[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -39,7 +41,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Hydrate from localStorage on mount
   useEffect(() => {
     const storedToken = window.localStorage.getItem(TOKEN_KEY);
     const storedUser = window.localStorage.getItem(USER_KEY);
@@ -66,36 +67,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const form = new URLSearchParams();
       form.append("username", email);
       form.append("password", password);
-      const { data } = await api.post<AuthResponse>("/api/auth/token", form, {
+      const data = await api.post("/api/auth/token", form, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
-      persist(data);
+      persist(data.data);
+      router.replace("/dashboard");
     },
-    [persist]
+    [persist, router]
   );
 
   const register = useCallback(
     async (data: { name: string; email: string; password: string }) => {
-      await api.post("/api/auth/register", data);
-      await login(data.email, data.password);
+      const res = await api.post("/api/auth/register", data);
+      persist(res.data);
+      router.replace("/dashboard");
     },
-    [login]
+    [persist, router]
   );
 
   const demoLogin = useCallback(async () => {
-    try {
-      await login("demo@talentpulse.app", "demo1234");
-    } catch (e) {
-      throw new Error(errorMessage(e, "Connexion démo impossible"));
-    }
-  }, [login]);
+    const form = new URLSearchParams();
+    form.append("username", "demo@talentpulse.app");
+    form.append("password", "demo1234");
+    const data = await api.post("/api/auth/token", form, {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+    persist(data.data);
+    router.replace("/dashboard");
+  }, [persist, router]);
 
   const logout = useCallback(() => {
     window.localStorage.removeItem(TOKEN_KEY);
     window.localStorage.removeItem(USER_KEY);
     setToken(null);
     setUser(null);
-    router.push("/");
+    router.replace("/auth/login");
   }, [router]);
 
   const updateUser = useCallback((u: User) => {
@@ -103,16 +109,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(USER_KEY, JSON.stringify(u));
   }, []);
 
+  const hasRole = useCallback(
+    (role: string) => {
+      if (!user) return false;
+      if (user.role === "admin") return true;
+      return user.role === role;
+    },
+    [user]
+  );
+
+  const hasAnyRole = useCallback(
+    (roles: string[]) => {
+      if (!user) return false;
+      if (user.role === "admin") return true;
+      return roles.includes(user.role);
+    },
+    [user]
+  );
+
   const value = useMemo(
-    () => ({ user, token, loading, login, register, demoLogin, logout, updateUser }),
-    [user, token, loading, login, register, demoLogin, logout, updateUser]
+    () => ({
+      user,
+      token,
+      loading,
+      login,
+      register,
+      demoLogin,
+      logout,
+      updateUser,
+      hasRole,
+      hasAnyRole,
+    }),
+    [user, token, loading, login, register, demoLogin, logout, updateUser, hasRole, hasAnyRole]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
-  return ctx;
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }
