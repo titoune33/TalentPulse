@@ -1,0 +1,18 @@
+# Code Ownership
+
+## Backend
+- `backend/routes/` — @titoune33
+- `backend/services/` — @titoune33
+- `backend/models/` — @titoune33
+- `backend/schemas/` — @titoune33
+
+## Frontend
+- `frontend/app/` — @titoune33
+- `frontend/components/` — @titoune33
+- `frontend/lib/` — @titoune33
+- `frontend/hooks/` — @titoune33
+
+## Infrastructure
+- `render.yaml` — @titoune33
+- `.github/` — @titoune33
+- `Dockerfile*` — @titoune33

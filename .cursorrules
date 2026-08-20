@@ -1,0 +1,47 @@
+# TalentPulse — Cursor Rules
+
+## Project
+TalentPulse — French SaaS RH: prédiction de turnover par ML, gestion talents, analytics.
+
+## Stack
+- **Backend**: FastAPI + SQLAlchemy + scikit-learn (Python 3.12)
+- **Frontend**: Next.js 14 (App Router) + TypeScript + Tailwind CSS + Chart.js
+- **DB**: SQLite (local) / PostgreSQL (prod)
+- **Auth**: JWT (HS256) + bcrypt
+- **Billing**: Stripe
+
+## Commands
+```bash
+# Backend
+cd backend && uv venv --python 3.12 .venv && uv pip install -r requirements.txt
+.venv/bin/uvicorn main:app --reload
+
+# Frontend
+cd frontend && npm install && npm run dev
+```
+
+## Architecture
+- `backend/routes/*` → `backend/services/*` (singletons) → `backend/models/*` (SQLAlchemy)
+- Frontend: static export (`output: 'export'`), all `"use client"`, no SSR
+- Axios instance in `frontend/lib/api.ts` handles JWT + 401 redirect
+- ML: RandomForest trained on boot → `backend/data/ml/` (gitignored)
+
+## Conventions
+- **French** for all user-facing strings (messages, labels, errors)
+- Path alias: `@/*` → `frontend/*`
+- Use shared Tailwind components from `app/globals.css` (`card`, `btn`, `badge`, `input`, `label`)
+- Format helpers in `frontend/lib/format.ts` (`pct`, `eur`, `dateFR`, `riskLabel`)
+- Components flat in `frontend/components/`
+
+## Gotchas
+- Unused services (don't touch): `services/airtable.py`, `services/baserow_service.py`, `services/cv_analysis.py`
+- Static routes before `/{id}` in `talents.py` — don't reorder
+- Employee registration auto-creates Talent row
+- No migration system — schema changes = manual ALTER or DB reset
+- Frontend env var `NEXT_PUBLIC_BACKEND_URL` baked at build time
+
+## Rules
+- Never commit `.env`, `*.db`, `data/`, `__pycache__/`, `.venv/`
+- Keep UI strings in French
+- Don't add test suites unless asked
+- Backend: no ruff/mypy — skip linter config unless requested

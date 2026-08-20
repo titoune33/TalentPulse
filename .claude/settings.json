@@ -1,0 +1,43 @@
+{
+  "projectContext": {
+    "name": "TalentPulse",
+    "description": "French HR SaaS: turnover prediction via ML, talent management, analytics",
+    "repo": "https://github.com/titoune33/TalentPulse",
+    "stack": {
+      "backend": "FastAPI + SQLAlchemy + scikit-learn (Python 3.12)",
+      "frontend": "Next.js 14 (App Router) + TypeScript + Tailwind CSS",
+      "db": "SQLite (local) / PostgreSQL (prod)",
+      "auth": "JWT (HS256) + bcrypt",
+      "billing": "Stripe"
+    }
+  },
+  "projectMcpServers": [],
+  "permissions": {
+    "allow": [
+      "Bash(cd backend && *)",
+      "Bash(cd frontend && *)",
+      "Bash(python -m py_compile *)",
+      "Bash(npx next lint *)",
+      "Read(backend/**)",
+      "Read(frontend/**)",
+      "Read(README.md)",
+      "Read(render.yaml)",
+      "Edit(backend/**)",
+      "Edit(frontend/**)",
+      "Edit(README.md)",
+      "Edit(render.yaml)",
+      "Write(backend/**)",
+      "Write(frontend/**)"
+    ],
+    "deny": [
+      "Bash(git push)",
+      "Bash(git commit)",
+      "Bash(npm install -g *)",
+      "Bash(pip install -g *)",
+      "Bash(curl * --data *)",
+      "Write(.gitignore)",
+      "Write(backend/.env)",
+      "Write(frontend/.env)"
+    ]
+  }
+}
