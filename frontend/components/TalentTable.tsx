@@ -11,12 +11,14 @@ export function TalentTable({
   onEdit,
   onDelete,
   onPredict,
+  onOpenCopilot,
 }: {
   talents: Talent[];
   loading?: boolean;
   onEdit?: (t: Talent) => void;
   onDelete?: (t: Talent) => void;
   onPredict?: (t: Talent) => void;
+  onOpenCopilot?: (t: Talent) => void;
 }) {
   if (loading) {
     return (
@@ -117,13 +119,22 @@ export function TalentTable({
               </td>
               <td className="px-4 py-3">
                 <div className="flex justify-end gap-1">
+                  {onOpenCopilot && (
+                    <button
+                      onClick={() => onOpenCopilot(t)}
+                      title="Ouvrir le Copilot de Rétention IA"
+                      className="rounded-lg p-2 text-primary-600 hover:bg-primary-50 transition"
+                    >
+                      <Sparkles className="h-4 w-4 text-primary-600" />
+                    </button>
+                  )}
                   {onPredict && (
                     <button
                       onClick={() => onPredict(t)}
                       title="Lancer une prédiction"
-                      className="rounded-lg p-2 text-indigo-600 hover:bg-indigo-50"
+                      className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
                     >
-                      <Sparkles className="h-4 w-4" />
+                      <Calendar className="h-4 w-4" />
                     </button>
                   )}
                   {onEdit && (

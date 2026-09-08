@@ -30,64 +30,76 @@ body {
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.99];
   }
 
   .btn-primary {
-    @apply btn bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 active:scale-[0.98];
+    @apply btn bg-slate-900 text-white shadow-sm hover:bg-slate-850 hover:shadow hover:text-white border border-slate-800;
+  }
+
+  .btn-accent {
+    @apply btn bg-primary-600 text-white shadow-sm hover:bg-primary-700 hover:shadow-glow;
   }
 
   .btn-secondary {
-    @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400;
+    @apply btn border border-slate-200/90 bg-white text-slate-700 shadow-subtle hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900;
   }
 
   .btn-ghost {
-    @apply btn text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+    @apply btn text-slate-600 hover:bg-slate-100/80 hover:text-slate-900;
   }
 
   .btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-700;
+    @apply btn bg-rose-600 text-white hover:bg-rose-700 shadow-sm;
   }
 
   .input {
-    @apply w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20;
+    @apply w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 shadow-subtle transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15;
   }
 
   .label {
-    @apply mb-1.5 block text-sm font-medium text-slate-700;
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-600;
   }
 
   .card {
-    @apply rounded-xl border border-slate-200 bg-white shadow-card;
+    @apply rounded-xl border border-slate-200/80 bg-white shadow-card transition-all duration-200;
+  }
+
+  .card-hover {
+    @apply hover:border-slate-300 hover:shadow-lift;
   }
 
   .badge {
-    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium tracking-tight;
   }
 
-  /* Premium button hover */
-  .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px 0 rgb(79 70 229 / 0.25);
+  .badge-risk-high {
+    @apply bg-rose-50 text-rose-700 border border-rose-200/80;
   }
 
-  .btn-secondary:hover {
-    transform: translateY(-1px);
+  .badge-risk-medium {
+    @apply bg-amber-50 text-amber-700 border border-amber-200/80;
   }
 
-  /* Card hover effect */
-  .card:hover {
-    box-shadow: 0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.06);
+  .badge-risk-low {
+    @apply bg-emerald-50 text-emerald-700 border border-emerald-200/80;
+  }
+
+  /* Range slider styling */
+  input[type=range] {
+    @apply accent-primary-600 h-2 bg-slate-200 rounded-lg cursor-pointer;
   }
 
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
-    .btn-primary,
-    .btn-secondary {
+    .btn,
+    .card {
       transform: none !important;
+      transition: none !important;
     }
     .animate-fadeUp,
-    .animate-fadeIn {
+    .animate-fadeIn,
+    .animate-slideInRight {
       animation: none !important;
     }
   }

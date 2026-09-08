@@ -8,6 +8,7 @@ import { Button } from "@/components/Button";
 import { Field, Input, Select } from "@/components/Field";
 import { Spinner } from "@/components/Spinner";
 import { EmptyState } from "@/components/EmptyState";
+import { RetentionCopilotDrawer } from "@/components/RetentionCopilotDrawer";
 import { useTalents } from "@/hooks/useTalents";
 import { usePredictions } from "@/hooks/usePredictions";
 import { errorMessage } from "@/lib/api";
@@ -47,6 +48,8 @@ export default function TalentsPage() {
   const [editing, setEditing] = useState<Talent | null>(null);
   const [deleting, setDeleting] = useState<Talent | null>(null);
   const [predicting, setPredicting] = useState<Talent | null>(null);
+  const [copilotTalent, setCopilotTalent] = useState<Talent | null>(null);
+  const [copilotOpen, setCopilotOpen] = useState(false);
   const [form, setForm] = useState<TalentInput>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<{ tone: "error" | "success"; text: string } | null>(null);
@@ -249,6 +252,10 @@ export default function TalentsPage() {
             onEdit={openEdit}
             onDelete={setDeleting}
             onPredict={handlePredict}
+            onOpenCopilot={(t) => {
+              setCopilotTalent(t);
+              setCopilotOpen(true);
+            }}
           />
         </div>
       )}
@@ -405,6 +412,13 @@ export default function TalentsPage() {
           </p>
         </div>
       </Modal>
+
+      {/* Retention Copilot Drawer */}
+      <RetentionCopilotDrawer
+        talent={copilotTalent}
+        isOpen={copilotOpen}
+        onClose={() => setCopilotOpen(false)}
+      />
     </div>
   );
 }

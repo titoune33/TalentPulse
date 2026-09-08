@@ -26,14 +26,16 @@ export function StatsCard({
   sub?: ReactNode;
 }) {
   return (
-    <div className="card flex items-start gap-4 p-5">
-      <div className={`rounded-xl p-3 ${iconBg[tone]}`}>{icon}</div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-slate-500">{title}</p>
-        <p className="mt-0.5 truncate text-2xl font-extrabold text-slate-900">
+    <div className="card p-5 transition-all duration-200 hover:border-slate-300 hover:shadow-lift">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{title}</p>
+        <div className={`rounded-lg p-2.5 ${iconBg[tone]}`}>{icon}</div>
+      </div>
+      <div className="mt-2">
+        <p className="font-mono text-3xl font-bold tracking-tight text-slate-900">
           {value}
         </p>
-        {sub && <p className="mt-1 text-xs text-slate-400">{sub}</p>}
+        {sub && <p className="mt-1.5 text-xs text-slate-500">{sub}</p>}
       </div>
     </div>
   );

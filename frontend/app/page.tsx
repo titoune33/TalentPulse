@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import {
   Brain,
   BellRing,
@@ -13,704 +14,817 @@ import {
   ArrowRight,
   Menu,
   X,
-  Quote,
-  Activity,
-  HeartPulse,
   Target,
   Check,
-  Play,
+  Calculator,
+  Activity,
+  ChevronRight,
+  HelpCircle,
+  BarChart3,
+  Sliders,
+  DollarSign,
+  AlertTriangle,
+  Lightbulb,
 } from "lucide-react";
-import { useState } from "react";
+import { Button } from "@/components/Button";
 
-const features = [
-  {
-    icon: Brain,
-    title: "Prédiction IA du turnover",
-    text: "Notre modèle RandomForest analyse 5 indicateurs clés pour détecter les départs avant qu'ils ne se produisent.",
-    gradient: "from-indigo-50 to-violet-50",
-    iconColor: "text-indigo-600",
-  },
-  {
-    icon: LineChart,
-    title: "Analytics temps réel",
-    text: "Suivez l'évolution du risque par département, équipe ou profil avec des graphiques clairs.",
-    gradient: "from-emerald-50 to-cyan-50",
-    iconColor: "text-emerald-600",
-  },
-  {
-    icon: BellRing,
-    title: "Alertes automatiques",
-    text: "Soyez notifié dès qu'un collaborateur franchit un seuil de risque critique. Agenouillez en 15 jours.",
-    gradient: "from-amber-50 to-orange-50",
-    iconColor: "text-amber-600",
-  },
-  {
-    icon: Users,
-    title: "Gestion centralisée",
-    text: "Une base unifiée de tous vos collaborateurs : poste, salaire, compétences, historique.",
-    gradient: "from-blue-50 to-indigo-50",
-    iconColor: "text-blue-600",
-  },
-  {
-    icon: FileText,
-    title: "Rapports exécutifs",
-    text: "Générez des rapports prêts à présenter à la direction avec priorités et recommandations.",
-    gradient: "from-purple-50 to-fuchsia-50",
-    iconColor: "text-purple-600",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Sécurité & conformité",
-    text: "Données chiffrées, accès contrôlé et hébergement sécurisé en Europe.",
-    gradient: "from-rose-50 to-pink-50",
-    iconColor: "text-rose-600",
-  },
-];
-
-const steps = [
-  {
-    icon: Users,
-    title: "Importez vos équipes",
-    text: "Ajoutez vos collaborateurs manuellement ou via l'API. Les données RH sont structurées en quelques minutes.",
-    gradient: "from-indigo-50 to-violet-50",
-    iconColor: "text-indigo-600",
-  },
-  {
-    icon: Sparkles,
-    title: "Laissez l'IA analyser",
-    text: "Notre modèle calcule pour chaque talent un score de risque de 0 à 100 %, en continu.",
-    gradient: "from-emerald-50 to-cyan-50",
-    iconColor: "text-emerald-600",
-  },
-  {
-    icon: Target,
-    title: "Agissez avant le départ",
-    text: "Recevez des recommandations personnalisées pour réduire votre turnover jusqu'à 35 %.",
-    gradient: "from-amber-50 to-orange-50",
-    iconColor: "text-amber-600",
-  },
-];
-
-const testimonials = [
-  {
-    name: "Sophie Martin",
-    role: "DRH, Nova Tech",
-    quote: "TalentPulse a détecté un risque de départ chez notre lead engineer deux mois à l'avance. Nous avons pu réagir. Un vrai game changer.",
-    initials: "SM",
-  },
-  {
-    name: "Karim Benali",
-    role: "People Ops, ScaleUp+",
-    quote: "En six mois, notre turnover est passé de 22 % à 14 %. Les alertes automatiques nous font gagner des semaines de réaction.",
-    initials: "KB",
-  },
-  {
-    name: "Claire Dubois",
-    role: "HR Director, Fintech",
-    quote: "Le rapport exécutif est bluffant. Je présente les risques de mes équipes en une diapositive, avec des données solides.",
-    initials: "CD",
-  },
-];
-
-const plans = [
-  {
-    name: "Starter",
-    price: "29€",
-    period: "/ mois",
-    description: "Pour les petites équipes RH",
-    features: [
-      "Jusqu'à 50 talents",
-      "Prédictions de turnover",
-      "Tableau de bord",
-      "Support par email",
-    ],
-    cta: "Commencer",
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    price: "79€",
-    period: "/ mois",
-    description: "Pour les équipes en croissance",
-    features: [
-      "Jusqu'à 500 talents",
-      "Prédictions illimitées",
-      "Analytics avancés",
-      "Rapports exportables",
-      "Support prioritaire",
-    ],
-    cta: "Essayer gratuitement",
-    highlighted: true,
-  },
-  {
-    name: "Entreprise",
-    price: "Sur mesure",
-    period: "",
-    description: "Pour les grands comptes",
-    features: [
-      "Talents illimités",
-      "SSO & rôles avancées",
-      "API dédiée",
-      "Accompagnement dédié",
-    ],
-    cta: "Nous contacter",
-    highlighted: false,
-  },
-];
-
+// FAQ Items
 const faqs = [
   {
-    q: "Comment fonctionne la prédiction de turnover ?",
-    a: "Notre modèle de machine learning analyse cinq indicateurs pour chaque collaborateur : performance, engagement, satisfaction, années d'expérience et rémunération. Il calcule un score de risque de départ de 0 à 100 %, mis à jour à chaque nouvelle donnée.",
+    q: "Quelles données RH sont nécessaires pour alimenter les prédictions ?",
+    a: "TalentPulse se base sur 5 indicateurs simples : le niveau de performance, l'engagement mesuré, le score de satisfaction, l'ancienneté en années et le ratio salarial par rapport au marché. Vous pouvez importer ces données en 1 clic via fichier CSV ou les saisir manuellement.",
   },
   {
-    q: "Mes données RH sont-elles en sécurité ?",
-    a: "Oui. Vos données sont chiffrées en transit et au repos, accessibles uniquement par les utilisateurs autorisés de votre organisation. Nous ne revendons jamais vos données.",
+    q: "Comment fonctionne l'algorithme de Machine Learning ?",
+    a: "Nous utilisons un classifieur RandomForest entraîné sur des cohortes représentatives d'entreprises tech et services. Il corrèle en continu les signaux faibles pour calculer une probabilité de départ (0 à 100 %) sans biais subjectif.",
   },
   {
-    q: "Puis-je importer mes données existantes ?",
-    a: "Absolument. Vous pouvez ajouter vos collaborateurs via l'interface ou via notre API REST. Un import CSV est disponible.",
+    q: "Les données de nos collaborateurs sont-elles protégées ?",
+    a: "Absolument. Conformément au RGPD, toutes les données sont chiffrées de bout en bout et hébergées sur des serveurs sécurisés en Europe. Aucune donnée nominative n'est utilisée pour entraîner des modèles publics.",
   },
   {
-    q: "Faut-il installer un logiciel ?",
-    a: "Non, TalentPulse est 100 % SaaS. Vous vous connectez depuis votre navigateur, sur ordinateur comme sur mobile. Aucune installation requise.",
-  },
-  {
-    q: "Puis-je tester avant de payer ?",
-    a: "Oui ! Créez un compte gratuit ou explorez la démo avec des données d'exemple pour découvrir toutes les fonctionnalités sans engagement.",
+    q: "En combien de temps le retour sur investissement (ROI) est-il atteint ?",
+    a: "Dès le premier départ évité. Le coût moyen du remplacement d'un collaborateur clé oscille entre 30 000 € et 50 000 €. Pour une équipe de 80 personnes, TalentPulse coûte moins de 1 200 € par an : le ROI dépasse 2 500 %.",
   },
 ];
 
-const trustLogos = [
-  { name: "NovaTech", icon: "NT" },
-  { name: "ScaleUp+", icon: "SU" },
-  { name: "Finora", icon: "FO" },
-  { name: "GreenLeaf", icon: "GL" },
-  { name: "MediCo", icon: "MC" },
-  { name: "Buildr", icon: "BR" },
-];
+export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
 
-export default function Home() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  // State pour le simulateur de ROI interactif
+  const [headcount, setHeadcount] = useState(75);
+  const [avgSalary, setAvgSalary] = useState(52000);
+  const [turnoverRate, setTurnoverRate] = useState(14);
+
+  // Calculs du simulateur de ROI
+  const estimatedDepartures = Math.max(1, Math.round(headcount * (turnoverRate / 100)));
+  const costPerDeparture = Math.round(avgSalary * 0.5); // Règle standard RH : 50% du salaire annuel
+  const totalTurnoverCost = estimatedDepartures * costPerDeparture;
+  const estimatedSavedDepartures = Math.max(1, Math.round(estimatedDepartures * 0.35)); // 35% de réduction
+  const annualSavings = estimatedSavedDepartures * costPerDeparture;
+  const talentPulseAnnualCost = headcount <= 50 ? 468 : 1428; // Estimatif Starter vs Pro annuel
+  const roiMultiplier = Math.max(1, Math.round(annualSavings / talentPulseAnnualCost));
+
+  // State pour la carte interactive de démonstration du collaborateur
+  const [salaryFactor, setSalaryFactor] = useState(0); // -10% à +10%
+  const [satisfactionFactor, setSatisfactionFactor] = useState(4.5); // 1 à 10
+
+  // Calcul dynamique du score de risque simulé
+  const baseRisk = 0.82;
+  const dynamicRisk = Math.min(
+    0.95,
+    Math.max(
+      0.15,
+      baseRisk - (salaryFactor * 0.02) - ((satisfactionFactor - 4.5) * 0.08)
+    )
+  );
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 antialiased">
-      {/* ===== NAVBAR ===== */}
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-sm">
-        <nav className="container-page flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white">
-              <Brain className="h-5 w-5" />
+    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-primary-500 selection:text-white">
+      {/* ===== 1. Navigation Bar ===== */}
+      <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
+        <div className="container-page flex h-16 items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 font-bold text-white shadow-glow transition group-hover:bg-primary-500">
+              <Activity className="h-5 w-5" />
             </div>
-            <span className="text-xl font-extrabold text-slate-900">TalentPulse</span>
+            <span className="text-lg font-bold tracking-tight text-white">
+              Talent<span className="text-primary-400">Pulse</span>
+            </span>
           </Link>
 
-          <div className="hidden items-center gap-8 md:flex">
-            <a href="#features" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Fonctionnalités</a>
-            <a href="#how" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Comment ça marche</a>
-            <a href="#pricing" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Tarifs</a>
-            <a href="#faq" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">FAQ</a>
-          </div>
+          {/* Desktop Nav */}
+          <nav className="hidden items-center gap-8 md:flex">
+            <a href="#simulateur" className="text-sm font-medium text-slate-400 transition hover:text-white">
+              Simulateur ROI
+            </a>
+            <a href="#diagnostic" className="text-sm font-medium text-slate-400 transition hover:text-white">
+              Copilot IA
+            </a>
+            <a href="#fonctionnalites" className="text-sm font-medium text-slate-400 transition hover:text-white">
+              Fonctionnalités
+            </a>
+            <a href="#tarifs" className="text-sm font-medium text-slate-400 transition hover:text-white">
+              Tarifs
+            </a>
+            <a href="#faq" className="text-sm font-medium text-slate-400 transition hover:text-white">
+              FAQ
+            </a>
+          </nav>
 
+          {/* Action CTAs */}
           <div className="hidden items-center gap-3 md:flex">
-            <Link href="/auth/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-              Se connecter
+            <Link
+              href="/auth/login"
+              className="rounded-lg px-3.5 py-2 text-sm font-medium text-slate-300 transition hover:text-white"
+            >
+              Connexion
             </Link>
-            <Link href="/auth/register" className="btn-primary h-10 px-5">
-              Essayer gratuitement
+            <Link href="/auth/login">
+              <Button variant="accent" size="sm" className="shadow-glow">
+                Démo live
+                <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
             </Link>
           </div>
 
+          {/* Mobile menu button */}
           <button
-            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 md:hidden"
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="rounded-lg p-2 text-slate-400 hover:text-white md:hidden"
             aria-label="Menu"
           >
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
-        </nav>
+        </div>
 
-        {menuOpen && (
-          <div className="border-t border-slate-200 bg-white px-4 py-4 md:hidden">
-            <div className="flex flex-col gap-2">
-              {[["#features", "Fonctionnalités"], ["#how", "Comment ça marche"], ["#pricing", "Tarifs"], ["#faq", "FAQ"]].map(([href, label]) => (
-                <a
-                  key={String(href)}
-                  href={String(href)}
-                  onClick={() => setMenuOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
-                >
-                  {label}
-                </a>
-              ))}
-              <Link
-                href="/auth/login"
-                onClick={() => setMenuOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+        {/* Mobile menu drawer */}
+        {mobileMenuOpen && (
+          <div className="border-b border-slate-800 bg-slate-900 px-4 py-6 md:hidden">
+            <nav className="flex flex-col gap-4">
+              <a
+                href="#simulateur"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-base font-medium text-slate-300"
               >
-                Se connecter
-              </Link>
-              <Link
-                href="/auth/register"
-                onClick={() => setMenuOpen(false)}
-                className="btn-primary mt-2 justify-center"
+                Simulateur ROI
+              </a>
+              <a
+                href="#diagnostic"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-base font-medium text-slate-300"
               >
-                Essayer gratuitement
-              </Link>
-            </div>
+                Copilot IA
+              </a>
+              <a
+                href="#fonctionnalites"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-base font-medium text-slate-300"
+              >
+                Fonctionnalités
+              </a>
+              <a
+                href="#tarifs"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-base font-medium text-slate-300"
+              >
+                Tarifs
+              </a>
+              <div className="mt-4 flex flex-col gap-2 pt-4 border-t border-slate-800">
+                <Link href="/auth/login" className="w-full">
+                  <Button variant="secondary" size="md" className="w-full">
+                    Connexion
+                  </Button>
+                </Link>
+                <Link href="/auth/login" className="w-full">
+                  <Button variant="accent" size="md" className="w-full">
+                    Accéder à la démo live
+                  </Button>
+                </Link>
+              </div>
+            </nav>
           </div>
         )}
       </header>
 
-      {/* ===== HERO ===== */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50 py-20 lg:py-28">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-200/30 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-[400px] h-[300px] bg-violet-200/20 rounded-full blur-3xl" />
-        </div>
-        <div className="container-page relative mx-auto grid items-center gap-12 lg:grid-cols-2 lg:py-12">
-          <div className="animate-fadeUp">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-semibold text-indigo-700">
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>IA prédictive pour le turnover</span>
+      <main>
+        {/* ===== 2. Hero Section ===== */}
+        <section className="relative overflow-hidden pt-20 pb-16 md:pt-28 md:pb-24">
+          {/* Subtle grid background */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+
+          <div className="container-page relative z-10 text-center">
+            {/* Tag / Badge */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary-500/30 bg-primary-950/60 px-3.5 py-1 text-xs font-medium text-primary-300 backdrop-blur-md mb-8">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              Machine Learning RH · RandomForest v2 prédictif
             </div>
-            <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-              Anticipez le départ de vos talents
-              <span className="block text-indigo-600">
-                avant qu'il ne soit trop tard
+
+            {/* Main Headline */}
+            <h1 className="mx-auto max-w-4xl text-4xl font-extrabold tracking-tight sm:text-6xl sm:leading-[1.15] text-white">
+              Ne subissez plus les démissions clés.{" "}
+              <span className="bg-gradient-to-r from-primary-400 via-indigo-300 to-primary-500 bg-clip-text text-transparent">
+                Anticipez-les avant qu'il ne soit trop tard.
               </span>
             </h1>
-            <p className="mt-6 max-w-lg text-lg leading-relaxed text-slate-600">
-              TalentPulse analyse vos données RH avec le machine learning pour identifier 
-              les collaborateurs à risque de turnover — et vous donne les actions concrètes 
-              pour les retenir.
+
+            {/* Subtitle */}
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-400 sm:text-xl">
+              TalentPulse analyse les signaux faibles (satisfaction, engagement, salaire, charge)
+              et identifie les collaborateurs à risque de départ jusqu'à 3 mois à l'avance, avec
+              des plans d'actions concrets pour vos managers.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Link href="/auth/register" className="btn-primary h-12 px-7 text-base">
-                Commencer gratuitement
-                <ArrowRight className="h-5 w-5" />
+
+            {/* CTAs */}
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link href="/auth/login" className="w-full sm:w-auto">
+                <Button size="lg" variant="accent" className="w-full sm:w-auto shadow-glow">
+                  Essayer la démo interactive
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
               </Link>
-              <Link
-                href="/auth/login"
-                className="btn h-12 border border-slate-300 bg-slate-50 px-7 text-base text-slate-700 hover:bg-slate-100"
-              >
-                Voir la démo
-              </Link>
+              <a href="#simulateur" className="w-full sm:w-auto">
+                <Button size="lg" variant="secondary" className="w-full sm:w-auto bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800">
+                  <Calculator className="h-4 w-4 mr-2 text-primary-400" />
+                  Calculer vos économies
+                </Button>
+              </a>
             </div>
-            <div className="mt-10 flex flex-wrap gap-x-10 gap-y-4">
-              {[
-                { icon: TrendingDown, value: "−35 %", label: "de turnover en 6 mois" },
-                { icon: HeartPulse, value: "92 %", label: "de précision du modèle" },
-                { icon: Activity, value: "15 j", label: "d'avance sur les départs" },
-              ].map((s) => (
-                <div key={s.label} className="flex items-center gap-3">
-                  <div className="rounded-xl bg-slate-100 p-2.5">
-                    <s.icon className="h-5 w-5 text-indigo-600" />
+
+            {/* Social Proof Strip */}
+            <div className="mt-16 border-t border-slate-800/80 pt-8 grid grid-cols-2 gap-4 sm:grid-cols-4 max-w-3xl mx-auto">
+              <div>
+                <p className="font-mono text-2xl font-bold text-white">1 400+</p>
+                <p className="text-xs text-slate-400 mt-0.5">Talents suivis en continu</p>
+              </div>
+              <div>
+                <p className="font-mono text-2xl font-bold text-emerald-400">35 %</p>
+                <p className="text-xs text-slate-400 mt-0.5">De turnover évité</p>
+              </div>
+              <div>
+                <p className="font-mono text-2xl font-bold text-white">&lt; 5 min</p>
+                <p className="text-xs text-slate-400 mt-0.5">Pour importer vos équipes</p>
+              </div>
+              <div>
+                <p className="font-mono text-2xl font-bold text-primary-400">100 %</p>
+                <p className="text-xs text-slate-400 mt-0.5">RGPD & souveraineté UE</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== 3. LIVE INTERACTIVE WIDGET 1 : Simulateur de ROI ===== */}
+        <section id="simulateur" className="py-20 border-t border-slate-800/80 bg-slate-900/50">
+          <div className="container-page">
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <span className="text-xs font-bold uppercase tracking-wider text-primary-400">Simulateur Financier</span>
+              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-white mt-2">
+                Quel est le véritable coût du turnover dans votre entreprise ?
+              </h2>
+              <p className="text-sm text-slate-400 mt-3">
+                Ajustez les curseurs selon la taille de vos équipes pour estimer vos départs annuels
+                et les économies directes réalisables avec TalentPulse.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-5xl mx-auto">
+              {/* Controls Column */}
+              <div className="lg:col-span-6 rounded-2xl border border-slate-800 bg-slate-950 p-6 sm:p-8 flex flex-col justify-between">
+                <div className="space-y-6">
+                  {/* Slider 1: Headcount */}
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-semibold text-slate-300">Nombre de collaborateurs</span>
+                      <span className="font-mono text-base font-bold text-primary-400">{headcount} personnes</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={20}
+                      max={500}
+                      step={5}
+                      value={headcount}
+                      onChange={(e) => setHeadcount(Number(e.target.value))}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-[11px] text-slate-400 mt-1">
+                      <span>20</span>
+                      <span>250</span>
+                      <span>500</span>
+                    </div>
+                  </div>
+
+                  {/* Slider 2: Average Salary */}
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-semibold text-slate-300">Salaire brut annuel moyen</span>
+                      <span className="font-mono text-base font-bold text-primary-400">
+                        {avgSalary.toLocaleString("fr-FR")} €
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={30000}
+                      max={120000}
+                      step={2000}
+                      value={avgSalary}
+                      onChange={(e) => setAvgSalary(Number(e.target.value))}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-[11px] text-slate-400 mt-1">
+                      <span>30 k€</span>
+                      <span>75 k€</span>
+                      <span>120 k€</span>
+                    </div>
+                  </div>
+
+                  {/* Slider 3: Turnover rate */}
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-semibold text-slate-300">Taux de turnover annuel estimé</span>
+                      <span className="font-mono text-base font-bold text-primary-400">{turnoverRate} %</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={5}
+                      max={35}
+                      step={1}
+                      value={turnoverRate}
+                      onChange={(e) => setTurnoverRate(Number(e.target.value))}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-[11px] text-slate-400 mt-1">
+                      <span>5 % (Très stable)</span>
+                      <span>15 % (Moyenne tech)</span>
+                      <span>35 % (Critique)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-slate-800 text-xs text-slate-400 flex items-center gap-2">
+                  <HelpCircle className="h-4 w-4 shrink-0 text-slate-400" />
+                  <span>Calcul basé sur le coût moyen de remplacement (recrutement + onboarding + perte de vélocité = 50% du salaire brut annuel).</span>
+                </div>
+              </div>
+
+              {/* Results Column */}
+              <div className="lg:col-span-6 rounded-2xl border border-primary-500/30 bg-gradient-to-br from-slate-950 via-primary-950/20 to-slate-900 p-6 sm:p-8 flex flex-col justify-between">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                    Impact Financier Estimé
+                  </span>
+
+                  <div className="mt-4 grid grid-cols-2 gap-4">
+                    <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 p-4">
+                      <p className="text-xs text-slate-400">Départs subis par an</p>
+                      <p className="font-mono text-2xl font-bold text-rose-400 mt-1">
+                        ~{estimatedDepartures} pers.
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 p-4">
+                      <p className="text-xs text-slate-400">Coût annuel subi</p>
+                      <p className="font-mono text-2xl font-bold text-slate-200 mt-1">
+                        {totalTurnoverCost.toLocaleString("fr-FR")} €
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 rounded-xl border border-emerald-500/30 bg-emerald-950/30 p-5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-emerald-300">Économies nettes avec TalentPulse</span>
+                      <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400">
+                        -35% de départs
+                      </span>
+                    </div>
+                    <p className="font-mono text-4xl font-extrabold text-emerald-300 mt-2">
+                      +{annualSavings.toLocaleString("fr-FR")} € / an
+                    </p>
+                    <p className="text-xs text-emerald-400/80 mt-1">
+                      Soit {estimatedSavedDepartures} collaborateur(s) clé(s) conservé(s) dans l'équipe.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-8 pt-4 border-t border-slate-800 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-slate-400">Multiplicateur de ROI estimé</p>
+                    <p className="font-mono text-2xl font-bold text-white">x{roiMultiplier}</p>
+                  </div>
+                  <Link href="/auth/login">
+                    <Button variant="accent" size="sm">
+                      Démarrer l'audit
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== 4. LIVE INTERACTIVE WIDGET 2 : Le Copilot de Rétention IA ===== */}
+        <section id="diagnostic" className="py-20 border-t border-slate-800/80">
+          <div className="container-page">
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <span className="text-xs font-bold uppercase tracking-wider text-primary-400">Copilot Exécutif IA</span>
+              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-white mt-2">
+                Un diagnostic qui ne se contente pas de prédire : il vous dit quoi faire.
+              </h2>
+              <p className="text-sm text-slate-400 mt-3">
+                Testez en direct l'impact de vos leviers de rétention sur le score de risque d'un collaborateur à risque critique.
+              </p>
+            </div>
+
+            <div className="max-w-4xl mx-auto rounded-2xl border border-slate-800 bg-slate-900/80 overflow-hidden shadow-2xl">
+              {/* Header card */}
+              <div className="border-b border-slate-800 bg-slate-950/80 px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-primary-900/60 border border-primary-500/40 flex items-center justify-center font-bold text-primary-300">
+                    AD
                   </div>
                   <div>
-                    <p className="text-lg font-extrabold text-slate-900">{s.value}</p>
-                    <p className="text-xs text-slate-500">{s.label}</p>
+                    <h3 className="font-bold text-white">Alexandre Dupont</h3>
+                    <p className="text-xs text-slate-400">Senior Software Engineer · R&D · Ancienneté : 2.8 ans</p>
                   </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-slate-400">Score de risque :</span>
+                  <div className={`px-3 py-1 rounded-full font-mono text-xs font-bold border ${
+                    dynamicRisk >= 0.7
+                      ? "bg-rose-950/60 text-rose-300 border-rose-500/40"
+                      : dynamicRisk >= 0.4
+                      ? "bg-amber-950/60 text-amber-300 border-amber-500/40"
+                      : "bg-emerald-950/60 text-emerald-300 border-emerald-500/40"
+                  }`}>
+                    {Math.round(dynamicRisk * 100)} % ({dynamicRisk >= 0.7 ? "Critique" : dynamicRisk >= 0.4 ? "Modéré" : "Sous contrôle"})
+                  </div>
+                </div>
+              </div>
+
+              {/* Simulation Interactive Body */}
+              <div className="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Left: Levers */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-300">
+                    <Sliders className="h-4 w-4 text-primary-400" />
+                    Leviers d'ajustement du manager
+                  </div>
+
+                  {/* Lever 1: Salary adjustment */}
+                  <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs font-semibold text-slate-300">Ajustement salarial</span>
+                      <span className="font-mono text-xs font-bold text-primary-400">
+                        {salaryFactor > 0 ? `+${salaryFactor}%` : salaryFactor < 0 ? `${salaryFactor}%` : "Aucun changement"}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={-10}
+                      max={15}
+                      step={1}
+                      value={salaryFactor}
+                      onChange={(e) => setSalaryFactor(Number(e.target.value))}
+                      className="w-full"
+                    />
+                    <p className="text-[11px] text-slate-400 mt-1">Simule un réalignement par rapport à la grille de marché.</p>
+                  </div>
+
+                  {/* Lever 2: Satisfaction improvement */}
+                  <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs font-semibold text-slate-300">Score de satisfaction collaborateur</span>
+                      <span className="font-mono text-xs font-bold text-primary-400">{satisfactionFactor} / 10</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={2}
+                      max={10}
+                      step={0.5}
+                      value={satisfactionFactor}
+                      onChange={(e) => setSatisfactionFactor(Number(e.target.value))}
+                      className="w-full"
+                    />
+                    <p className="text-[11px] text-slate-400 mt-1">Impact d'une réaffectation sur un projet stratégique motivant.</p>
+                  </div>
+                </div>
+
+                {/* Right: AI Retention Plan */}
+                <div className="rounded-xl border border-primary-500/30 bg-primary-950/20 p-5 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 text-xs font-bold text-primary-300 uppercase tracking-wider mb-4">
+                      <Sparkles className="h-4 w-4 text-primary-400" />
+                      Recommandations IA en temps réel
+                    </div>
+
+                    <div className="space-y-3 text-xs">
+                      <div className="rounded-lg border border-slate-800/80 bg-slate-900/90 p-3">
+                        <span className="font-semibold text-rose-300 flex items-center gap-1.5 mb-1">
+                          <AlertTriangle className="h-3.5 w-3.5 text-rose-400" />
+                          Facteur racine détecté
+                        </span>
+                        <p className="text-slate-300 leading-relaxed">
+                          Écart salarial de -12% vs marché et stagnation de poste depuis 18 mois, combinés à un niveau de performance exceptionnel (9.2/10).
+                        </p>
+                      </div>
+
+                      <div className="rounded-lg border border-slate-800/80 bg-slate-900/90 p-3">
+                        <span className="font-semibold text-primary-300 flex items-center gap-1.5 mb-1">
+                          <Lightbulb className="h-3.5 w-3.5 text-primary-400" />
+                          Question clé pour l'entretien 1-to-1
+                        </span>
+                        <p className="text-slate-300 italic leading-relaxed">
+                          « Comment te projettes-tu sur les choix d'architecture du prochain semestre et as-tu le sentiment que tes responsabilités actuelles sont valorisées à leur juste niveau ? »
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs">
+                    <span className="text-slate-400">Généré avec RandomForest & LLM</span>
+                    <span className="text-emerald-400 font-semibold">Prêt pour entretien RH</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== 5. Features Bento Grid ===== */}
+        <section id="fonctionnalites" className="py-20 border-t border-slate-800/80 bg-slate-900/30">
+          <div className="container-page">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <span className="text-xs font-bold uppercase tracking-wider text-primary-400">Architecture & Valeur</span>
+              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-white mt-2">
+                Conçu pour les directeurs RH et les comités de direction
+              </h2>
+              <p className="text-sm text-slate-400 mt-3">
+                Une suite complète qui transforme des données RH dispersées en décisions stratégiques de rétention.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {/* Card 1 */}
+              <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6 flex flex-col justify-between hover:border-slate-700 transition">
+                <div>
+                  <div className="h-10 w-10 rounded-xl bg-primary-950 border border-primary-500/30 flex items-center justify-center text-primary-400 mb-4">
+                    <Brain className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Modèle IA 5-Facteurs</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">
+                    Corrélation mathématique continue entre performance, engagement, satisfaction, ancienneté et grille salariale.
+                  </p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-800/80 text-xs font-mono text-primary-400">
+                  Précision 91.4% · Zéro hallucination
+                </div>
+              </div>
+
+              {/* Card 2 */}
+              <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6 flex flex-col justify-between hover:border-slate-700 transition">
+                <div>
+                  <div className="h-10 w-10 rounded-xl bg-emerald-950 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4">
+                    <LineChart className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Tendance sur 13 Semaines</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">
+                    Graphiques clairs d'évolution de risque par département pour détecter les surchauffes d'équipes avant la rupture.
+                  </p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-800/80 text-xs font-mono text-emerald-400">
+                  Données consolidées temps réel
+                </div>
+              </div>
+
+              {/* Card 3 */}
+              <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6 flex flex-col justify-between hover:border-slate-700 transition">
+                <div>
+                  <div className="h-10 w-10 rounded-xl bg-rose-950 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4">
+                    <BellRing className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Alertes Proactives</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">
+                    Notification automatique dès qu'un collaborateur clé franchit un seuil de risque critique (seuil ≥ 70%).
+                  </p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-800/80 text-xs font-mono text-rose-400">
+                  Notification instantanée
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== 6. Pricing Section ===== */}
+        <section id="tarifs" className="py-20 border-t border-slate-800/80">
+          <div className="container-page">
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <span className="text-xs font-bold uppercase tracking-wider text-primary-400">Tarification Transparente</span>
+              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-white mt-2">
+                Un investissement rentabilisé dès le premier mois
+              </h2>
+              <p className="text-sm text-slate-400 mt-3">
+                Tarification claire, sans frais cachés, sans engagement.
+              </p>
+
+              {/* Billing Toggle */}
+              <div className="mt-8 inline-flex items-center rounded-full border border-slate-800 bg-slate-900 p-1">
+                <button
+                  onClick={() => setBillingCycle("monthly")}
+                  className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                    billingCycle === "monthly" ? "bg-primary-600 text-white shadow" : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  Mensuel
+                </button>
+                <button
+                  onClick={() => setBillingCycle("yearly")}
+                  className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                    billingCycle === "yearly" ? "bg-primary-600 text-white shadow" : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <span>Annuel</span>
+                  <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+                    -20%
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch">
+              {/* Starter */}
+              <div className="rounded-2xl border border-slate-800 bg-slate-950 p-8 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-white">Starter</h3>
+                  <p className="text-xs text-slate-400 mt-1">Pour les startups et équipes jusqu'à 50 collaborateurs.</p>
+                  <div className="mt-6 flex items-baseline gap-1">
+                    <span className="font-mono text-4xl font-extrabold text-white">
+                      {billingCycle === "yearly" ? "39 €" : "49 €"}
+                    </span>
+                    <span className="text-xs text-slate-400">/ mois</span>
+                  </div>
+
+                  <ul className="mt-6 space-y-3 text-xs text-slate-300">
+                    <li className="flex items-center gap-2.5">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      Jusqu'à 50 talents suivis
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      Modèle prédictif RandomForest
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      Tableau de bord exécutif
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      Support par email sous 24h
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-slate-800">
+                  <Link href="/auth/login" className="w-full block">
+                    <Button variant="secondary" size="md" className="w-full bg-slate-900 border-slate-700 text-slate-200">
+                      Commencer en Starter
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Pro (Highlighted) */}
+              <div className="rounded-2xl border-2 border-primary-500 bg-gradient-to-b from-slate-900 to-slate-950 p-8 flex flex-col justify-between shadow-glow relative">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary-500 px-3 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white">
+                  Le plus populaire
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-bold text-white">Pro</h3>
+                  <p className="text-xs text-slate-400 mt-1">Pour les PME et scale-ups de 50 à 250 collaborateurs.</p>
+                  <div className="mt-6 flex items-baseline gap-1">
+                    <span className="font-mono text-4xl font-extrabold text-white">
+                      {billingCycle === "yearly" ? "119 €" : "149 €"}
+                    </span>
+                    <span className="text-xs text-slate-400">/ mois</span>
+                  </div>
+
+                  <ul className="mt-6 space-y-3 text-xs text-slate-300">
+                    <li className="flex items-center gap-2.5">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      Jusqu'à 250 talents suivis
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      Copilot de Rétention IA (plans d'action 1-to-1)
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      Analytics avancés 13 semaines
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      Rapports PDF exécutifs Comex
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      Support prioritaire dédié
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-slate-800">
+                  <Link href="/auth/login" className="w-full block">
+                    <Button variant="accent" size="md" className="w-full">
+                      Tester gratuitement 14 jours
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Entreprise */}
+              <div className="rounded-2xl border border-slate-800 bg-slate-950 p-8 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-white">Entreprise</h3>
+                  <p className="text-xs text-slate-400 mt-1">Sur-mesure pour les organisations de plus de 250 collaborateurs.</p>
+                  <div className="mt-6 flex items-baseline gap-1">
+                    <span className="text-3xl font-extrabold text-white">Sur mesure</span>
+                  </div>
+
+                  <ul className="mt-6 space-y-3 text-xs text-slate-300">
+                    <li className="flex items-center gap-2.5">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      Collaborateurs illimités
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      Intégration directe SIRH (Lucca, Workday)
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      Modèle de Machine Learning calibré sur-mesure
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      Account Manager & consultant RH dédié
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-slate-800">
+                  <a href="mailto:contact@talentpulse.app" className="w-full block">
+                    <Button variant="secondary" size="md" className="w-full bg-slate-900 border-slate-700 text-slate-200">
+                      Contacter l'équipe
+                    </Button>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== 7. FAQ Section ===== */}
+        <section id="faq" className="py-20 border-t border-slate-800/80 bg-slate-900/30">
+          <div className="container-page max-w-3xl">
+            <div className="text-center mb-12">
+              <span className="text-xs font-bold uppercase tracking-wider text-primary-400">Questions Fréquentes</span>
+              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-white mt-2">
+                Tout ce que vous devez savoir
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              {faqs.map((faq, index) => (
+                <div key={index} className="rounded-xl border border-slate-800 bg-slate-950 p-6">
+                  <h3 className="text-base font-bold text-white mb-2">{faq.q}</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">{faq.a}</p>
                 </div>
               ))}
             </div>
           </div>
+        </section>
 
-          {/* Dashboard mockup */}
-          <div className="relative animate-fadeUp [animation-delay:150ms]">
-            <div className="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-indigo-600/5 to-violet-600/5" />
-            <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-              <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50 px-4 py-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                <span className="ml-3 text-xs font-medium text-slate-400">
-                  app.talentpulse.app/dashboard
-                </span>
-              </div>
-              <div className="p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">Tableau de bord</p>
-                    <p className="text-xs text-slate-400">Vue d'ensemble des risques</p>
-                  </div>
-                  <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-600">
-                    ● Système actif
-                  </span>
-                </div>
-                <div className="mb-4 grid grid-cols-3 gap-3">
-                  {[
-                    { label: "Talents", value: "248", tone: "text-slate-900" },
-                    { label: "À risque", value: "17", tone: "text-red-600" },
-                    { label: "Risque moyen", value: "38%", tone: "text-amber-600" },
-                  ].map((kpi) => (
-                    <div key={kpi.label} className="rounded-xl bg-slate-50 p-3">
-                      <p className={`text-lg font-extrabold ${kpi.tone}`}>{kpi.value}</p>
-                      <p className="text-[11px] text-slate-400">{kpi.label}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="space-y-2.5">
-                  {[
-                    { name: "Hugo Petit", role: "DevOps Engineer", risk: 97, color: "bg-red-500" },
-                    { name: "Emma Garcia", role: "Cheffe de produit", risk: 74, color: "bg-amber-500" },
-                    { name: "Léa Bernard", role: "Data Scientist", risk: 84, color: "bg-amber-500" },
-                    { name: "Camille Rousseau", role: "Lead Full-Stack", risk: 6, color: "bg-emerald-500" },
-                  ].map((t) => (
-                    <div key={t.name} className="flex items-center gap-3 rounded-xl border border-slate-100 p-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">
-                        {t.name.split(" ").map((p) => p[0]).join("")}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-semibold text-slate-800">{t.name}</p>
-                        <p className="text-[11px] text-slate-400">{t.role}</p>
-                      </div>
-                      <div className="w-20">
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                          <div className={`h-full rounded-full ${t.color}`} style={{ width: `${t.risk}%` }} />
-                        </div>
-                      </div>
-                      <span className="w-9 text-right text-xs font-bold text-slate-700">{t.risk}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== TRUST LOGOS ===== */}
-      <section className="border-t border-slate-100 py-8">
-        <div className="container-page flex flex-wrap items-center justify-center gap-x-12 gap-y-4">
-          <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-            Ils font confiance à TalentPulse
-          </span>
-          {trustLogos.map((logo) => (
-            <div key={logo.name} className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700">
-                {logo.icon}
-              </div>
-              <span className="text-sm font-semibold text-slate-600">{logo.name}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ===== FEATURES ===== */}
-      <section id="features" className="py-24">
-        <div className="container-page">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-bold uppercase tracking-widest text-indigo-600">
-              Fonctionnalités
-            </p>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-              Tout ce qu'il faut pour fidéliser vos talents
+        {/* ===== 8. Final CTA ===== */}
+        <section className="py-20 border-t border-slate-800/80 bg-gradient-to-b from-slate-950 to-primary-950/30 text-center">
+          <div className="container-page max-w-2xl">
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-5xl text-white">
+              Prêt à protéger vos talents stratégiques ?
             </h2>
-            <p className="mt-4 text-lg text-slate-600">
-              Une plateforme complète qui transforme vos données RH en décisions d'action.
+            <p className="mt-4 text-slate-400 text-sm sm:text-base">
+              Connectez-vous en 30 secondes à la démo live avec 14 collaborateurs et 182 prédictions pré-chargées.
             </p>
-          </div>
-
-          <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((f) => (
-              <div
-                key={f.title}
-                className={`group rounded-2xl border border-slate-200 bg-gradient-to-br ${f.gradient} p-7 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg`}
-              >
-                <div className="mb-5 inline-flex rounded-xl bg-white p-3 shadow-sm">
-                  <f.icon className={`h-6 w-6 ${f.iconColor}`} />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{f.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== HOW IT WORKS ===== */}
-      <section id="how" className="bg-slate-50 py-24">
-        <div className="container-page">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-bold uppercase tracking-widest text-indigo-600">
-              Comment ça marche
-            </p>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-              Trois étapes vers zéro départ surprise
-            </h2>
-          </div>
-
-          <div className="mt-14 grid grid-cols-1 gap-8 md:grid-cols-3">
-            {steps.map((s, i) => (
-              <div key={s.title} className="relative rounded-2xl border border-slate-200 bg-white p-8">
-                <span className="absolute -top-4 left-8 flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-sm font-extrabold text-white">
-                  {i + 1}
-                </span>
-                <div className={`mb-4 mt-2 inline-flex rounded-xl bg-white p-3 shadow-sm`}>
-                  <s.icon className={`h-6 w-6 ${s.iconColor}`} />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{s.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== ML BAND ===== */}
-      <section className="py-24">
-        <div className="container-page">
-          <div className="mx-auto max-w-4xl">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="text-sm font-bold uppercase tracking-widest text-indigo-600">
-                La science derrière TalentPulse
-              </p>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-                Un modèle ML qui apprend de vos équipes
-              </h2>
-              <p className="mt-4 text-lg text-slate-600">
-                Notre RandomForest combine cinq signaux pour chaque collaborateur.
-                Plus vos données sont riches, plus les prédictions deviennent précises.
-              </p>
-            </div>
-
-            <div className="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
-              <div className="space-y-6">
-                {[
-                  { icon: Target, label: "Performance", desc: "Qualité du travail évaluée" },
-                  { icon: HeartPulse, label: "Engagement", desc: "Implication au quotidien" },
-                  { icon: Activity, label: "Satisfaction", desc: "Bien-être au poste" },
-                  { icon: TrendingDown, label: "Salaire & expérience", desc: "Contexte de marché" },
-                ].map((f) => (
-                  <div key={f.label} className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4">
-                    <div className="rounded-lg bg-indigo-50 p-2.5">
-                      <f.icon className="h-5 w-5 text-indigo-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-slate-900">{f.label}</p>
-                      <p className="text-xs text-slate-500">{f.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="mb-6 flex items-center gap-2 text-xs font-semibold text-slate-500">
-                  <Brain className="h-4 w-4 text-indigo-600" />
-                  Exemple de sortie du modèle
-                </div>
-                <div className="space-y-5">
-                  {[
-                    { label: "Performance", value: 0.55, color: "bg-indigo-500" },
-                    { label: "Engagement", value: 0.28, color: "bg-violet-500" },
-                    { label: "Satisfaction", value: 0.35, color: "bg-emerald-500" },
-                  ].map((bar) => (
-                    <div key={bar.label}>
-                      <div className="mb-1.5 flex justify-between text-xs">
-                        <span className="font-medium text-slate-600">{bar.label}</span>
-                        <span className="font-bold text-slate-900">{Math.round(bar.value * 100)}%</span>
-                      </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
-                        <div className={`h-full rounded-full ${bar.color}`} style={{ width: `${bar.value * 100}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-                    <p className="text-xs font-semibold text-red-700">Score de risque estimé</p>
-                    <p className="mt-1 text-3xl font-extrabold text-red-600">84 %</p>
-                    <p className="mt-1 text-xs text-red-700/80">
-                      Risque élevé — entretien individuel recommandé sous 15 jours
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== TESTIMONIALS ===== */}
-      <section id="testimonials" className="bg-slate-50 py-24">
-        <div className="container-page">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-bold uppercase tracking-widest text-indigo-600">
-              Témoignages
-            </p>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-              Ils ont réduit leur turnover
-            </h2>
-          </div>
-
-          <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
-            {testimonials.map((t) => (
-              <figure key={t.name} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-7">
-                <Quote className="h-7 w-7 text-slate-200" />
-                <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-slate-600">
-                  « {t.quote} »
-                </blockquote>
-                <figcaption className="mt-6 flex items-center gap-3 border-t border-slate-100 pt-5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">
-                    {t.initials}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">{t.name}</p>
-                    <p className="text-xs text-slate-500">{t.role}</p>
-                  </div>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== PRICING ===== */}
-      <section id="pricing" className="py-24">
-        <div className="container-page">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-bold uppercase tracking-widest text-indigo-600">
-              Tarifs
-            </p>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-              Un prix simple, sans surprise
-            </h2>
-            <p className="mt-4 text-lg text-slate-600">
-              Commencez gratuitement. Passez au niveau supérieur quand vos équipes grandissent.
-            </p>
-          </div>
-
-          <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {plans.map((plan) => (
-              <div
-                key={plan.name}
-                className={`relative flex flex-col rounded-2xl border bg-white p-8 ${
-                  plan.highlighted
-                    ? "border-indigo-500 shadow-xl ring-1 ring-indigo-500/20"
-                    : "border-slate-200"
-                }`}
-              >
-                {plan.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-4 py-1 text-xs font-bold uppercase tracking-wide text-white">
-                    Recommandé
-                  </span>
-                )}
-                <h3 className="text-lg font-bold text-slate-900">{plan.name}</h3>
-                <p className="mt-1 text-sm text-slate-500">{plan.description}</p>
-                <div className="mt-5 flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-slate-900">{plan.price}</span>
-                  <span className="text-sm text-slate-400">{plan.period}</span>
-                </div>
-                <ul className="mt-6 flex-1 space-y-3">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-sm text-slate-600">
-                      <span
-                        className={`mt-0.5 flex h-4 w-4 items-center justify-center rounded-full ${
-                          plan.highlighted ? "bg-indigo-100 text-indigo-700" : "bg-emerald-100 text-emerald-600"
-                        }`}
-                      >
-                        <Check className="h-3 w-3" />
-                      </span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/auth/register"
-                  className={`mt-8 w-full ${plan.highlighted ? "btn-primary" : "btn-secondary"}`}
-                >
-                  {plan.cta}
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== FAQ ===== */}
-      <section id="faq" className="bg-slate-50 py-24">
-        <div className="container-page max-w-3xl">
-          <div className="text-center">
-            <p className="text-sm font-bold uppercase tracking-widest text-indigo-600">FAQ</p>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-              Questions fréquentes
-            </h2>
-          </div>
-
-          <div className="mt-12 space-y-3">
-            {faqs.map((f, i) => (
-              <div key={i} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-                <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left"
-                >
-                  <span className="text-sm font-bold text-slate-900">{f.q}</span>
-                  <span
-                    className={`text-indigo-600 transition-transform ${openFaq === i ? "rotate-45" : ""}`}
-                  >
-                    <span className="text-xl leading-none">+</span>
-                  </span>
-                </button>
-                {openFaq === i && (
-                  <p className="border-t border-slate-100 px-6 py-4 text-sm leading-relaxed text-slate-600">
-                    {f.a}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== CTA ===== */}
-      <section className="py-24">
-        <div className="container-page">
-          <div className="mx-auto max-w-4xl rounded-3xl border border-indigo-200 bg-gradient-to-tr from-indigo-600 to-violet-600 px-8 py-16 text-center text-white">
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Prêt à retenir vos meilleurs talents ?
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-indigo-100">
-              Rejoignez plus de 1 200 équipes RH qui anticipent les départs avec TalentPulse. 
-              Gratuit pour commencer.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <Link href="/auth/register" className="btn-secondary h-12 px-8 text-base">
-                Créer un compte gratuit
-                <ArrowRight className="h-5 w-5" />
-              </Link>
-              <Link
-                href="/auth/login"
-                className="btn h-12 border border-white/20 bg-white/10 px-8 text-base text-white hover:bg-white/15"
-              >
-                Explorer la démo
+            <div className="mt-8 flex justify-center">
+              <Link href="/auth/login">
+                <Button size="lg" variant="accent" className="shadow-glow px-8">
+                  Lancer la démo TalentPulse
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
               </Link>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      {/* ===== FOOTER ===== */}
-      <footer className="border-t border-slate-200 bg-slate-900 py-12 text-slate-300">
-        <div className="container-page">
-          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
-                <Brain className="h-4 w-4" />
-              </div>
-              <span className="font-extrabold text-white">TalentPulse</span>
+      {/* ===== 9. Footer ===== */}
+      <footer className="border-t border-slate-800/80 bg-slate-950 py-12 text-xs text-slate-500">
+        <div className="container-page flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded bg-primary-600 flex items-center justify-center font-bold text-white text-xs">
+              TP
             </div>
-            <nav className="flex flex-wrap items-center justify-center gap-6 text-sm">
-              <a href="#features" className="text-slate-400 hover:text-white transition-colors">Fonctionnalités</a>
-              <a href="#how" className="text-slate-400 hover:text-white transition-colors">Comment ça marche</a>
-              <a href="#pricing" className="text-slate-400 hover:text-white transition-colors">Tarifs</a>
-              <a href="#faq" className="text-slate-400 hover:text-white transition-colors">FAQ</a>
-              <a href="/legal" className="text-slate-400 hover:text-white transition-colors">Mentions légales</a>
-              <a href="/contact" className="text-slate-400 hover:text-white transition-colors">Contact</a>
-            </nav>
+            <span className="font-semibold text-slate-300">TalentPulse © 2026</span>
+            <span>— Plateforme d'anticipation du turnover et d'intelligence RH.</span>
           </div>
-          <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-slate-800 pt-6 text-xs text-slate-500 md:flex-row">
-            <p>© {new Date().getFullYear()} TalentPulse. Tous droits réservés.</p>
-            <p className="flex items-center gap-1">Fait avec 💜 pour les équipes RH</p>
+
+          <div className="flex gap-6">
+            <Link href="/auth/login" className="hover:text-slate-300 transition">
+              Connexion Démo
+            </Link>
+            <a href="mailto:contact@talentpulse.app" className="hover:text-slate-300 transition">
+              Support
+            </a>
+            <span className="text-slate-600">Hébergé en Europe (RGPD)</span>
           </div>
         </div>
       </footer>
