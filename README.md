@@ -4,8 +4,8 @@
 
 TalentPulse aide les équipes RH à **prédire le turnover** avant qu'il ne se produise. En analysant performance, engagement, satisfaction et salaire, notre modèle ML score chaque collaborateur de 0 à 100 %.
 
-[![Demo](https://img.shields.io/badge/D%C3%A9mo-Live-6366f1)](https://talentpulse.app)
-[![Render](https://img.shields.io/badge/Deploy-Rendere8d04c)](https://render.com)
+[![Demo](https://img.shields.io/badge/D%C3%A9mo-Live-6366f1)](https://frontend-phi-liard-81.vercel.app)
+[![Deploy Vercel](https://img.shields.io/badge/Deploy-Vercel-black)](https://frontend-phi-liard-81.vercel.app)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 ---
