@@ -48,7 +48,7 @@ export default function SettingsPage() {
     setChanging(true);
     setPwdMsg(null);
     try {
-      await api.post("/api/auth/change-password", {
+      await api.post("/api/auth/me/password", {
         current_password: currentPassword,
         new_password: newPassword,
       });

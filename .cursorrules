@@ -1,47 +1,22 @@
 # TalentPulse — Cursor Rules
 
-## Project
-TalentPulse — French SaaS RH: prédiction de turnover par ML, gestion talents, analytics.
+> **Source unique de vérité : [`AGENTS.md`](./AGENTS.md).**
+> Ce fichier ne duplique plus la stack, les commandes ni les pièges : ils divergeaient
+> du code réel. Lis `AGENTS.md` avant toute modification.
 
-## Stack
-- **Backend**: FastAPI + SQLAlchemy + scikit-learn (Python 3.12)
-- **Frontend**: Next.js 14 (App Router) + TypeScript + Tailwind CSS + Chart.js
-- **DB**: SQLite (local) / PostgreSQL (prod)
-- **Auth**: JWT (HS256) + bcrypt
-- **Billing**: Stripe
+## En une ligne
 
-## Commands
-```bash
-# Backend
-cd backend && uv venv --python 3.12 .venv && uv pip install -r requirements.txt
-.venv/bin/uvicorn main:app --reload
+SaaS RH français de prédiction du turnover — `backend/` FastAPI + scikit-learn,
+`frontend/` Next.js 14 en export statique, SQLite en local / PostgreSQL en production.
 
-# Frontend
-cd frontend && npm install && npm run dev
-```
+## Règles permanentes
 
-## Architecture
-- `backend/routes/*` → `backend/services/*` (singletons) → `backend/models/*` (SQLAlchemy)
-- Frontend: static export (`output: 'export'`), all `"use client"`, no SSR
-- Axios instance in `frontend/lib/api.ts` handles JWT + 401 redirect
-- ML: RandomForest trained on boot → `backend/data/ml/` (gitignored)
-
-## Conventions
-- **French** for all user-facing strings (messages, labels, errors)
-- Path alias: `@/*` → `frontend/*`
-- Use shared Tailwind components from `app/globals.css` (`card`, `btn`, `badge`, `input`, `label`)
-- Format helpers in `frontend/lib/format.ts` (`pct`, `eur`, `dateFR`, `riskLabel`)
-- Components flat in `frontend/components/`
-
-## Gotchas
-- Unused services (don't touch): `services/airtable.py`, `services/baserow_service.py`, `services/cv_analysis.py`
-- Static routes before `/{id}` in `talents.py` — don't reorder
-- Employee registration auto-creates Talent row
-- No migration system — schema changes = manual ALTER or DB reset
-- Frontend env var `NEXT_PUBLIC_BACKEND_URL` baked at build time
-
-## Rules
-- Never commit `.env`, `*.db`, `data/`, `__pycache__/`, `.venv/`
-- Keep UI strings in French
-- Don't add test suites unless asked
-- Backend: no ruff/mypy — skip linter config unless requested
+- Toutes les chaînes destinées à l'utilisateur sont **en français** (UI et `detail` d'API).
+- Alias d'import : `@/*` → `frontend/*`.
+- Réutiliser les classes Tailwind de `app/globals.css` (`card`, `btn`, `badge`, `input`, `label`)
+  et les formateurs de `frontend/lib/format.ts` (`pct`, `eur`, `dateFR`, `riskLabel`).
+- Ne jamais committer `.env`, `*.db`, `data/`, `__pycache__/`, `.venv/`, `node_modules/`.
+- Ne jamais promettre sur la landing page une fonctionnalité qui n'existe pas.
+- Toute modification est validée par :
+  `cd backend && .venv/bin/python -m pytest` puis
+  `cd frontend && npx tsc --noEmit && npm run lint && npm run build && npm run test:e2e`.

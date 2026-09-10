@@ -37,43 +37,95 @@ export default function ReportsPage() {
     );
   }
 
-  const download = () => {
-    const lines = [
-      "RAPPORT DE RISQUE DE TURNOVER - TalentPulse",
-      `Généré le ${new Date().toLocaleDateString("fr-FR")}`,
-      "=".repeat(60),
-      "",
-      `Effectif total : ${stats?.total}`,
-      `Risque moyen : ${pct(report.avgRisk)}`,
-      `Talents à risque élevé (>= 70%) : ${report.atRisk.length}`,
-      `Talents à risque modéré (40-70%) : ${report.moderate.length}`,
-      `Prédictions disponibles : ${predictions.length}`,
-      "",
-      "TALENTS PRIORITAIRES",
-      "-".repeat(60),
-      ...report.atRisk.map(
-        (t, i) =>
-          `${i + 1}. ${t.first_name} ${t.last_name} (${t.position ?? "—"}, ${t.department ?? "—"}) - risque ${pct(t.turnover_risk)}`
-      ),
-      "",
-      "RECOMMANDATIONS",
-      "-".repeat(60),
-      ...report.atRisk.map(
-        (t, i) =>
-          `${i + 1}. ${t.first_name} ${t.last_name} : ${
-            t.turnover_risk >= 0.8
-              ? "entretien individuel + revue de rémunération"
-              : "entretien de carrière + reconnaissance"
-          }`
-      ),
-    ];
-    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+  const buildLines = () => [
+    "RAPPORT DE RISQUE DE TURNOVER - TalentPulse",
+    `Généré le ${new Date().toLocaleDateString("fr-FR")}`,
+    "=".repeat(60),
+    "",
+    `Effectif total : ${stats?.total}`,
+    `Risque moyen : ${pct(report.avgRisk)}`,
+    `Talents à risque élevé (>= 70%) : ${report.atRisk.length}`,
+    `Talents à risque modéré (40-70%) : ${report.moderate.length}`,
+    `Prédictions disponibles : ${predictions.length}`,
+    "",
+    "TALENTS PRIORITAIRES",
+    "-".repeat(60),
+    ...report.atRisk.map(
+      (t, i) =>
+        `${i + 1}. ${t.first_name} ${t.last_name} (${t.position ?? "—"}, ${t.department ?? "—"}) - risque ${pct(t.turnover_risk)}`
+    ),
+    "",
+    "RECOMMANDATIONS",
+    "-".repeat(60),
+    ...report.atRisk.map(
+      (t, i) =>
+        `${i + 1}. ${t.first_name} ${t.last_name} : ${
+          t.turnover_risk >= 0.8
+            ? "entretien individuel + revue de rémunération"
+            : "entretien de carrière + reconnaissance"
+        }`
+    ),
+  ];
+
+  const saveBlob = (content: string, mime: string, extension: string) => {
+    const blob = new Blob([content], { type: `${mime};charset=utf-8` });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `rapport-turnover-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `rapport-turnover-${new Date().toISOString().slice(0, 10)}.${extension}`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const downloadSummary = () => saveBlob(buildLines().join("\n"), "text/plain", "txt");
+
+  /** Full register as CSV — one row per collaborator. */
+  const downloadCsv = () => {
+    const header = [
+      "prenom",
+      "nom",
+      "email",
+      "poste",
+      "departement",
+      "anciennete_annees",
+      "salaire_annuel_eur",
+      "performance_0_1",
+      "engagement_0_1",
+      "satisfaction_0_1",
+      "risque_turnover_0_1",
+      "niveau_risque",
+    ];
+    const rows = [...talents]
+      .sort((a, b) => b.turnover_risk - a.turnover_risk)
+      .map((t) => [
+        t.first_name,
+        t.last_name,
+        t.email,
+        t.position ?? "",
+        t.department ?? "",
+        String(t.experience_years),
+        t.salary != null ? String(t.salary) : "",
+        t.performance_score.toFixed(3),
+        t.engagement_score.toFixed(3),
+        t.satisfaction_score.toFixed(3),
+        t.turnover_risk.toFixed(4),
+        riskTone(t.turnover_risk),
+      ]);
+    const csv = [header, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(";"))
+      .join("\n");
+    // A BOM keeps Excel from mangling the French accents.
+    saveBlob(`\uFEFF${csv}`, "text/csv", "csv");
+  };
+
+  /** Opens the user's mail client with the executive summary pre-filled. */
+  const sendToDirection = () => {
+    const subject = encodeURIComponent(
+      `Rapport turnover TalentPulse — ${report.atRisk.length} talent(s) à risque élevé`
+    );
+    const body = encodeURIComponent(buildLines().join("\n"));
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    setSent(true);
   };
 
   return (
@@ -88,9 +140,9 @@ export default function ReportsPage() {
         <div className="flex gap-2">
           <Button variant="secondary" onClick={() => window.print()}>
             <Printer className="h-4 w-4" />
-            Imprimer
+            Imprimer / PDF
           </Button>
-          <Button onClick={download}>
+          <Button onClick={downloadSummary}>
             <Download className="h-4 w-4" />
             Télécharger (.txt)
           </Button>
@@ -154,9 +206,9 @@ export default function ReportsPage() {
                 <AlertTriangle className="h-4 w-4 text-red-500" />
                 Talents prioritaires ({report.atRisk.length})
               </h4>
-              <Button variant="ghost" size="sm" onClick={download}>
+              <Button variant="ghost" size="sm" onClick={downloadCsv}>
                 <Download className="h-3.5 w-3.5" />
-                CSV
+                Exporter tout en CSV
               </Button>
             </div>
             <div className="overflow-x-auto">
@@ -212,21 +264,24 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          {/* Send to direction */}
-          {!sent && (
-            <div className="border-t border-slate-200 pt-5">
-              <Button variant="secondary" onClick={() => setSent(true)}>
-                <Send className="h-4 w-4" />
-                Envoyer à la direction
-              </Button>
-              {sent && (
-                <p className="mt-2 text-xs text-emerald-600 flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Rapport envoyé par email.
-                </p>
-              )}
-            </div>
-          )}
+          {/* Share with the executive committee */}
+          <div className="border-t border-slate-200 pt-5">
+            <Button variant="secondary" onClick={sendToDirection}>
+              <Send className="h-4 w-4" />
+              Envoyer à la direction
+            </Button>
+            {sent ? (
+              <p className="mt-2 text-xs text-emerald-600 flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" />
+                Votre logiciel de messagerie s&apos;est ouvert avec le rapport pré-rempli.
+              </p>
+            ) : (
+              <p className="mt-2 text-xs text-slate-500">
+                Ouvre votre messagerie avec la synthèse prête à envoyer. Pour joindre une pièce,
+                téléchargez d&apos;abord le rapport.
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -32,19 +32,19 @@ import { Button } from "@/components/Button";
 const faqs = [
   {
     q: "Quelles données RH sont nécessaires pour alimenter les prédictions ?",
-    a: "TalentPulse se base sur 5 indicateurs simples : le niveau de performance, l'engagement mesuré, le score de satisfaction, l'ancienneté en années et le ratio salarial par rapport au marché. Vous pouvez importer ces données en 1 clic via fichier CSV ou les saisir manuellement.",
+    a: "TalentPulse se base sur 5 indicateurs : le niveau de performance, l'engagement, le score de satisfaction, l'ancienneté en années et la rémunération. Ils se saisissent dans l'interface ou s'envoient directement à l'API REST documentée (OpenAPI).",
   },
   {
     q: "Comment fonctionne l'algorithme de Machine Learning ?",
-    a: "Nous utilisons un classifieur RandomForest entraîné sur des cohortes représentatives d'entreprises tech et services. Il corrèle en continu les signaux faibles pour calculer une probabilité de départ (0 à 100 %) sans biais subjectif.",
+    a: "Le score de risque est produit par un classifieur RandomForest. L'instance est livrée avec un modèle entraîné sur un jeu de données RH de référence, et l'endpoint /api/predictions/train permet de le réentraîner sur vos propres collaborateurs dès que des départs confirmés sont enregistrés.",
   },
   {
-    q: "Les données de nos collaborateurs sont-elles protégées ?",
-    a: "Absolument. Conformément au RGPD, toutes les données sont chiffrées de bout en bout et hébergées sur des serveurs sécurisés en Europe. Aucune donnée nominative n'est utilisée pour entraîner des modèles publics.",
+    q: "Où vivent les données de nos collaborateurs ?",
+    a: "Dans l'instance que vous déployez, sur votre base PostgreSQL ou SQLite. Aucune donnée nominative ne quitte votre infrastructure et rien ne sert à entraîner un modèle partagé. Les exports CSV restent sous votre contrôle, ce qui facilite la conformité RGPD et la tenue du registre de traitement.",
   },
   {
     q: "En combien de temps le retour sur investissement (ROI) est-il atteint ?",
-    a: "Dès le premier départ évité. Le coût moyen du remplacement d'un collaborateur clé oscille entre 30 000 € et 50 000 €. Pour une équipe de 80 personnes, TalentPulse coûte moins de 1 200 € par an : le ROI dépasse 2 500 %.",
+    a: "Le simulateur ci-dessus utilise une hypothèse prudente : un remplacement coûte environ 50 % du salaire annuel brut (recrutement, montée en compétence, perte de vélocité). Éviter un seul départ suffit à couvrir plusieurs années d'abonnement — ajustez les curseurs à votre réalité avant de vous engager.",
   },
 ];
 
@@ -198,7 +198,7 @@ export default function LandingPage() {
             {/* Tag / Badge */}
             <div className="inline-flex items-center gap-2 rounded-full border border-primary-500/30 bg-primary-950/60 px-3.5 py-1 text-xs font-medium text-primary-300 backdrop-blur-md mb-8">
               <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              Machine Learning RH · RandomForest v2 prédictif
+              RandomForest · 5 signaux RH · score explicable
             </div>
 
             {/* Main Headline */}
@@ -211,9 +211,9 @@ export default function LandingPage() {
 
             {/* Subtitle */}
             <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-400 sm:text-xl">
-              TalentPulse analyse les signaux faibles (satisfaction, engagement, salaire, charge)
-              et identifie les collaborateurs à risque de départ jusqu'à 3 mois à l'avance, avec
-              des plans d'actions concrets pour vos managers.
+              TalentPulse note chaque collaborateur de 0 à 100 % à partir de sa performance, son
+              engagement, sa satisfaction, son ancienneté et sa rémunération, puis transforme ce
+              score en plan d&apos;action concret pour le manager.
             </p>
 
             {/* CTAs */}
@@ -232,23 +232,23 @@ export default function LandingPage() {
               </a>
             </div>
 
-            {/* Social Proof Strip */}
+            {/* Product facts — kept verifiable on purpose */}
             <div className="mt-16 border-t border-slate-800/80 pt-8 grid grid-cols-2 gap-4 sm:grid-cols-4 max-w-3xl mx-auto">
               <div>
-                <p className="font-mono text-2xl font-bold text-white">1 400+</p>
-                <p className="text-xs text-slate-400 mt-0.5">Talents suivis en continu</p>
+                <p className="font-mono text-2xl font-bold text-white">5</p>
+                <p className="text-xs text-slate-400 mt-0.5">Signaux analysés par collaborateur</p>
               </div>
               <div>
-                <p className="font-mono text-2xl font-bold text-emerald-400">35 %</p>
-                <p className="text-xs text-slate-400 mt-0.5">De turnover évité</p>
+                <p className="font-mono text-2xl font-bold text-emerald-400">13 sem.</p>
+                <p className="text-xs text-slate-400 mt-0.5">D&apos;historique de risque par équipe</p>
               </div>
               <div>
                 <p className="font-mono text-2xl font-bold text-white">&lt; 5 min</p>
-                <p className="text-xs text-slate-400 mt-0.5">Pour importer vos équipes</p>
+                <p className="text-xs text-slate-400 mt-0.5">Pour démarrer en local</p>
               </div>
               <div>
                 <p className="font-mono text-2xl font-bold text-primary-400">100 %</p>
-                <p className="text-xs text-slate-400 mt-0.5">RGPD & souveraineté UE</p>
+                <p className="text-xs text-slate-400 mt-0.5">Auto-hébergeable sur votre infra</p>
               </div>
             </div>
           </div>
@@ -522,7 +522,7 @@ export default function LandingPage() {
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs">
-                    <span className="text-slate-400">Généré avec RandomForest & LLM</span>
+                    <span className="text-slate-400">Score RandomForest · plan généré automatiquement</span>
                     <span className="text-emerald-400 font-semibold">Prêt pour entretien RH</span>
                   </div>
                 </div>
@@ -557,7 +557,7 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-slate-800/80 text-xs font-mono text-primary-400">
-                  Précision 91.4% · Zéro hallucination
+                  Score 0-100 % · modèle réentraînable
                 </div>
               </div>
 
@@ -573,7 +573,7 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-slate-800/80 text-xs font-mono text-emerald-400">
-                  Données consolidées temps réel
+                  Historique conservé pour l&apos;audit
                 </div>
               </div>
 
@@ -583,13 +583,14 @@ export default function LandingPage() {
                   <div className="h-10 w-10 rounded-xl bg-rose-950 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4">
                     <BellRing className="h-5 w-5" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Alertes Proactives</h3>
+                  <h3 className="text-lg font-bold text-white mb-2">Alertes de seuil critique</h3>
                   <p className="text-sm text-slate-400 leading-relaxed">
-                    Notification automatique dès qu'un collaborateur clé franchit un seuil de risque critique (seuil ≥ 70%).
+                    Tout collaborateur qui franchit le seuil de 70 % remonte en tête du tableau de
+                    bord avec son plan d&apos;entretien prêt à l&apos;emploi.
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-slate-800/80 text-xs font-mono text-rose-400">
-                  Notification instantanée
+                  Seuil configurable (≥ 70 %)
                 </div>
               </div>
             </div>
@@ -660,7 +661,7 @@ export default function LandingPage() {
                     </li>
                     <li className="flex items-center gap-2.5">
                       <Check className="h-4 w-4 text-emerald-400" />
-                      Support par email sous 24h
+                      Support par email
                     </li>
                   </ul>
                 </div>
@@ -668,7 +669,7 @@ export default function LandingPage() {
                 <div className="mt-8 pt-6 border-t border-slate-800">
                   <Link href="/auth/login" className="w-full block">
                     <Button variant="secondary" size="md" className="w-full bg-slate-900 border-slate-700 text-slate-200">
-                      Commencer en Starter
+                      Voir la démo live
                     </Button>
                   </Link>
                 </div>
@@ -705,7 +706,7 @@ export default function LandingPage() {
                     </li>
                     <li className="flex items-center gap-2.5">
                       <Check className="h-4 w-4 text-emerald-400" />
-                      Rapports PDF exécutifs Comex
+                      Rapport imprimable (PDF) et export CSV
                     </li>
                     <li className="flex items-center gap-2.5">
                       <Check className="h-4 w-4 text-emerald-400" />
@@ -717,7 +718,7 @@ export default function LandingPage() {
                 <div className="mt-8 pt-6 border-t border-slate-800">
                   <Link href="/auth/login" className="w-full block">
                     <Button variant="accent" size="md" className="w-full">
-                      Tester gratuitement 14 jours
+                      Voir la démo live
                     </Button>
                   </Link>
                 </div>
@@ -739,11 +740,11 @@ export default function LandingPage() {
                     </li>
                     <li className="flex items-center gap-2.5">
                       <Check className="h-4 w-4 text-emerald-400" />
-                      Intégration directe SIRH (Lucca, Workday)
+                      Intégration SIRH sur mesure (API REST documentée)
                     </li>
                     <li className="flex items-center gap-2.5">
                       <Check className="h-4 w-4 text-emerald-400" />
-                      Modèle de Machine Learning calibré sur-mesure
+                      Modèle RandomForest réentraîné sur vos données
                     </li>
                     <li className="flex items-center gap-2.5">
                       <Check className="h-4 w-4 text-emerald-400" />
@@ -792,7 +793,8 @@ export default function LandingPage() {
               Prêt à protéger vos talents stratégiques ?
             </h2>
             <p className="mt-4 text-slate-400 text-sm sm:text-base">
-              Connectez-vous en 30 secondes à la démo live avec 14 collaborateurs et 182 prédictions pré-chargées.
+              Connectez-vous en 30 secondes à la démo live avec 14 collaborateurs et 182 prédictions
+              pré-chargées. Aucune carte bancaire, aucune installation.
             </p>
             <div className="mt-8 flex justify-center">
               <Link href="/auth/login">
@@ -824,7 +826,7 @@ export default function LandingPage() {
             <a href="mailto:contact@talentpulse.app" className="hover:text-slate-300 transition">
               Support
             </a>
-            <span className="text-slate-600">Hébergé en Europe (RGPD)</span>
+            <span className="text-slate-600">Déployable sur votre infrastructure</span>
           </div>
         </div>
       </footer>

@@ -79,7 +79,7 @@ async def get_talent(
     """Get a single talent by ID"""
     talent = talent_service.get_talent(db, talent_id)
     if not talent:
-        raise HTTPException(status_code=404, detail="Talent not found")
+        raise HTTPException(status_code=404, detail="Talent introuvable")
     return talent
 
 
@@ -101,7 +101,10 @@ async def update_talent(
     _ : User = Depends(require_any_role([UserRole.ADMIN, UserRole.HR_MANAGER])),
 ):
     """Update a talent"""
-    return talent_service.update_talent(db, talent_id, talent_data)
+    updated = talent_service.update_talent(db, talent_id, talent_data)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Talent introuvable")
+    return updated
 
 
 @router.delete("/{talent_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -111,4 +114,5 @@ async def delete_talent(
     _ : User = Depends(require_any_role([UserRole.ADMIN, UserRole.HR_MANAGER])),
 ):
     """Delete a talent"""
-    talent_service.delete_talent(db, talent_id)
+    if not talent_service.delete_talent(db, talent_id):
+        raise HTTPException(status_code=404, detail="Talent introuvable")

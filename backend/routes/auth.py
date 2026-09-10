@@ -11,6 +11,7 @@ from datetime import timedelta
 from database import get_db
 from schemas.user import (
     UserCreate,
+    RegisterRequest,
     UserResponse,
     UserUpdate,
     ChangePassword,
@@ -25,12 +26,19 @@ from models.user import User, UserRole
 router = APIRouter(tags=["authentication"])
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(
-    user_data: UserCreate,
+    user_data: RegisterRequest,
     db: Session = Depends(get_db),
 ):
-    """Register new user"""
+    """
+    Public self-serve signup.
+
+    Creates the workspace owner (admin role) and returns a JWT directly so the
+    frontend can land the user on the dashboard in a single round trip. The
+    role is never taken from the request body — that would let anyone mint an
+    admin account.
+    """
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
         raise HTTPException(
@@ -38,32 +46,27 @@ async def register_user(
             detail="Un utilisateur avec cet email existe déjà",
         )
 
-    hashed_password = auth_service.hash_password(user_data.password)
-
     db_user = User(
         email=user_data.email,
         name=user_data.name,
-        hashed_password=hashed_password,
-        role=user_data.role,
+        hashed_password=auth_service.hash_password(user_data.password),
+        role=UserRole.ADMIN,
     )
 
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
 
-    # Create associated talent profile for employees
-    if db_user.role == UserRole.EMPLOYEE and user_data.name:
-        parts = user_data.name.strip().split()
-        talent_service.create_talent(
-            db,
-            TalentCreate(
-                first_name=parts[0],
-                last_name=parts[1] if len(parts) > 1 else "",
-                email=user_data.email,
-            ),
-        )
+    access_token = auth_service.create_access_token(
+        data={"sub": str(db_user.id), "role": db_user.role.value},
+        expires_delta=timedelta(minutes=auth_service.ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
 
-    return db_user
+    return TokenResponse(
+        access_token=access_token,
+        token_type="bearer",
+        user=UserResponse.model_validate(db_user),
+    )
 
 
 @router.post("/token", response_model=TokenResponse)
@@ -158,6 +161,52 @@ async def list_users(
     """List all users (admin only)"""
     users = db.query(User).order_by(User.created_at.desc()).all()
     return {"users": [UserResponse.model_validate(u) for u in users]}
+
+
+@router.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def create_user(
+    user_data: UserCreate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_role(UserRole.ADMIN)),
+):
+    """
+    Invite a colleague with an explicit role (admin only).
+
+    This is the only place where a role can be chosen; the public signup
+    endpoint always creates the workspace owner.
+    """
+    existing = db.query(User).filter(User.email == user_data.email).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Un utilisateur avec cet email existe déjà",
+        )
+
+    db_user = User(
+        email=user_data.email,
+        name=user_data.name,
+        hashed_password=auth_service.hash_password(user_data.password),
+        role=user_data.role,
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+
+    # An employee account is also a collaborator in the HR registry.
+    if db_user.role == UserRole.EMPLOYEE and user_data.name:
+        parts = user_data.name.strip().split()
+        if not talent_service.get_talent_by_email(db, user_data.email):
+            talent_service.create_talent(
+                db,
+                TalentCreate(
+                    first_name=parts[0],
+                    last_name=parts[1] if len(parts) > 1 else "",
+                    email=user_data.email,
+                ),
+                user_id=db_user.id,
+            )
+
+    return db_user
 
 
 @router.put("/users/{user_id}/role", response_model=UserResponse)

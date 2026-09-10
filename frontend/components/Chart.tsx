@@ -11,6 +11,12 @@ import {
   Tooltip,
   Legend,
   Filler,
+  // Controllers are NOT bundled by default: without them Chart.js throws
+  // `"doughnut" is not a registered controller` at runtime and the whole page
+  // crashes. Register every controller this app actually renders.
+  LineController,
+  BarController,
+  DoughnutController,
   type ChartData,
   type ChartOptions,
   type ChartType,
@@ -18,6 +24,9 @@ import {
 import { Chart as ReactChart } from "react-chartjs-2";
 
 ChartJS.register(
+  LineController,
+  BarController,
+  DoughnutController,
   ArcElement,
   BarElement,
   LineElement,

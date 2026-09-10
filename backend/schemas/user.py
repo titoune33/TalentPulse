@@ -2,7 +2,7 @@
 User schemas TalentPulse
 """
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing import Optional
 from datetime import datetime
 from models.user import UserRole
@@ -18,6 +18,20 @@ class UserCreate(UserBase):
     password: str = Field(..., min_length=8)
 
 
+class RegisterRequest(BaseModel):
+    """
+    Public self-serve signup payload.
+
+    Deliberately has no `role` field: the account created through the public
+    endpoint is always the workspace owner. Creating another account with a
+    specific role is an admin-only operation (POST /api/auth/users).
+    """
+
+    email: EmailStr
+    name: str = Field(..., min_length=1, max_length=100)
+    password: str = Field(..., min_length=8)
+
+
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -30,8 +44,7 @@ class UserResponse(UserBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserListResponse(BaseModel):

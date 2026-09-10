@@ -33,26 +33,32 @@ export function RetentionCopilotDrawer({
 }: RetentionCopilotDrawerProps) {
   const [copied, setCopied] = useState(false);
   const [salaryAdj, setSalaryAdj] = useState(0); // in percent (-5 to +20%)
+  // The API stores satisfaction on a 0-1 scale; managers think in /10, so the
+  // slider works in /10 and is normalised before any maths.
   const [targetSatisfaction, setTargetSatisfaction] = useState(5);
 
   useEffect(() => {
     if (talent) {
       setSalaryAdj(0);
-      setTargetSatisfaction(Math.round(talent.satisfaction_score));
+      setTargetSatisfaction(Math.round((talent.satisfaction_score ?? 0) * 20) / 2);
     }
   }, [talent]);
 
   if (!isOpen || !talent) return null;
 
-  // Calcul du score simulé
+  const satisfaction = talent.satisfaction_score ?? 0;
+  const engagement = talent.engagement_score ?? 0;
+
+  // Simulated risk after the manager's actions. Coefficients are illustrative
+  // what-if sensitivities, not a retrained model output.
   const currentRisk = talent.turnover_risk;
   const simulatedRisk = Math.min(
-    0.95,
+    0.98,
     Math.max(
-      0.1,
+      0.05,
       currentRisk -
-        salaryAdj * 0.015 -
-        (targetSatisfaction - talent.satisfaction_score) * 0.07
+        salaryAdj * 0.012 -
+        (targetSatisfaction / 10 - satisfaction) * 0.45
     )
   );
 
@@ -62,13 +68,13 @@ export function RetentionCopilotDrawer({
   const initials = `${talent.first_name[0] ?? ""}${talent.last_name[0] ?? ""}`.toUpperCase();
 
   const handleCopyPlan = () => {
-    const text = `Plan de Rétention IA pour ${fullName} (${talent.position ?? "Poste non défini"}, ${talent.department ?? "Département non défini"})
-Risque actuel : ${pct(currentRisk)}
-Facteurs clés : Satisfaction ${talent.satisfaction_score}/10, Engagement ${talent.engagement_score}/10, Salaire ${eur(talent.salary)}
-Questions recommandées :
+    const text = `Plan de rétention — ${fullName} (${talent.position ?? "Poste non défini"}, ${talent.department ?? "Département non défini"})
+Risque de départ estimé : ${pct(currentRisk)} (score RandomForest)
+Facteurs clés : satisfaction ${(satisfaction * 10).toFixed(1)}/10 · engagement ${(engagement * 10).toFixed(1)}/10 · salaire ${eur(talent.salary)} · ancienneté ${talent.experience_years} ans
+Questions recommandées pour l'entretien 1-to-1 :
 1. Comment perçois-tu l'évolution de tes responsabilités pour les 6 prochains mois ?
 2. Quels sont les irritants majeurs dans tes projets actuels ?
-Recommandation d'action : Envisager un ajustement salarial ciblé et une réévaluation des objectifs.`;
+Simulation de contre-mesure : revalorisation ${salaryAdj > 0 ? `+${salaryAdj}%` : `${salaryAdj}%`} et objectif de satisfaction ${targetSatisfaction}/10 → risque estimé ${pct(simulatedRisk)}.`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -76,7 +82,12 @@ Recommandation d'action : Envisager un ajustement salarial ciblé et une rééva
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-xl bg-white shadow-2xl flex flex-col h-full border-l border-slate-200 overflow-y-auto animate-slideInRight">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Plan de rétention"
+        className="relative w-full max-w-xl bg-white shadow-2xl flex flex-col h-full border-l border-slate-200 overflow-y-auto animate-slideInRight"
+      >
         {/* Header */}
         <div className="sticky top-0 z-10 border-b border-slate-100 bg-slate-900 text-white px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -87,7 +98,7 @@ Recommandation d'action : Envisager un ajustement salarial ciblé et une rééva
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-lg text-white leading-snug">{fullName}</h3>
                 <span className="rounded-md bg-primary-950 border border-primary-500/40 px-2 py-0.5 text-[10px] font-semibold text-primary-300">
-                  Copilot IA
+                  Plan de rétention
                 </span>
               </div>
               <p className="text-xs text-slate-400">
@@ -154,13 +165,13 @@ Recommandation d'action : Envisager un ajustement salarial ciblé et une rééva
               <div>
                 <span className="text-slate-500">Satisfaction</span>
                 <p className="font-mono font-bold text-slate-800">
-                  {talent.satisfaction_score.toFixed(1)} / 10
+                  {(satisfaction * 10).toFixed(1)} / 10
                 </p>
               </div>
               <div>
                 <span className="text-slate-500">Engagement</span>
                 <p className="font-mono font-bold text-slate-800">
-                  {talent.engagement_score.toFixed(1)} / 10
+                  {(engagement * 10).toFixed(1)} / 10
                 </p>
               </div>
               <div>
@@ -172,13 +183,13 @@ Recommandation d'action : Envisager un ajustement salarial ciblé et une rééva
             </div>
           </div>
 
-          {/* AI Retention Recommendations */}
+          {/* Retention recommendations */}
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-card space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary-600" />
                 <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
-                  Recommandations Stratégiques IA
+                  Recommandations stratégiques
                 </h4>
               </div>
               <button
@@ -198,7 +209,7 @@ Recommandation d'action : Envisager un ajustement salarial ciblé et une rééva
               </div>
               <p className="text-xs text-slate-700 leading-relaxed">
                 {currentRisk >= 0.7
-                  ? `Risque élevé alimenté par un score de satisfaction bas (${talent.satisfaction_score}/10) et un niveau de rémunération (${eur(talent.salary)}) potentiellement en décalage avec le marché pour ${talent.experience_years} ans d'expérience.`
+                  ? `Risque élevé alimenté par un score de satisfaction bas (${(satisfaction * 10).toFixed(1)}/10) et un niveau de rémunération (${eur(talent.salary)}) potentiellement en décalage avec le marché pour ${talent.experience_years} ans d'expérience.`
                   : currentRisk >= 0.4
                   ? `Signaux modérés de désengagement. Le collaborateur maintient de bonnes performances mais montre une baisse progressive d'adhésion aux objectifs collectifs.`
                   : `Indicateurs au vert. Collaborateur engagé et performant avec un risque de départ minime.`}
@@ -262,12 +273,12 @@ Recommandation d'action : Envisager un ajustement salarial ciblé et une rééva
               <div className="flex justify-between items-center text-xs mb-1.5">
                 <span className="text-slate-600 font-medium">Objectif satisfaction</span>
                 <span className="font-mono font-bold text-primary-600">
-                  {targetSatisfaction} / 10
+                  {targetSatisfaction.toFixed(1)} / 10
                 </span>
               </div>
               <input
                 type="range"
-                min={1}
+                min={0}
                 max={10}
                 step={0.5}
                 value={targetSatisfaction}

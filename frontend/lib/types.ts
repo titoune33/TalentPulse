@@ -92,19 +92,12 @@ export interface PredictionStats {
   high_risk: number;
   medium_risk: number;
   low_risk: number;
+  /** Number of raw prediction rows stored (history), not the cohort size. */
+  predictions_total: number;
 }
 
 export interface AuthResponse {
   access_token: string;
   token_type: string;
   user: User;
-}
-
-export interface Plan {
-  name: string;
-  price: number | null;
-  description: string;
-  features: string[];
-  highlighted: boolean;
-  cta: string;
 }

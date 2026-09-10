@@ -5,11 +5,13 @@ The model is trained automatically on first boot if no model file exists,
 so the service works out of the box in any environment.
 """
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from typing import Dict, Any, List, Tuple
+from timeutils import utcnow
 from models.talent import Talent, TalentStatus
 from models.prediction import Prediction
-from datetime import datetime, timedelta
+from datetime import timedelta
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
@@ -159,7 +161,7 @@ class PredictionService:
             features=data["features"],
             details={"model": "RandomForestClassifier", "version": "2.0"},
             recommendation=self._generate_recommendation(talent, risk_score),
-            valid_until=datetime.utcnow() + timedelta(days=30),
+            valid_until=utcnow() + timedelta(days=30),
         )
 
         db.add(db_prediction)
@@ -172,6 +174,87 @@ class PredictionService:
         db.commit()
         db.refresh(db_prediction)
         return db_prediction
+
+    # --- Read side used by the HTTP layer -----------------------------------
+
+    def get_all_predictions(self, db: Session, skip: int = 0, limit: int = 100) -> List[Prediction]:
+        """List predictions, most recent first."""
+        return (
+            db.query(Prediction)
+            .order_by(Prediction.predicted_at.desc(), Prediction.id.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+    def get_prediction(self, db: Session, prediction_id: int) -> Prediction | None:
+        """Fetch a single prediction by id."""
+        return db.query(Prediction).filter(Prediction.id == prediction_id).first()
+
+    def get_recent_predictions(self, db: Session, limit: int = 200) -> List[Prediction]:
+        """
+        Most recent prediction rows, newest first.
+
+        This is the raw history feed the dashboard and the analytics trend
+        chart consume, so every row is returned (not deduplicated by talent).
+        Use `get_latest_per_talent` for cohort-level figures.
+        """
+        return (
+            db.query(Prediction)
+            .order_by(Prediction.predicted_at.desc(), Prediction.id.desc())
+            .limit(limit)
+            .all()
+        )
+
+    def get_latest_per_talent(self, db: Session, limit: int = 1000) -> List[Prediction]:
+        """Latest prediction of each talent, newest first (cohort snapshot)."""
+        latest_ids = (
+            db.query(func.max(Prediction.id))
+            .group_by(Prediction.talent_id)
+            .scalar_subquery()
+        )
+        return (
+            db.query(Prediction)
+            .filter(Prediction.id.in_(latest_ids))
+            .order_by(Prediction.predicted_at.desc(), Prediction.id.desc())
+            .limit(limit)
+            .all()
+        )
+
+    def get_talent_predictions(self, db: Session, talent_id: int, limit: int = 100) -> List[Prediction]:
+        """Full prediction history for one talent, newest first."""
+        return (
+            db.query(Prediction)
+            .filter(Prediction.talent_id == talent_id)
+            .order_by(Prediction.predicted_at.desc(), Prediction.id.desc())
+            .limit(limit)
+            .all()
+        )
+
+    def get_high_risk_predictions(self, db: Session, min_risk: float = 0.7, limit: int = 200) -> List[Prediction]:
+        """Current risk picture: latest prediction per talent at or above `min_risk`."""
+        return [p for p in self.get_latest_per_talent(db, limit=limit) if p.score >= min_risk]
+
+    def get_prediction_stats(self, db: Session) -> Dict[str, Any]:
+        """
+        Cohort-level KPIs computed on the latest prediction of each talent,
+        so a talent is never counted twice.
+        """
+        latest = self.get_latest_per_talent(db)
+        total = len(latest)
+        scores = [p.score for p in latest]
+        high = len([s for s in scores if s >= 0.7])
+        medium = len([s for s in scores if 0.4 <= s < 0.7])
+        low = len([s for s in scores if s < 0.4])
+
+        return {
+            "total": total,
+            "avg_risk_score": round(sum(scores) / total, 4) if total else 0.0,
+            "high_risk": high,
+            "medium_risk": medium,
+            "low_risk": low,
+            "predictions_total": int(db.query(func.count(Prediction.id)).scalar() or 0),
+        }
 
     def _generate_recommendation(self, talent: Talent, risk_score: float) -> str:
         """Generate a recommendation based on the risk score."""
@@ -210,6 +293,61 @@ class PredictionService:
             return {"status": "success", "message": "Model trained successfully"}
         except Exception as e:
             return {"status": "error", "message": str(e)}
+
+    def retrain_from_database(self, db: Session, min_real_samples: int = 8) -> Dict[str, Any]:
+        """
+        Retrain the model using this instance's own workforce as ground truth.
+
+        Labelling rule (only real, observable outcomes are used):
+          - status TURNOVER            -> positive (the person actually left)
+          - status ACTIVE              -> negative (still in the company)
+          - status AT_RISK / INACTIVE  -> ignored (model output, not an outcome)
+
+        If there are not enough labelled rows, or only one class is present,
+        the model falls back to the synthetic reference dataset so the service
+        always ends up with a usable model instead of crashing.
+        """
+        labelled = db.query(Talent).filter(Talent.status.in_([TalentStatus.TURNOVER, TalentStatus.ACTIVE])).all()
+        positives = [t for t in labelled if t.status == TalentStatus.TURNOVER]
+        negatives = [t for t in labelled if t.status == TalentStatus.ACTIVE]
+        used_synthetic = False
+
+        if len(positives) >= 1 and len(negatives) >= 1 and len(labelled) >= min_real_samples:
+            X = np.vstack([self._features(t) for t in labelled])
+            y = np.array([1 if t.status == TalentStatus.TURNOVER else 0 for t in labelled])
+        else:
+            used_synthetic = True
+            X, y = _synthetic_dataset()
+
+        try:
+            scaler = StandardScaler()
+            X_scaled = scaler.fit_transform(X)
+            model = RandomForestClassifier(n_estimators=120, max_depth=8, random_state=42)
+            model.fit(X_scaled, y)
+
+            os.makedirs(MODEL_DIR, exist_ok=True)
+            joblib.dump(model, MODEL_PATH)
+            joblib.dump(scaler, SCALER_PATH)
+
+            # Swap the live artifacts only once both files are safely written.
+            self.model = model
+            self.scaler = scaler
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+        return {
+            "status": "success",
+            "trained_on": "synthetic_reference" if used_synthetic else "customer_data",
+            "real_samples": 0 if used_synthetic else len(labelled),
+            "positive_samples": 0 if used_synthetic else len(positives),
+            "negative_samples": 0 if used_synthetic else len(negatives),
+            "message": (
+                "Modèle réentraîné sur le jeu de données de référence "
+                "(pas assez de départs confirmés dans vos données)."
+                if used_synthetic
+                else f"Modèle réentraîné sur {len(labelled)} collaborateurs de votre organisation."
+            ),
+        }
 
 
 prediction_service = PredictionService()

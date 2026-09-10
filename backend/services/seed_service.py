@@ -7,13 +7,14 @@ Populates the database with demo data on first boot:
 """
 
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import timedelta
 import os
 import random
 from dotenv import load_dotenv
 
 load_dotenv()
 
+from timeutils import utcnow
 from models.user import User, UserRole
 from models.talent import Talent, TalentStatus
 from models.prediction import Prediction
@@ -84,7 +85,7 @@ def seed_if_empty(db: Session) -> bool:
                 k=random.randint(3, 5),
             ),
             education=random.choice(["Master", "Bachelor", "Doctorat", "École d'ingénieur"]),
-            hire_date=datetime.utcnow() - timedelta(days=hire_offset),
+            hire_date=utcnow() - timedelta(days=hire_offset),
             user_id=admin.id,
         )
         db.add(talent)
@@ -93,7 +94,7 @@ def seed_if_empty(db: Session) -> bool:
     db.flush()
 
     # --- Historical predictions (90 days of history for trend charts) ---
-    now = datetime.utcnow()
+    now = utcnow()
     for talent in created_talents:
         base_risk = prediction_service.predict_turnover(talent)["risk_score"]
         for weeks_ago in range(13, 0, -1):  # 13 weeks back to today

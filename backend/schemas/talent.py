@@ -2,7 +2,7 @@
 Talent schemas for TalentPulse
 """
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing import Optional, List
 from datetime import datetime
 from models.talent import TalentStatus
@@ -48,8 +48,7 @@ class TalentResponse(TalentBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TalentUpdate(BaseModel):

@@ -9,13 +9,11 @@ import { TalentTable } from "@/components/TalentTable";
 import { Spinner } from "@/components/Spinner";
 import { RetentionCopilotDrawer } from "@/components/RetentionCopilotDrawer";
 import { useTalents } from "@/hooks/useTalents";
-import { usePredictions } from "@/hooks/usePredictions";
 import { pct, eur } from "@/lib/format";
 import type { Talent } from "@/lib/types";
 
 export default function DashboardPage() {
   const { talents, stats, loading, error } = useTalents();
-  const { predictions } = usePredictions();
   const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
 
@@ -35,14 +33,15 @@ export default function DashboardPage() {
     );
   }
 
+  // Distribution of the current cohort (one talent = one count).
   const riskDistribution = {
     labels: ["Risque faible (<40%)", "Risque modéré (40-70%)", "Risque élevé (≥70%)"],
     datasets: [
       {
         data: [
-          predictions.filter((p) => p.score < 0.4).length,
-          predictions.filter((p) => p.score >= 0.4 && p.score < 0.7).length,
-          predictions.filter((p) => p.score >= 0.7).length,
+          talents.filter((t) => t.turnover_risk < 0.4).length,
+          talents.filter((t) => t.turnover_risk >= 0.4 && t.turnover_risk < 0.7).length,
+          talents.filter((t) => t.turnover_risk >= 0.7).length,
         ],
         backgroundColor: ["#10b981", "#f59e0b", "#f43f5e"],
         borderWidth: 0,
