@@ -33,6 +33,7 @@ class AuthService:
     """
     Service handling authentication
     """
+    ACCESS_TOKEN_EXPIRE_MINUTES = ACCESS_TOKEN_EXPIRE_MINUTES
 
     @staticmethod
     def hash_password(password: str) -> str:
