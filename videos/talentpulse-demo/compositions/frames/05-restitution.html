@@ -52,19 +52,22 @@
 
     /* --- the pulled figure plate -------------------------------------------- */
     /* Bottom-right of the safety band, OUTSIDE the browser frame:
-       x 1560→1816, y 962→1046. It first sat at (1560,112) inside the frame, and the
-       snapshot showed that clipping it against the frame's top edge while the plate's
-       hairline cut across the report's own toolbar — it read as a rendering fault.
-       It now balances the bottom-left surimpression instead, over the 140px band
-       below the capture, where nothing load-bearing lives.
+       x 1608→1816, y 974→1026 (52px tall, was 256×84 at y=962).
+       It first sat at (1560,112) inside the frame, and the snapshot showed it
+       clipping against the frame's top edge while the plate's hairline cut across
+       the report's own toolbar — it read as a rendering fault. It now balances the
+       bottom-left surimpression instead, over the band below the capture.
+       SHORTENED AND NUDGED RIGHT for the subtitle build: the burned-in strip's plate
+       is drawn at y 988→1058, so the plate's 52px box ends at 1026 and its left edge
+       at 1608 clears the centred caption text (which ends at x ≈ 1470 at most).
        Hairline border + white surface: depth is paper, never a shadow. */
     .f5-plate {
       position: absolute;
-      left: 1560px;
-      top: 962px;
-      width: 256px;
-      height: 84px;
-      padding: 0 20px;
+      left: 1608px;
+      top: 974px;
+      width: 208px;
+      height: 52px;
+      padding: 0 16px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
@@ -80,12 +83,12 @@
       will-change: transform, opacity;
     }
     .f5-plate-label {
-      font-size: 12px;
+      font-size: 11px;
     }
     .f5-plate-figure {
-      font-size: 30px;
+      font-size: 24px;
       line-height: 1.05;
-      margin-top: 6px;
+      margin-top: 4px;
     }
 
     .overlay-rule {

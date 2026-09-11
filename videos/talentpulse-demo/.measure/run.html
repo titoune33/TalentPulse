@@ -1,4 +1,11 @@
-/* ============================================================================
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <style>
+      /* copy of compositions/scene-base.css (authoritative for this measurement) */
+      /* ============================================================================
    talentpulse-demo — shared scene stylesheet  (the only source of design tokens)
 
    Each frame links this file so it lints and previews standalone, AND
@@ -575,3 +582,43 @@
   background: var(--ink);
   color: var(--canvas);
 }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #FF00FF; }
+      #root {
+        position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #FF00FF;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="overlay" class="overlay-label">
+        <div class="overlay-rule"></div>
+        <div class="overlay-text" id="ov-text">CAS CRITIQUES ≥ 70 %</div>
+      </div>
+
+      <div class="risk-caption" id="risk">
+        <span class="risk-row"><span class="risk-dot risk-high"></span><span class="risk-label">≥ 70 %</span></span>
+        <span class="risk-row"><span class="risk-dot risk-watch"></span><span class="risk-label">40–69 %</span></span>
+        <span class="risk-row"><span class="risk-dot risk-healthy"></span><span class="risk-label">&lt; 40 %</span></span>
+      </div>
+
+      <div class="f5-plate" id="plate" style="position:absolute;left:1608px;top:974px;width:208px;height:52px;padding:0 16px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;text-align:right;background:#fff;border:1px solid var(--line-strong);border-radius:4px">
+        <div class="t-mono-label f5-plate-label">SORTIE COMEX</div>
+        <div class="t-mono-figure f5-plate-figure">1 PAGE</div>
+      </div>
+
+      <div class="f2-caption" id="f2cap" style="position:absolute;right:104px;top:1000px;text-align:right;white-space:nowrap">
+        <div class="t-mono-small">SCORE 0 – 100 %  ·  13 SEMAINES</div>
+      </div>
+
+      <div class="ink-footer-meta" id="inkmeta" style="--ink-footer-rule-top:954px;--ink-footer-meta-top:908px">TALENTPULSE</div>
+      <div class="ink-footer-rule" id="inkrule" style="--ink-footer-rule-top:954px;--ink-footer-meta-top:908px"></div>
+
+      <div class="clip tp-subtitle tp-subtitle--paper" id="cap" style="opacity:1">
+        <p class="tp-subtitle__text" id="captext">TalentPulse. Sachez qui va partir, avant qu'il ne démissionne.</p>
+      </div>
+    </div>
+  <script>document.getElementById("cap").style.opacity="1";</script>
+</body>
+</html>

@@ -130,6 +130,13 @@
     }
 
     /* --- ink-plate chrome helpers (the shared sheet carries the geometry) -- */
+    /* The footer hairline + meta line are RAISED here (from the shared 986/1032)
+       so the burned-in subtitle strip owns the bottom band on its own. Padding and
+       the measure of the strip, and the values themselves, stay in scene-base.css. */
+    #root {
+      --ink-footer-rule-top: 954px;
+      --ink-footer-meta-top: 908px;
+    }
     .tp-annonce-meta {
       color: #82868e;
     }

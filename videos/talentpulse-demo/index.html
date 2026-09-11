@@ -105,14 +105,47 @@
      Derived from the real captures (dashboard.png / rapport.png are 2880×1800; their
      app content area, sidebar excluded, is x 176→1749, y 32→957 at 1×).
      width 1472 → a 1× dashboard renders at scale 0.511, so 1440 is the natural fit;
-     height 820 keeps the frame inside the safe area and clears the overlay label at
+     height 820 keeps the frame inside the safe area and clears the surimpression at
      y=1000. The viewport is therefore 1472×771, i.e. 71 % of frame height — the
      capture stays the subject. */
+
+  /* BOTTOM-BAND BUDGET (subtitle build). The burned-in subtitle strip owns
+     y 1000→1058 and x 240→1680, so every other piece of bottom furniture has to
+     stay out of that box:
+       · surimpression (bottom-left) .... y 1000→1018, x 104→~990   (in the box, left
+                                                                     of the centred text)
+       · ink footer hairline (01 / 06) .. y 954                    (raised from 1032)
+       · f5 "SORTIE COMEX" plate ........ x 1608→1816, h 52        (shortened + pushed
+                                                                     right of the text)
+       · f2 / f3 bottom-right captions .. y 1000, left edge ≥ 1470 (risk rows tightened
+                                                                     from 26px to 18px)
+       · subtitle text ................... y 1002→1044
+     The subtitle's own backing plate is drawn at y 988→1058 so its padding frames
+     that text. Measured from rendered frames, not assumed. */
+
   --chrome-h: 48px;
   --frame-x: 224px;
   --frame-y: 120px;
   --frame-w: 1472px;
   --frame-h: 820px;
+
+  /* --- subtitles (burned-in, French) --------------------------------------- */
+  /* The strip is anchored to the BOTTOM of the frame, centred, and its opaque
+     plate is the ground colour, so a caption never sits on a hairline or on the
+     product captures. */
+  --sub-bottom: 22px; /* plate bottom edge -> frame bottom */
+  --sub-plate-pad-x: 30px;
+  --sub-plate-pad-top: 12px;
+  --sub-plate-pad-bottom: 13px;
+  --sub-plate-radius: 4px;
+  --sub-font-size: 34px;
+  --sub-line-height: 1.35; /* 46px box */
+  --sub-max-width: 1440px; /* one line for every caption in this script */
+  /* The ink frames raise their footer hairline to make room for the strip; the
+     paper frames keep the shared y=1032. Declared here so the change is one line
+     per frame, never a redeclared geometry. */
+  --ink-footer-rule-top: 954px;
+  --ink-footer-meta-top: 908px;
 }
 
 /* --- scene root ----------------------------------------------------------- */
@@ -268,6 +301,12 @@
 .bracket {
   z-index: 3;
 }
+/* The subtitle strip is a HOST-page element (build-index.mjs emits it as a direct
+   child of #root), so it outranks every scene layer. z-index 4 here is a no-op on
+   the frames — it simply documents the order for anyone reading the sheet. */
+.tp-subtitle {
+  z-index: 4;
+}
 .browser-bar {
   position: absolute;
   left: 0;
@@ -328,7 +367,11 @@
 }
 
 /* --- the surimpression (overlay label) ----------------------------------- */
-/* bottom-left safe corner, y ≈ 1000px; the cobalt rule above, then the label */
+/* bottom-left safe corner, y = 1000px; the cobalt rule above, then the label.
+   The block runs y 1000 → 1018 and stops at x ≈ 990, i.e. it lives INSIDE the
+   subtitle strip's own y-band but strictly to the LEFT of the centred caption
+   text (which never starts before x = 240). That is the collision-free split:
+   nothing had to move off the bottom edge. */
 
 .overlay-label {
   position: absolute;
@@ -355,19 +398,21 @@
 }
 
 /* --- ink-plate footer hairline (frames 01 / 06) -------------------------- */
+/* Raised from y=1032 / y=986 to clear the subtitle strip. At 14px the meta line's
+   box ends near y=930, so the 954px rule keeps ~22px of air above the plate. */
 
 .ink-footer-rule {
   position: absolute;
   left: var(--pad-x);
   right: var(--pad-x);
-  top: 1032px;
+  top: var(--ink-footer-rule-top);
   height: 1px;
   background: #2a2e35;
 }
 .ink-footer-meta {
   position: absolute;
   left: var(--pad-x);
-  top: 986px;
+  top: var(--ink-footer-meta-top);
   font-family: var(--mono);
   font-weight: 500;
   font-size: 14px;
@@ -378,8 +423,9 @@
 
 /* --- risk caption (frame 03 only) ---------------------------------------- */
 /* Sits BELOW the browser frame (y=970), never on it: the real dashboard already
-   renders its own risk legend, so this annotates the threshold in the voice-over's
-   own words instead of duplicating the product's legend. */
+   renders its own risk legend, so this annotates the threshold in the script's own
+   words instead of duplicating the product's legend. The row gap is 18px (was 26px)
+   so the legend's left edge stays right of the centred caption text. */
 
 .risk-caption {
   position: absolute;
@@ -389,7 +435,7 @@
 }
 .risk-row {
   display: inline-block;
-  margin-left: 26px;
+  margin-left: 18px;
 }
 .risk-dot {
   display: inline-block;
@@ -453,6 +499,84 @@
   color: var(--cobalt);
 }
 
+/* ==========================================================================
+   burned-in subtitles — the French script, no voice-over
+   ==========================================================================
+   These are HOST-page elements: `build-index.mjs` emits one `.tp-subtitle`
+   block per line as a direct child of #root, each carrying its own
+   `data-start` / `data-duration`. The frame sub-compositions know nothing
+   about them.
+
+   Two variants, picked per scene from its ground:
+
+     paper        scenes 02–05 (ground #FAFAF8) → text  ink    #14161A
+     ink          scenes 01 / 06 (ground #14161A) → text  paper #FAFAF8
+
+   Contrast, both ≥ WCAG AA for body text:
+     #14161A on #FAFAF8 = 16.35:1      #FAFAF8 on #14161A = 16.05:1
+     (and 18.66:1 on the closing #0C0E11 plate of scene 06)
+
+   THE BACKING PLATE IS OPAQUE GROUND COLOUR, ON PURPOSE.
+   The brief allows a translucent plate — `rgba(250,250,248,0.86)` on paper,
+   `rgba(20,22,26,0.86)` on ink — and a translucent plate would composite to
+   `#F6F6F4` / `#1F2126` here, because there is nothing but ground behind the
+   strip. An opaque plate of the ground colour is the same pixels, but it is a
+   *measured* background instead of a composited one, so `hyperframes check`'s
+   contrast audit resolves the plate itself and reports the numbers above
+   rather than sampling whatever happens to sit behind the alpha. It is also
+   what guarantees no capture or hairline can ever show through a subtitle.
+
+   The plate is sized to its text (inline-flex), never full-bleed: it is the
+   caption's own measure, with 4px corners. There is no full-width band.
+
+   FADE. Each caption is a timed clip, so the framework owns whether it is in
+   the DOM; the root GSAP timeline (see build-index.mjs) fades `opacity`
+   only — 200ms in, 200ms out. Never `autoAlpha`: see the hard rule at the
+   top of this sheet. `.tp-subtitle` itself is the positioning wrapper and is
+   never animated; `.tp-subtitle__text` is the animated box.
+   ========================================================================== */
+
+.tp-subtitle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* the strip's own box: bottom edge 22px off the frame, plate drawn from
+     y = 988 to y = 1058 for the 34px/1.35 caption ramp */
+  bottom: var(--sub-bottom);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.tp-subtitle__text {
+  display: inline-block;
+  max-width: var(--sub-max-width);
+  padding: var(--sub-plate-pad-top) var(--sub-plate-pad-x) var(--sub-plate-pad-bottom);
+  border-radius: var(--sub-plate-radius);
+  font-family: var(--sans);
+  font-weight: 500;
+  font-style: normal;
+  font-size: var(--sub-font-size);
+  line-height: var(--sub-line-height);
+  letter-spacing: -0.005em;
+  text-align: center;
+  text-wrap: balance;
+  will-change: opacity;
+}
+
+/* paper plate — scenes 02–05 */
+.tp-subtitle--paper .tp-subtitle__text {
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+/* ink plate — scenes 01 / 06 */
+.tp-subtitle--ink .tp-subtitle__text {
+  background: var(--ink);
+  color: var(--canvas);
+}
+
     </style>
     <style>
       * {
@@ -500,14 +624,6 @@
         data-duration="4"
         data-track-index="1"
       ></div>
-      <audio
-        id="el-01-annonce-voice"
-        src="assets/voice/01.mp3"
-        data-start="0"
-        data-duration="3.576"
-        data-track-index="10"
-        data-volume="1"
-      ></audio>
 
       <div
         id="el-02-score"
@@ -518,14 +634,6 @@
         data-duration="6.5"
         data-track-index="1"
       ></div>
-      <audio
-        id="el-02-score-voice"
-        src="assets/voice/02.mp3"
-        data-start="4.35"
-        data-duration="6.873"
-        data-track-index="11"
-        data-volume="1"
-      ></audio>
 
       <div
         id="el-03-cas-critiques"
@@ -536,14 +644,6 @@
         data-duration="5.5"
         data-track-index="1"
       ></div>
-      <audio
-        id="el-03-cas-critiques-voice"
-        src="assets/voice/03.mp3"
-        data-start="11.6"
-        data-duration="5.619"
-        data-track-index="12"
-        data-volume="1"
-      ></audio>
 
       <div
         id="el-04-plan-retention"
@@ -554,14 +654,6 @@
         data-duration="5.9"
         data-track-index="1"
       ></div>
-      <audio
-        id="el-04-plan-retention-voice"
-        src="assets/voice/04.mp3"
-        data-start="17.4"
-        data-duration="6.316"
-        data-track-index="13"
-        data-volume="1"
-      ></audio>
 
       <div
         id="el-05-restitution"
@@ -572,14 +664,6 @@
         data-duration="4.1"
         data-track-index="1"
       ></div>
-      <audio
-        id="el-05-restitution-voice"
-        src="assets/voice/05.mp3"
-        data-start="23.2"
-        data-duration="2.461"
-        data-track-index="14"
-        data-volume="1"
-      ></audio>
 
       <div
         id="el-06-signature"
@@ -590,20 +674,149 @@
         data-duration="4.9"
         data-track-index="1"
       ></div>
-      <audio
-        id="el-06-signature-voice"
-        src="assets/voice/06.mp3"
-        data-start="26.1"
-        data-duration="4.365"
-        data-track-index="15"
-        data-volume="1"
-      ></audio>
+
+      <!-- subtitle 1/6 — 01-annonce · ink plate · 0→3.576s -->
+      <div
+        id="caption-1"
+        class="clip tp-subtitle tp-subtitle--ink"
+        style="opacity: 0"
+        data-start="0"
+        data-duration="3.576"
+        data-track-index="2"
+        data-layout-allow-caption-zone
+      >
+        <p class="tp-subtitle__text">Un départ non anticipé coûte la moitié d'un salaire annuel.</p>
+      </div>
+
+      <!-- subtitle 2/6 — 02-score · paper plate · 4.35→9.25s -->
+      <div
+        id="caption-2"
+        class="clip tp-subtitle tp-subtitle--paper"
+        style="opacity: 0"
+        data-start="4.35"
+        data-duration="4.9"
+        data-track-index="2"
+        data-layout-allow-caption-zone
+      >
+        <p class="tp-subtitle__text">TalentPulse note chaque collaborateur de zéro à cent pour cent, à partir de cinq signaux RH.</p>
+      </div>
+
+      <!-- subtitle 3/6 — 03-cas-critiques · paper plate · 10.85→15.7s -->
+      <div
+        id="caption-3"
+        class="clip tp-subtitle tp-subtitle--paper"
+        style="opacity: 0"
+        data-start="10.85"
+        data-duration="4.85"
+        data-track-index="2"
+        data-layout-allow-caption-zone
+      >
+        <p class="tp-subtitle__text">Les profils critiques remontent en tête, avec l'exposition financière correspondante.</p>
+      </div>
+
+      <!-- subtitle 4/6 — 04-plan-retention · paper plate · 16.35→21.6s -->
+      <div
+        id="caption-4"
+        class="clip tp-subtitle tp-subtitle--paper"
+        style="opacity: 0"
+        data-start="16.35"
+        data-duration="5.25"
+        data-track-index="2"
+        data-layout-allow-caption-zone
+      >
+        <p class="tp-subtitle__text">Pour chacun : un diagnostic, un guide d'entretien et un simulateur de contre-mesure.</p>
+      </div>
+
+      <!-- subtitle 5/6 — 05-restitution · paper plate · 22.25→25.55s -->
+      <div
+        id="caption-5"
+        class="clip tp-subtitle tp-subtitle--paper"
+        style="opacity: 0"
+        data-start="22.25"
+        data-duration="3.3"
+        data-track-index="2"
+        data-layout-allow-caption-zone
+      >
+        <p class="tp-subtitle__text">Et un rapport prêt pour le comité de direction.</p>
+      </div>
+
+      <!-- subtitle 6/6 — 06-signature · ink plate · 26.3→29.3s -->
+      <div
+        id="caption-6"
+        class="clip tp-subtitle tp-subtitle--ink"
+        style="opacity: 0"
+        data-start="26.3"
+        data-duration="3"
+        data-track-index="2"
+        data-layout-allow-caption-zone
+      >
+        <p class="tp-subtitle__text">TalentPulse. Sachez qui va partir, avant qu'il ne démissionne.</p>
+      </div>
 
     </div>
 
     <script>
       window.__timelines = window.__timelines || {};
-      window.__timelines["main"] = gsap.timeline({ paused: true });
+      var tl = gsap.timeline({ paused: true });
+
+      // Burned-in subtitles: opacity only. The framework owns each caption's
+      // visibility window from its data-start / data-duration; this timeline
+      // owns the 200ms fade in and out inside that window.
+      // 1/6  0→3.576s  "Un départ non anticipé coûte la moitié d'un s…
+      tl.fromTo(
+        '#caption-1',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.2, ease: "power1.out", immediateRender: false },
+        0.2,
+      );
+      tl.to('#caption-1', { opacity: 0, duration: 0.2, ease: "power1.in" }, 3.376);
+
+      // 2/6  4.35→9.25s  "TalentPulse note chaque collaborateur de zéro…
+      tl.fromTo(
+        '#caption-2',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.2, ease: "power1.out", immediateRender: false },
+        4.55,
+      );
+      tl.to('#caption-2', { opacity: 0, duration: 0.2, ease: "power1.in" }, 9.05);
+
+      // 3/6  10.85→15.7s  "Les profils critiques remontent en tête, avec…
+      tl.fromTo(
+        '#caption-3',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.2, ease: "power1.out", immediateRender: false },
+        11.05,
+      );
+      tl.to('#caption-3', { opacity: 0, duration: 0.2, ease: "power1.in" }, 15.5);
+
+      // 4/6  16.35→21.6s  "Pour chacun : un diagnostic, un guide d'entre…
+      tl.fromTo(
+        '#caption-4',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.2, ease: "power1.out", immediateRender: false },
+        16.55,
+      );
+      tl.to('#caption-4', { opacity: 0, duration: 0.2, ease: "power1.in" }, 21.4);
+
+      // 5/6  22.25→25.55s  "Et un rapport prêt pour le comité de directio…
+      tl.fromTo(
+        '#caption-5',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.2, ease: "power1.out", immediateRender: false },
+        22.45,
+      );
+      tl.to('#caption-5', { opacity: 0, duration: 0.2, ease: "power1.in" }, 25.35);
+
+      // 6/6  26.3→29.3s  "TalentPulse. Sachez qui va partir, avant qu'i…
+      tl.fromTo(
+        '#caption-6',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.2, ease: "power1.out", immediateRender: false },
+        26.5,
+      );
+      tl.to('#caption-6', { opacity: 0, duration: 0.2, ease: "power1.in" }, 29.1);
+
+      window.__timelines["main"] = tl;
     </script>
   </body>
 </html>

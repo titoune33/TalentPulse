@@ -24,7 +24,12 @@ services:
     repo: https://github.com/titoune33/TalentPulse
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn main:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    # FastAPI est une application ASGI : le worker `sync` par défaut de gunicorn
+    # ne peut pas la servir (TypeError: FastAPI.__call__() missing 'send').
+    # Le worker uvicorn est donc obligatoire. Un seul worker : le modèle ML
+    # s'entraîne et s'écrit sur disque au démarrage, deux workers se
+    # marcheraient dessus au premier boot.
+    startCommand: gunicorn main:app --bind 0.0.0.0:$PORT --worker-class uvicorn.workers.UvicornWorker --workers 1 --timeout 120
     plan: free
     healthCheckPath: /api/health
     envVars:
@@ -39,12 +44,12 @@ services:
         generateValue: true
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: "1440"
-      # ⚠️ À renseigner avec l'URL Vercel réelle : sans elle, le navigateur
-      # bloque tous les appels API (CORS).
+      # URL du frontend déployé sur Vercel. Sans elle, le navigateur bloque
+      # tous les appels API (CORS). À mettre à jour si le domaine change.
       - key: CORS_ORIGIN
-        sync: false
+        value: https://talentpulse-inky.vercel.app
       - key: FRONTEND_URL
-        sync: false
+        value: https://talentpulse-inky.vercel.app
       - key: DEMO_EMAIL
         value: demo@talentpulse.app
       - key: DEMO_PASSWORD

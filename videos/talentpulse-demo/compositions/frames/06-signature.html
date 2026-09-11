@@ -65,6 +65,20 @@
       margin-right: auto;
     }
 
+    /* 5 · the burned-in subtitle strip owns the bottom band, so this frame's URL
+       label and the cobalt rule above it are RAISED 16px (rule y 984 → text
+       y 998 → box ends ≈ 1013) to sit clear above the caption plate at y 988.
+       Only the offset moves; the geometry stays in scene-base.css. (The ink footer
+       variables are set for symmetry with frame 01; this frame carries its footer
+       as the URL label above, not as a hairline.) */
+    #root {
+      --ink-footer-rule-top: 954px;
+      --ink-footer-meta-top: 908px;
+    }
+    #root .overlay-label {
+      top: 984px;
+    }
+
     /* GSAP owns y/scale/opacity on these; hint the compositor only, never a
        CSS `transform` (that would fight the tweens). No `opacity: 0` anywhere —
        every entrance is a `fromTo`, so a cold seek restores the visible state. */

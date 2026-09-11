@@ -1,0 +1,55 @@
+{
+  "total_duration_s": 30.9,
+  "note": "The six French subtitle lines, burned in. Replaces audio_meta.json: this build has NO voice-over at all (no <audio> element, no AAC stream in the delivery). The placement grid is deliberately NOT the old voice grid — the speech ran 29.21s across 30.9s of scenes, while a subtitle only has to be readable inside its own scene. Each window therefore starts just after its scene's cut and ends shortly before the next one, so no caption ever straddles a cut. Text is verbatim from SCRIPT.md and is not rewritten. `variant` picks the colour pair from the scene ground: `ink` for the ink plates (scenes 01 / 06), `paper` for the paper plates (scenes 02–05).",
+  "fade_s": 0.2,
+  "captions": [
+    {
+      "frame": 1,
+      "scene": "01-annonce",
+      "variant": "ink",
+      "start_s": 0.0,
+      "duration_s": 3.576,
+      "text": "Un départ non anticipé coûte la moitié d'un salaire annuel."
+    },
+    {
+      "frame": 2,
+      "scene": "02-score",
+      "variant": "paper",
+      "start_s": 4.35,
+      "duration_s": 4.9,
+      "text": "TalentPulse note chaque collaborateur de zéro à cent pour cent, à partir de cinq signaux RH."
+    },
+    {
+      "frame": 3,
+      "scene": "03-cas-critiques",
+      "variant": "paper",
+      "start_s": 10.85,
+      "duration_s": 4.85,
+      "text": "Les profils critiques remontent en tête, avec l'exposition financière correspondante."
+    },
+    {
+      "frame": 4,
+      "scene": "04-plan-retention",
+      "variant": "paper",
+      "start_s": 16.35,
+      "duration_s": 5.25,
+      "text": "Pour chacun : un diagnostic, un guide d'entretien et un simulateur de contre-mesure."
+    },
+    {
+      "frame": 5,
+      "scene": "05-restitution",
+      "variant": "paper",
+      "start_s": 22.25,
+      "duration_s": 3.3,
+      "text": "Et un rapport prêt pour le comité de direction."
+    },
+    {
+      "frame": 6,
+      "scene": "06-signature",
+      "variant": "ink",
+      "start_s": 26.3,
+      "duration_s": 3.0,
+      "text": "TalentPulse. Sachez qui va partir, avant qu'il ne démissionne."
+    }
+  ]
+}
