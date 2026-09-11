@@ -34,28 +34,29 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-graphite-950/45 backdrop-blur-[2px] animate-fadeIn"
         onClick={onClose}
         aria-hidden
       />
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative w-full ${wide ? "max-w-3xl" : "max-w-lg"} animate-fadeUp rounded-2xl border border-slate-200 bg-white shadow-2xl`}
+        aria-label={title}
+        className={`relative w-full ${wide ? "max-w-3xl" : "max-w-lg"} animate-scaleIn overflow-hidden rounded-2xl border border-line bg-surface shadow-float`}
       >
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-          <h3 className="text-lg font-bold text-slate-900">{title}</h3>
+        <div className="flex items-center justify-between border-b border-line px-6 py-4">
+          <h3 className="text-title font-semibold text-ink">{title}</h3>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-md p-1.5 text-ink-3 transition hover:bg-sunken hover:text-ink"
             aria-label="Fermer"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
         <div className="max-h-[70vh] overflow-y-auto px-6 py-5">{children}</div>
         {footer && (
-          <div className="flex justify-end gap-3 border-t border-slate-200 px-6 py-4">
+          <div className="flex justify-end gap-2.5 border-t border-line bg-paper/60 px-6 py-4">
             {footer}
           </div>
         )}

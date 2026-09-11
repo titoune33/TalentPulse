@@ -1,0 +1,69 @@
+{
+  "total_duration_s": 30.9,
+  "note": "Product-launch audio_meta shape (frame-keyed) with TWO project-specific extensions: an absolute video length and an absolute per-line voice start. This project's script has locked timecodes AND measured speech durations that do not fit the delivered scene windows, so voice is placed on the absolute grid rather than pinned to a frame boundary. See BRIEF.md § Timing policy and SCRIPT.md.",
+  "bgm": null,
+  "bgm_pending": false,
+  "voices": [
+    {
+      "frame": 1,
+      "path": "assets/voice/01.mp3",
+      "start_s": 0.0,
+      "duration_s": 3.575873,
+      "text": "Un départ non anticipé coûte la moitié d'un salaire annuel.",
+      "voice_id": "onwK4e9ZLuTAKqWW03F9",
+      "model_id": "eleven_multilingual_v2",
+      "provider": "ElevenLabs (Zapier MCP)"
+    },
+    {
+      "frame": 2,
+      "path": "assets/voice/02.mp3",
+      "start_s": 4.35,
+      "duration_s": 6.873107,
+      "text": "TalentPulse note chaque collaborateur de zéro à cent pour cent, à partir de cinq signaux RH.",
+      "voice_id": "onwK4e9ZLuTAKqWW03F9",
+      "model_id": "eleven_multilingual_v2",
+      "provider": "ElevenLabs (Zapier MCP)"
+    },
+    {
+      "frame": 3,
+      "path": "assets/voice/03.mp3",
+      "start_s": 11.6,
+      "duration_s": 5.619229,
+      "text": "Les profils critiques remontent en tête, avec l'exposition financière correspondante.",
+      "voice_id": "onwK4e9ZLuTAKqWW03F9",
+      "model_id": "eleven_multilingual_v2",
+      "provider": "ElevenLabs (Zapier MCP)"
+    },
+    {
+      "frame": 4,
+      "path": "assets/voice/04.mp3",
+      "start_s": 17.4,
+      "duration_s": 6.315828,
+      "text": "Pour chacun : un diagnostic, un guide d'entretien et un simulateur de contre-mesure.",
+      "voice_id": "onwK4e9ZLuTAKqWW03F9",
+      "model_id": "eleven_multilingual_v2",
+      "provider": "ElevenLabs (Zapier MCP)"
+    },
+    {
+      "frame": 5,
+      "path": "assets/voice/05.mp3",
+      "start_s": 23.2,
+      "duration_s": 2.461315,
+      "text": "Et un rapport prêt pour le comité de direction.",
+      "voice_id": "onwK4e9ZLuTAKqWW03F9",
+      "model_id": "eleven_multilingual_v2",
+      "provider": "ElevenLabs (Zapier MCP)"
+    },
+    {
+      "frame": 6,
+      "path": "assets/voice/06.mp3",
+      "start_s": 26.1,
+      "duration_s": 4.365351,
+      "text": "TalentPulse. Sachez qui va partir, avant qu'il ne démissionne.",
+      "voice_id": "onwK4e9ZLuTAKqWW03F9",
+      "model_id": "eleven_multilingual_v2",
+      "provider": "ElevenLabs (Zapier MCP)"
+    }
+  ],
+  "sfx": []
+}

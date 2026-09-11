@@ -2,14 +2,15 @@ import type { ReactNode } from "react";
 
 export type Tone = "primary" | "green" | "amber" | "red" | "violet" | "slate" | "blue";
 
-const iconBg: Record<Tone, string> = {
-  primary: "bg-indigo-50 text-indigo-600",
-  green: "bg-emerald-50 text-emerald-600",
-  amber: "bg-amber-50 text-amber-600",
-  red: "bg-red-50 text-red-600",
-  violet: "bg-violet-50 text-violet-600",
-  slate: "bg-slate-100 text-slate-600",
-  blue: "bg-blue-50 text-blue-600",
+/** A semantic tone only earns a coloured mark; the card itself stays neutral. */
+const marks: Record<Tone, string> = {
+  primary: "bg-accent-600",
+  green: "bg-ok-600",
+  amber: "bg-warn-500",
+  red: "bg-danger-600",
+  violet: "bg-ink-3",
+  slate: "bg-ink-4",
+  blue: "bg-accent-600",
 };
 
 export function StatsCard({
@@ -26,16 +27,20 @@ export function StatsCard({
   sub?: ReactNode;
 }) {
   return (
-    <div className="card p-5 transition-all duration-200 hover:border-slate-300 hover:shadow-lift">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{title}</p>
-        <div className={`rounded-lg p-2.5 ${iconBg[tone]}`}>{icon}</div>
+    <div className="card card-hover flex flex-col justify-between p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className={`h-1.5 w-1.5 rounded-full ${marks[tone]}`} aria-hidden />
+          <p className="text-micro font-medium uppercase tracking-[0.09em] text-ink-3">
+            {title}
+          </p>
+        </div>
+        <span className="text-ink-4">{icon}</span>
       </div>
-      <div className="mt-2">
-        <p className="font-mono text-3xl font-bold tracking-tight text-slate-900">
-          {value}
-        </p>
-        {sub && <p className="mt-1.5 text-xs text-slate-500">{sub}</p>}
+
+      <div className="mt-5">
+        <p className="figure text-[2rem] leading-none">{value}</p>
+        {sub && <p className="mt-2 text-small text-ink-3">{sub}</p>}
       </div>
     </div>
   );

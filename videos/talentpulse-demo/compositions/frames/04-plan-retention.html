@@ -1,0 +1,252 @@
+<template>
+  <link rel="stylesheet" href="compositions/scene-base.css" />
+  <style>
+    /* ==========================================================================
+       frame 04 — le plan de rétention · portrait document scroll (5.9s)
+       The real portrait capture slides slowly upward through a fixed 1120x800
+       hairline window at 74 % of frame height; a margin scroll index travels
+       with it. Layout only — every token, colour and the .doc-frame geometry
+       come from compositions/scene-base.css.
+       ========================================================================== */
+
+    /* the frame root — styled by #root (never by a class on the root element) */
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      font-family: var(--sans);
+      font-synthesis: none;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+
+    /* the full-bleed paper ground, on its own clip layer */
+    .fp04-ground {
+      position: absolute;
+      inset: 0;
+    }
+
+    /* the fixed window the document travels through (x 400 -> 1520, centred on 960) */
+    .fp04-window {
+      left: 400px;
+      top: 170px;
+      width: 1120px;
+      height: 800px;
+    }
+
+    /* the image itself: 1120px wide -> 1752px tall, untransformed in CSS so the
+       whole pan can live in one fromTo tween */
+    .fp04-scroll {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1120px;
+    }
+
+    /* --- left margin scroll index ------------------------------------------ */
+
+    .fp04-index-rule {
+      position: absolute;
+      left: 88px;
+      top: 170px;
+      width: 1px;
+      height: 800px;
+      background: var(--line);
+      transform-origin: 50% 0%;
+    }
+
+    /* the two cobalt ticks + the vertical legend travel with the pan */
+    .fp04-track {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+    }
+
+    .fp04-tick {
+      position: absolute;
+      left: 88px;
+      width: 16px;
+      height: 1px;
+      background: var(--cobalt);
+      transform-origin: 0% 50%;
+    }
+    .fp04-tick-a {
+      top: 346px;
+    }
+    .fp04-tick-b {
+      top: 682px;
+    }
+
+    .fp04-legend {
+      position: absolute;
+      left: 64px;
+      top: 640px;
+      font-family: var(--mono);
+      font-weight: 400;
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      color: var(--ink-4);
+      white-space: nowrap;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+    }
+
+    /* --- right margin annotations ------------------------------------------ */
+
+    .fp04-note {
+      position: absolute;
+      right: var(--pad-x);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+    }
+    .fp04-note-a {
+      top: 300px;
+    }
+    .fp04-note-b {
+      top: 470px;
+    }
+    .fp04-note-c {
+      top: 640px;
+    }
+
+    .fp04-note-rule {
+      width: 20px;
+      height: 1px;
+      background: var(--line);
+      margin-bottom: 12px;
+    }
+
+    .fp04-note-text {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--ink-4);
+    }
+
+    /* --- the surimpression --------------------------------------------------- */
+
+    .fp04-ov-rule {
+      transform-origin: 0% 50%;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="04-plan-retention"
+    data-duration="5.9"
+    data-width="1920"
+    data-height="1080"
+  >
+    <div
+      id="fp04-ground"
+      class="clip ground-paper fp04-ground"
+      data-start="0"
+      data-duration="5.9"
+      data-track-index="0"
+    ></div>
+
+    <div class="chrome-rule"></div>
+    <div class="chrome-eyebrow t-mono-label">LE PLAN</div>
+    <div class="chrome-counter t-mono-label">04 / 06</div>
+
+    <div class="doc-frame fp04-window">
+      <div class="fp04-scroll">
+        <img
+          class="browser-shot"
+          src="assets/product/plan-retention.png"
+          alt="Le plan de rétention TalentPulse : diagnostic, guide d'entretien et simulateur de contre-mesure"
+        />
+      </div>
+    </div>
+
+    <div class="fp04-index-rule"></div>
+
+    <div class="fp04-track" data-layout-allow-overflow>
+      <div class="fp04-legend">DIAGNOSTIC · ENTRETIEN · CONTRE-MESURE</div>
+      <div class="fp04-tick fp04-tick-a"></div>
+      <div class="fp04-tick fp04-tick-b"></div>
+    </div>
+
+    <div class="fp04-note fp04-note-a">
+      <div class="fp04-note-rule"></div>
+      <div class="t-mono-label fp04-note-text">1-1</div>
+    </div>
+    <div class="fp04-note fp04-note-b">
+      <div class="fp04-note-rule"></div>
+      <div class="t-mono-label fp04-note-text">GUIDE</div>
+    </div>
+    <div class="fp04-note fp04-note-c">
+      <div class="fp04-note-rule"></div>
+      <div class="t-mono-label fp04-note-text">SIMULATEUR</div>
+    </div>
+
+    <div class="overlay-label">
+      <div class="overlay-rule fp04-ov-rule"></div>
+      <div class="overlay-text">PLAN DE RÉTENTION 1-1</div>
+    </div>
+  </div>
+
+  <script>
+    window.__timelines = window.__timelines || {};
+    const tl = gsap.timeline({ paused: true });
+
+    // 0.00 -> 0.65  the hairline window settles in
+    tl.fromTo(
+      ".doc-frame",
+      { opacity: 0, scale: 0.996 },
+      { opacity: 1, scale: 1, duration: 0.65, ease: "power3.out" },
+      0,
+    );
+
+    // 0.30 -> 5.30  the document pans up; the margin index travels with it
+    // (1752 - 800 = 952px of overflow, so -880 never reaches the foot)
+    tl.fromTo(".fp04-scroll", { y: 0 }, { y: -880, duration: 5.0, ease: "power1.inOut" }, 0.3);
+    tl.fromTo(".fp04-track", { y: 0 }, { y: -880, duration: 5.0, ease: "power1.inOut" }, 0.3);
+
+    // 0.55 -> 1.00  the cobalt rule above the surimpression wipes open
+    tl.fromTo(".overlay-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power2.out" }, 0.55);
+
+    // 0.55 -> 1.25  the left index rule draws down the margin
+    tl.fromTo(".fp04-index-rule", { scaleY: 0 }, { scaleY: 1, duration: 0.7, ease: "power3.out" }, 0.55);
+
+    // 0.75 -> 1.30  the surimpression rises into the safe corner
+    tl.fromTo(
+      ".overlay-text",
+      { y: 12, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.55, ease: "power3.out" },
+      0.75,
+    );
+
+    // 0.80 -> 1.45  the two cobalt ticks draw in
+    tl.fromTo(
+      ".fp04-tick",
+      { scaleX: 0 },
+      { scaleX: 1, duration: 0.45, ease: "power2.out", stagger: 0.1 },
+      0.8,
+    );
+
+    // 1.00 -> 1.55  the vertical legend fades in (opacity only: it keeps its
+    // CSS rotate(180deg) so it still reads bottom-to-top)
+    tl.fromTo(".fp04-legend", { opacity: 0 }, { opacity: 1, duration: 0.55, ease: "power3.out" }, 1.0);
+
+    // 1.40 -> 2.10  the right margin annotations, staggered down the safe edge.
+    // Full opacity: the snapshot showed 0.56 leaving them nearly invisible against
+    // the paper, and they carry the scene's three keywords. They are 13px ink-4
+    // labels doing real work, not decoration.
+    tl.fromTo(
+      ".fp04-note",
+      { opacity: 0, y: 8 },
+      { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", stagger: 0.1 },
+      1.4,
+    );
+
+    // 5.30 -> 5.90  the pan settles and the frame holds
+
+    window.__timelines["04-plan-retention"] = tl;
+  </script>
+</template>

@@ -11,9 +11,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const sizes: Record<Size, string> = {
-  sm: "h-8 px-3 text-xs",
-  md: "h-10 px-4 text-sm",
-  lg: "h-11 px-6 text-sm",
+  sm: "h-8 px-3 text-[13px]",
+  md: "h-10 px-4",
+  lg: "h-12 px-6 text-[15px]",
 };
 
 const variants: Record<Variant, string> = {
@@ -28,12 +28,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = "primary", size = "md", loading, className = "", children, disabled, ...props }, ref) => (
     <button
       ref={ref}
-      className={`${variants[variant]} ${sizes[size]} ${className}
-        ${loading ? "pointer-events-none opacity-70" : ""}`}
+      className={`${variants[variant]} ${sizes[size]} ${className}`}
       disabled={disabled || loading}
       {...props}
     >
-      {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+      {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
       {children}
     </button>
   )

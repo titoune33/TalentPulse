@@ -1,14 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { Chart } from "@/components/Chart";
+import { Chart, chartPalette } from "@/components/Chart";
 import { Spinner } from "@/components/Spinner";
 import { EmptyState } from "@/components/EmptyState";
-import { AlertTriangle, BarChart3, Users, TrendingUp, Calendar } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { useTalents } from "@/hooks/useTalents";
 import { usePredictions } from "@/hooks/usePredictions";
 import { pct } from "@/lib/format";
-import { Badge, riskTone } from "@/components/Badge";
 
 export default function AnalyticsPage() {
   const { talents, stats, loading, error } = useTalents();
@@ -69,14 +68,20 @@ export default function AnalyticsPage() {
       {
         label: "Talents",
         data: byDepartment.map((d) => d.total),
-        backgroundColor: "#cbd5e1",
-        borderRadius: 6,
+        backgroundColor: chartPalette.muted,
+        borderColor: chartPalette.grid,
+        borderWidth: 1,
+        borderRadius: 4,
+        borderSkipped: false,
       },
       {
         label: "À risque",
         data: byDepartment.map((d) => d.atRisk),
-        backgroundColor: "#ef4444",
-        borderRadius: 6,
+        backgroundColor: chartPalette.danger,
+        borderColor: chartPalette.grid,
+        borderWidth: 1,
+        borderRadius: 4,
+        borderSkipped: false,
       },
     ],
   };
@@ -87,11 +92,13 @@ export default function AnalyticsPage() {
       {
         label: "Risque moyen",
         data: trend.map((w) => +(w.avg * 100).toFixed(0)),
-        borderColor: "#4f46e5",
-        backgroundColor: "rgba(79, 70, 229, 0.08)",
+        borderColor: chartPalette.accent,
+        backgroundColor: chartPalette.accentSoft,
         fill: true,
         tension: 0.35,
-        pointRadius: 3,
+        pointRadius: 2,
+        pointBackgroundColor: chartPalette.accent,
+        pointBorderColor: chartPalette.accent,
       },
     ],
   };
@@ -106,77 +113,115 @@ export default function AnalyticsPage() {
           +(stats.avg_engagement * 100).toFixed(0),
           +((talents.reduce((s, t) => s + t.satisfaction_score, 0) / Math.max(1, talents.length)) * 100).toFixed(0),
         ],
-        backgroundColor: ["#6366f1", "#8b5cf6", "#10b981"],
-        borderRadius: 8,
+        backgroundColor: chartPalette.accent,
+        borderColor: chartPalette.grid,
+        borderWidth: 1,
+        borderRadius: 4,
+        borderSkipped: false,
       },
     ],
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-extrabold text-slate-900">Analytics</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Tendances du risque de turnover et répartition par équipe.
+      {/* En-tête de page — cf. DESIGN.md §5 */}
+      <header className="border-b border-line pb-5">
+        <p className="eyebrow">Pilotage du risque</p>
+        <h2 className="mt-2 text-h2 font-semibold">Analytics</h2>
+        <p className="mt-1.5 max-w-2xl text-base text-ink-2">
+          Identifiez les dynamiques de risque par équipe pour cibler les plans de rétention.
         </p>
-      </div>
+      </header>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="card p-6">
-          <div className="mb-4 flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-slate-400" />
-            <h3 className="text-sm font-bold text-slate-900">
-              Évolution du risque moyen (13 semaines)
-            </h3>
-          </div>
+      {/* Tendance — lecture linéaire sur 13 semaines */}
+      <section className="card p-5">
+        <h3 className="text-title font-semibold">Évolution du risque moyen (13 semaines)</h3>
+        <p className="mt-0.5 text-small text-ink-3">
+          Score prédictif moyen de la cohorte, semaine par semaine.
+        </p>
+        <div className="mt-4">
           <Chart type="line" data={trendData} height={260} />
         </div>
-        <div className="card p-6">
-          <div className="mb-4 flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-slate-400" />
-            <h3 className="text-sm font-bold text-slate-900">
-              Indicateurs clés de l'équipe
-            </h3>
+      </section>
+
+      {/* Indicateurs d'équipe & risque par département */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <section className="card p-5">
+          <h3 className="text-title font-semibold">Indicateurs clés de l'équipe</h3>
+          <p className="mt-0.5 text-small text-ink-3">
+            Moyennes de cohorte, en pourcentage du maximum.
+          </p>
+          <div className="mt-4">
+            <Chart type="bar" data={perfData} height={260} />
           </div>
-          <Chart type="bar" data={perfData} height={260} />
-        </div>
+        </section>
+
+        <section className="card p-5">
+          <h3 className="text-title font-semibold">Risque par département</h3>
+          <p className="mt-0.5 text-small text-ink-3">
+            Effectif total et part en risque élevé, empilés par équipe.
+          </p>
+          <div className="mt-4">
+            <Chart type="bar" data={deptData} height={260} options={{
+              scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+            }} />
+          </div>
+        </section>
       </div>
 
-      <div className="card p-6">
-        <div className="mb-4 flex items-center gap-2">
-          <Users className="h-4 w-4 text-slate-400" />
-          <h3 className="text-sm font-bold text-slate-900">Risque par département</h3>
+      {/* Détail chiffré par département */}
+      <section className="panel overflow-hidden">
+        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line px-5 py-4">
+          <div>
+            <p className="eyebrow">Détail par équipe</p>
+            <h3 className="mt-1.5 text-title font-semibold">Exposition des départements</h3>
+          </div>
+          <p className="text-small text-ink-3">
+            {byDepartment.length} département{byDepartment.length > 1 ? "s" : ""} · seuil critique 70%
+          </p>
         </div>
-        <Chart type="bar" data={deptData} height={280} options={{
-          scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
-        }} />
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-left text-sm">
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-small">
             <thead>
-              <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-400">
-                <th className="py-2 font-semibold">Département</th>
-                <th className="py-2 font-semibold">Effectif</th>
-                <th className="py-2 font-semibold">À risque</th>
-                <th className="py-2 font-semibold">Taux de risque</th>
+              <tr className="border-b border-line">
+                <th className="px-5 py-2.5 font-mono text-micro font-medium uppercase tracking-[0.09em] text-ink-3">
+                  Département
+                </th>
+                <th className="px-5 py-2.5 text-right font-mono text-micro font-medium uppercase tracking-[0.09em] text-ink-3">
+                  Effectif
+                </th>
+                <th className="px-5 py-2.5 text-right font-mono text-micro font-medium uppercase tracking-[0.09em] text-ink-3">
+                  À risque
+                </th>
+                <th className="px-5 py-2.5 text-right font-mono text-micro font-medium uppercase tracking-[0.09em] text-ink-3">
+                  Taux de risque
+                </th>
               </tr>
             </thead>
             <tbody>
               {byDepartment.map((d) => (
-                <tr key={d.name} className="border-b border-slate-100 last:border-0">
-                  <td className="py-2.5 font-medium text-slate-800">{d.name}</td>
-                  <td className="py-2.5 text-slate-600">{d.total}</td>
-                  <td className="py-2.5 text-slate-600">{d.atRisk}</td>
-                  <td className="py-2.5">
-                    <Badge tone={d.ratio >= 0.5 ? "red" : d.ratio >= 0.25 ? "amber" : "green"}>
-                      {pct(d.ratio)}
-                    </Badge>
+                <tr key={d.name} className="border-b border-line transition-colors last:border-0 hover:bg-sunken">
+                  <td className="px-5 py-2.5 font-medium text-ink">{d.name}</td>
+                  <td className="figure px-5 py-2.5 text-right text-ink-2">{d.total}</td>
+                  <td className="figure px-5 py-2.5 text-right text-ink-2">{d.atRisk}</td>
+                  <td
+                    className={`figure px-5 py-2.5 text-right ${
+                      d.ratio >= 0.5
+                        ? "text-danger-600"
+                        : d.ratio >= 0.25
+                        ? "text-warn-600"
+                        : "text-ok-600"
+                    }`}
+                  >
+                    {pct(d.ratio)}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

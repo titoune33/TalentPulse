@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
 import { useAuth } from "@/lib/auth";
@@ -12,9 +12,8 @@ export default function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading, hasAnyRole } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -24,18 +23,18 @@ export default function AppLayout({
 
   if (loading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <Spinner label="Connexion en cours…" />
+      <div className="flex min-h-screen items-center justify-center bg-paper">
+        <Spinner label="Ouverture de votre espace…" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-paper">
       <Sidebar />
-      <div className="lg:pl-64">
+      <div className="lg:pl-[248px]">
         <Topbar />
-        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <main className="mx-auto w-full max-w-[1320px] px-5 py-7 sm:px-8 sm:py-9">
           {children}
         </main>
       </div>

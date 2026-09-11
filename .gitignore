@@ -53,3 +53,11 @@ Thumbs.db
 
 # OpenCode secrets vault (never commit)
 .opencode/secrets.env
+
+# HyperFrames video projects — sources are tracked, output is not
+videos/*/node_modules/
+videos/*/renders/
+videos/*/out/
+videos/*/.scratch/
+videos/*/.hyperframes/
+videos/*/snapshots/

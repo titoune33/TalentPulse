@@ -3,12 +3,12 @@ import type { ReactNode } from "react";
 type Tone = "green" | "amber" | "red" | "blue" | "slate" | "violet";
 
 const tones: Record<Tone, string> = {
-  green: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
-  amber: "bg-amber-50 text-amber-700 ring-amber-600/20",
-  red: "bg-red-50 text-red-700 ring-red-600/20",
-  blue: "bg-blue-50 text-blue-700 ring-blue-600/20",
-  slate: "bg-slate-100 text-slate-600 ring-slate-500/20",
-  violet: "bg-violet-50 text-violet-700 ring-violet-600/20",
+  green: "badge-risk-low",
+  amber: "badge-risk-medium",
+  red: "badge-risk-high",
+  blue: "badge border-accent-100 bg-accent-50 text-accent-700",
+  slate: "badge-neutral",
+  violet: "badge border-line bg-sunken text-ink-2",
 };
 
 export function Badge({
@@ -18,9 +18,7 @@ export function Badge({
   tone?: Tone;
   children: ReactNode;
 }) {
-  return (
-    <span className={`badge ring-1 ring-inset ${tones[tone]}`}>{children}</span>
-  );
+  return <span className={tones[tone]}>{children}</span>;
 }
 
 export function riskTone(score: number): Tone {
@@ -50,3 +48,10 @@ export const statusLabel: Record<string, string> = {
   inactive: "Inactif",
   turnover: "Départ",
 };
+
+/** Solid swatch used next to a risk figure in dense tables. */
+export function RiskDot({ score }: { score: number }) {
+  const color =
+    score >= 0.7 ? "bg-danger-600" : score >= 0.4 ? "bg-warn-500" : "bg-ok-600";
+  return <span className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${color}`} />;
+}

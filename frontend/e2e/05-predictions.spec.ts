@@ -16,7 +16,7 @@ test.describe("Turnover predictions", () => {
     await expect(page.getByText(/Impossible de charger les prédictions/)).toHaveCount(0);
 
     // 13 weeks × 14 talents are seeded; the page shows the 12 most recent cards.
-    await expect(page.locator("div.card").filter({ hasText: "de risque" }).first()).toBeVisible();
+    await expect(page.getByTestId("prediction-card").first()).toBeVisible();
     expectNoPageErrors(errors);
   });
 
@@ -36,7 +36,7 @@ test.describe("Turnover predictions", () => {
   });
 
   test("the risk filter narrows the list of prediction cards", async ({ page }) => {
-    const cards = page.locator("div.card").filter({ hasText: "de risque" });
+    const cards = page.getByTestId("prediction-card");
     const all = await cards.count();
     expect(all).toBeGreaterThan(0);
 

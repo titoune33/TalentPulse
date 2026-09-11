@@ -25,6 +25,29 @@ Monorepo :
 
 ---
 
+## Design
+
+Registre **institutionnel clair** : papier chaud, encre presque noire, **un seul accent cobalt**,
+typographie auto-hébergée. Le système complet est documenté dans
+[`frontend/DESIGN.md`](./frontend/DESIGN.md) — c'est la référence à lire avant de toucher à l'UI.
+
+- **Polices** : Inter (interface), Instrument Serif (accents éditoriaux), IBM Plex Mono (chiffres).
+  Fichiers `.woff2` livrés dans `frontend/app/fonts/` — **aucun appel réseau au build ni au runtime**.
+- **La page marketing montre le vrai produit** : les visuels sont des captures de l'application,
+  pas des maquettes. Pour les régénérer :
+
+  ```bash
+  cd frontend
+  npm run build
+  node e2e/static-server.mjs &          # sert out/ sur :3000
+  node scripts/capture-screenshots.mjs  # écrit public/product/*.png et public/og.png
+  ```
+
+- **Vidéo de démonstration** : `frontend/public/product/demo.mp4` (30 s, voix off française),
+  produite avec HyperFrames. Sources reproductibles dans `videos/talentpulse-demo/`.
+
+---
+
 ## Démarrage rapide
 
 ### 1. Backend

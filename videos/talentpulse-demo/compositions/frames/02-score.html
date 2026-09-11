@@ -1,0 +1,174 @@
+<template>
+  <link rel="stylesheet" href="compositions/scene-base.css" />
+
+  <style>
+    /* Everything below is layout for THIS frame only: no tokens, no colours and
+       no browser-frame geometry (all of those live in scene-base.css and must
+       not be redeclared here). */
+
+    /* Inner wrapper so the slow push-in never touches the capture's own box.
+       --frame-w / --chrome-h are shared tokens: 1472 x 772 viewport. */
+    /* In normal flow, NOT absolutely positioned: an absolutely-positioned wrapper
+       becomes its own offset parent, which the layout audit reads as a mis-computed
+       frame (escaped_container). Relative + 100% keeps it a plain box the scale
+       tween can grow from the top-centre. */
+    .shot-wrap {
+      position: relative;
+      width: 100%;
+      transform-origin: 50% 0%;
+      will-change: transform;
+    }
+
+    /* The browser frame is transform-origin'd on its own centre (scale 0.994 -> 1). */
+    .browser-frame {
+      transform-origin: 50% 50%;
+      will-change: transform, opacity;
+    }
+    .browser-dot {
+      will-change: opacity;
+    }
+
+    /* Rest of the frame's chrome. Each animated element gets its own positioning
+       wrapper so GSAP owns a clean, untransformed box to tween. */
+    .f2-eyebrow,
+    .f2-counter,
+    .f2-overlay-text,
+    .f2-caption {
+      will-change: transform, opacity;
+    }
+    .f2-caption {
+      position: absolute;
+      right: var(--pad-x);
+      top: 1000px;
+      text-align: right;
+      white-space: nowrap;
+    }
+  </style>
+
+  <div
+    id="root"
+    class=""
+    data-composition-id="02-score"
+    data-duration="6.5"
+    data-width="1920"
+    data-height="1080"
+  >
+    <div class="ground-paper" style="position: absolute; inset: 0"></div>
+
+    <div class="chrome-rule"></div>
+
+    <div class="chrome-eyebrow">
+      <div class="t-mono-label f2-eyebrow">LE MOTEUR</div>
+    </div>
+    <div class="chrome-counter">
+      <div class="t-mono-label f2-counter">02 / 06</div>
+    </div>
+
+    <div class="browser-frame" data-layout-allow-overflow>
+      <div class="browser-bar">
+        <div class="browser-dots">
+          <span class="browser-dot"></span>
+          <span class="browser-dot"></span>
+          <span class="browser-dot"></span>
+        </div>
+        <div class="browser-url">talentpulse.app / dashboard</div>
+      </div>
+
+      <div class="browser-viewport">
+        <div class="shot-wrap">
+          <img
+            class="browser-shot"
+            src="assets/product/dashboard.png"
+            alt="Tableau de bord TalentPulse : cinq signaux RH agrégés en un score de turnover par collaborateur"
+            width="2880"
+            height="1800"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay-label">
+      <div class="overlay-rule"></div>
+      <div class="overlay-text f2-overlay-text">5 SIGNAUX · 1 SCORE</div>
+    </div>
+
+    <div class="f2-caption">
+      <div class="t-mono-small">SCORE 0 – 100 %  ·  13 SEMAINES</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      // 0.00–0.55 — the browser frame settles in (hairline visible from frame one).
+      tl.fromTo(
+        ".browser-frame",
+        { scale: 0.994, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.55, ease: "power3.out" },
+        0,
+      );
+
+      // 0.20–0.61 — the three chrome dots follow with a 0.06s stagger.
+      tl.fromTo(
+        ".browser-dot",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.35, ease: "power2.out", stagger: 0.06 },
+        0.2,
+      );
+
+      // 0.35–5.75 — the slow push-in on the capture. Capped at 1.045 so the
+      // product's own text stays at native sharpness.
+      tl.fromTo(
+        ".shot-wrap",
+        { scale: 1 },
+        { scale: 1.045, duration: 5.4, ease: "power1.inOut" },
+        0.35,
+      );
+
+      // 0.60–1.20 — top chrome: eyebrow + counter mask/rise in.
+      tl.fromTo(
+        ".f2-eyebrow",
+        { y: 10, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" },
+        0.6,
+      );
+      tl.fromTo(
+        ".f2-counter",
+        { y: 10, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" },
+        0.6,
+      );
+
+      // 0.90–1.40 — the cobalt rule draws in from the left.
+      tl.fromTo(
+        ".overlay-rule",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.45, ease: "power2.out", transformOrigin: "0% 50%" },
+        0.9,
+      );
+
+      // 1.10–1.70 — the surimpression rises 12px into place.
+      tl.fromTo(
+        ".f2-overlay-text",
+        { y: 12, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.55, ease: "power3.out" },
+        1.1,
+      );
+
+      // 1.60–2.40 — the bottom-right mono caption wipes in from the right.
+      tl.fromTo(
+        ".f2-caption",
+        { x: 24, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" },
+        1.6,
+      );
+
+      // 2.40–6.5 — hold. Only the push-in keeps breathing, so the dashboard is
+      // fully readable for four full seconds.
+
+      window.__timelines["02-score"] = tl;
+    })();
+  </script>
+</template>

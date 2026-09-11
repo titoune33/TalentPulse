@@ -1,0 +1,209 @@
+<template>
+  <link rel="stylesheet" href="compositions/scene-base.css" />
+
+  <style>
+    /* Layout only — every token, the browser-frame geometry and the shared chrome
+       live in scene-base.css. The root is styled by #root (the scoper's special case)
+       and carries the shared .scene-root box inline, so this frame does not depend on
+       a class-keyed rule that cannot match the scoped root. */
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: none;
+      font-family: var(--sans);
+      font-synthesis: none;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+
+    /* The push-in lives on this inner wrapper, never on the capture's own box.
+       --frame-w / --chrome-h are shared tokens → 1472 × 772 viewport. */
+    /* In normal flow, NOT absolutely positioned — see 02-score.html for why. */
+    .shot-wrap {
+      position: relative;
+      width: 100%;
+      transform-origin: 50% 0%;
+      will-change: transform;
+    }
+    /* rapport.png is 2880×1800 → 1472 × 920 at width:100%, i.e. 148px taller than
+       the viewport. The shared `.browser-shot` already anchors it to the TOP on
+       purpose: the crop keeps the report header, the four summary figures and the
+       head of the priority-talent table. */
+
+    /* The browser frame is transform-origin'd on its own centre (0.994 → 1). */
+    .browser-frame {
+      transform-origin: 50% 50%;
+      will-change: transform, opacity;
+    }
+
+    /* `.browser-dots` is a 10px-tall wrapper at left:20px in scene-base.css; its three
+       9px dots sit at 18px pitch, so they land at x = 20 / 38 / 56 as specified — no
+       geometry is redeclared here, the margin is simply folded into the layout. */
+    .browser-dots .browser-dot:nth-child(2) {
+      margin-left: 9px;
+    }
+
+    .f5-overlay-text {
+      will-change: transform, opacity;
+    }
+
+    /* --- the pulled figure plate -------------------------------------------- */
+    /* Bottom-right of the safety band, OUTSIDE the browser frame:
+       x 1560→1816, y 962→1046. It first sat at (1560,112) inside the frame, and the
+       snapshot showed that clipping it against the frame's top edge while the plate's
+       hairline cut across the report's own toolbar — it read as a rendering fault.
+       It now balances the bottom-left surimpression instead, over the 140px band
+       below the capture, where nothing load-bearing lives.
+       Hairline border + white surface: depth is paper, never a shadow. */
+    .f5-plate {
+      position: absolute;
+      left: 1560px;
+      top: 962px;
+      width: 256px;
+      height: 84px;
+      padding: 0 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+      text-align: right;
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      border-radius: 4px;
+      will-change: transform, opacity;
+    }
+    .f5-plate-line {
+      will-change: transform, opacity;
+    }
+    .f5-plate-label {
+      font-size: 12px;
+    }
+    .f5-plate-figure {
+      font-size: 30px;
+      line-height: 1.05;
+      margin-top: 6px;
+    }
+
+    .overlay-rule {
+      transform-origin: 0% 50%;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="05-restitution"
+    data-duration="4.1"
+    data-width="1920"
+    data-height="1080"
+  >
+    <div class="ground-paper" style="position: absolute; inset: 0"></div>
+
+    <div class="chrome-rule"></div>
+
+    <div class="chrome-eyebrow">
+      <div class="t-mono-label">LE COMITÉ</div>
+    </div>
+    <div class="chrome-counter">
+      <div class="t-mono-label">05 / 06</div>
+    </div>
+
+    <div class="browser-frame" data-layout-allow-overflow>
+      <div class="browser-bar">
+        <div class="browser-dots">
+          <span class="browser-dot"></span>
+          <span class="browser-dot"></span>
+          <span class="browser-dot"></span>
+        </div>
+        <div class="browser-url">talentpulse.app / rapports</div>
+      </div>
+
+      <div class="browser-viewport">
+        <div class="shot-wrap">
+          <img
+            class="browser-shot"
+            src="assets/product/rapport.png"
+            alt="Rapport de restitution TalentPulse prêt pour le comité de direction"
+            width="2880"
+            height="1800"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay-label">
+      <div class="overlay-rule"></div>
+      <div class="overlay-text f5-overlay-text">RESTITUTION DIRIGEANT</div>
+    </div>
+
+    <div class="f5-plate">
+      <div class="t-mono-label f5-plate-label f5-plate-line">SORTIE COMEX</div>
+      <div class="t-mono-figure f5-plate-figure f5-plate-line">1 PAGE</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      // 0.00–0.55 — the browser frame settles in (hairline visible from the first frame).
+      tl.fromTo(
+        ".browser-frame",
+        { opacity: 0, scale: 0.994 },
+        { opacity: 1, scale: 1, duration: 0.55, ease: "power3.out" },
+        0,
+      );
+
+      // 0.30–4.10 — the very slow push-in on the capture. Capped at 1.035 so the
+      // report's own text stays crisp; it is still moving when the scene ends.
+      tl.fromTo(
+        ".shot-wrap",
+        { scale: 1 },
+        { scale: 1.035, duration: 3.8, ease: "power1.inOut", transformOrigin: "50% 45%" },
+        0.3,
+      );
+
+      // 0.50–0.95 — the cobalt rule draws out from the left. opacity rides the
+      // same fromTo so the rule is absent on the poster frame (t=0) instead of
+      // sitting at full width until the wipe starts.
+      tl.fromTo(
+        ".overlay-rule",
+        { scaleX: 0, opacity: 0 },
+        { scaleX: 1, opacity: 1, duration: 0.45, ease: "power2.out", transformOrigin: "0% 50%" },
+        0.5,
+      );
+
+      // 0.70–1.25 — the surimpression rises 12px into place.
+      tl.fromTo(
+        ".f5-overlay-text",
+        { y: 12, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.55, ease: "power3.out" },
+        0.7,
+      );
+
+      // 0.85–1.45 — the pulled figure plate fades in and settles 10px down.
+      tl.fromTo(
+        ".f5-plate",
+        { y: 10, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" },
+        0.85,
+      );
+
+      // 1.00–1.60 — its two lines follow, staggered 0.1s inside the plate.
+      tl.fromTo(
+        ".f5-plate-line",
+        { y: 6, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, ease: "power3.out", stagger: 0.1 },
+        1.0,
+      );
+
+      // 1.65–4.10 — hold. Only the push-in keeps breathing.
+
+      window.__timelines["05-restitution"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,267 @@
+<template>
+  <link rel="stylesheet" href="compositions/scene-base.css" />
+
+  <style>
+    /* ==========================================================================
+       01-annonce — « L'annonce » (ink statement plate, 4.0s)
+       Full-bleed ink ground · one vertical measure hairline · one cobalt rule,
+       the mono label, a two-line measured headline with the editorial italic
+       word « moitié » in cobalt, then the ink footer hairline + 01 / 06.
+       Restraint: hairlines + space only. No gradient, no shadow, no glow.
+       ========================================================================== */
+
+    /* --- the plate --------------------------------------------------------- */
+    /* The root is styled by #root (the scoper's special case) and carries the
+       shared .scene-root box here, so this frame never depends on a class-keyed
+       rule that cannot match the scoped root. The ink is PAINTED by the
+       inset:0 ground child below, never by a background on the root. */
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: var(--ink);
+      font-family: var(--sans);
+      font-synthesis: none;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+    /* full-bleed ink ground — an inset:0 CHILD, never a background on the root */
+    .tp-annonce-ground {
+      position: absolute;
+      inset: 0;
+      background: var(--ink);
+    }
+
+    /* --- the only structure: the measure hairline at x = 1488 ------------- */
+    .tp-annonce-hairline {
+      position: absolute;
+      left: 1488px;
+      top: 0;
+      width: 1px;
+      height: 1080px;
+      background: #2a2e35;
+      transform-origin: 50% 100%;
+    }
+
+    /* --- the cobalt eyebrow rule, 40×2, at x=104 / y=330 ------------------ */
+    .tp-annonce-eyebrow-rule {
+      position: absolute;
+      left: 104px;
+      top: 330px;
+      width: 40px;
+      height: 2px;
+      background: var(--cobalt);
+      transform-origin: 0% 50%;
+    }
+
+    /* --- the mono label --------------------------------------------------- */
+    .tp-annonce-label {
+      position: absolute;
+      left: 104px;
+      top: 356px;
+      white-space: nowrap;
+    }
+
+    /* --- the headline: two measured lines at x = 104 ---------------------- */
+    /* The MASK owns position + clip-path, the LINE (child) owns the y tween and
+       the padding-bottom that gives the descenders room — never set a CSS
+       transform on the element GSAP moves.                                   */
+    .tp-annonce-mask {
+      position: absolute;
+      left: 104px;
+      width: 1450px;
+      overflow: hidden;
+    }
+    .tp-annonce-mask-l1 {
+      top: 410px;
+      height: 118px;
+    }
+    .tp-annonce-mask-l2 {
+      top: 508px;
+      height: 146px;
+    }
+    .tp-annonce-line {
+      display: block;
+      /* Inter 650 / 78px — the h1 role. Declared here because .t-h1 keys off a
+         class this inner element does not carry. */
+      font-family: var(--sans);
+      font-weight: 650;
+      font-size: 78px;
+      line-height: 1.08;
+      letter-spacing: -0.025em;
+      color: #ffffff;
+      white-space: nowrap;
+    }
+    .tp-annonce-line-1 {
+      padding-bottom: 40px;
+    }
+    .tp-annonce-line-2 {
+      padding-bottom: 40px;
+    }
+
+    /* the editorial word — Instrument Serif 400 italic, cobalt, ≈92px */
+    .tp-annonce-editorial {
+      display: inline-block;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 92px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    /* the cobalt rule wiping in under « moitié ».
+       x/width are MEASURED, not eyeballed — headless Chrome over http with the
+       real woff2 files (Inter 650 on the line, Instrument Serif italic on the
+       word): the italic word's box sits at left 405.5px, width 216.7px, so the
+       rule starts on its left edge and runs its width. Measure after
+       document.fonts.ready — a fallback (Times) pass misplaces the word by 13px
+       and silently under-runs the rule. If the type ramp changes, re-measure. */
+    .tp-annonce-editorial-rule {
+      position: absolute;
+      left: 405px;
+      top: 640px;
+      width: 217px;
+      height: 1px;
+      background: var(--cobalt);
+      transform-origin: 0% 50%;
+    }
+
+    /* --- ink-plate chrome helpers (the shared sheet carries the geometry) -- */
+    .tp-annonce-meta {
+      color: #82868e;
+    }
+    .tp-annonce-counter {
+      left: auto;
+      right: 104px;
+      text-align: right;
+    }
+  </style>
+
+  <div
+    id="root"
+    class=""
+    data-composition-id="01-annonce"
+    data-duration="4"
+    data-width="1920"
+    data-height="1080"
+  >
+    <!-- full-bleed ink ground: an inset:0 CHILD, never a background on the root -->
+    <div class="tp-annonce-ground ground-ink"></div>
+
+    <!-- the single vertical measure hairline -->
+    <div id="tp-annonce-hairline" class="tp-annonce-hairline"></div>
+
+    <!-- eyebrow rule + mono label -->
+    <div id="tp-annonce-eyebrow-rule" class="tp-annonce-eyebrow-rule"></div>
+    <div id="tp-annonce-label" class="tp-annonce-label t-mono-label">PRÉVISION DU TURNOVER</div>
+
+    <!-- headline: line 1 -->
+    <div id="tp-annonce-mask-l1" class="tp-annonce-mask tp-annonce-mask-l1">
+      <div id="tp-annonce-line-1" class="tp-annonce-line tp-annonce-line-1">
+        Un départ non anticipé
+      </div>
+    </div>
+
+    <!-- headline: line 2 — « coûte la » + italic « moitié » + « d'un salaire annuel. » -->
+    <div id="tp-annonce-mask-l2" class="tp-annonce-mask tp-annonce-mask-l2">
+      <div id="tp-annonce-line-2" class="tp-annonce-line tp-annonce-line-2">
+        coûte la
+        <span class="tp-annonce-editorial t-editorial">moitié</span>
+        d'un salaire annuel.
+      </div>
+    </div>
+
+    <!-- the cobalt rule under « moitié » -->
+    <div id="tp-annonce-editorial-rule" class="tp-annonce-editorial-rule"></div>
+
+    <!-- ink footer -->
+    <div id="tp-annonce-meta" class="ink-footer-meta tp-annonce-meta">TALENTPULSE</div>
+    <div id="tp-annonce-counter" class="ink-footer-meta tp-annonce-meta tp-annonce-counter">
+      01 / 06
+    </div>
+    <div id="tp-annonce-footer-rule" class="ink-footer-rule"></div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      // 0.00–0.90 — the measure hairline rises from the bottom edge
+      tl.fromTo(
+        "#tp-annonce-hairline",
+        { scaleY: 0 },
+        { scaleY: 1, duration: 0.9, ease: "power3.out" },
+        0,
+      );
+
+      // 0.00–0.70 — the cobalt eyebrow rule draws left → right
+      tl.fromTo(
+        "#tp-annonce-eyebrow-rule",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.7, ease: "power3.out" },
+        0,
+      );
+
+      // 0.25–0.75 — the mono label clips up into place
+      tl.fromTo(
+        "#tp-annonce-label",
+        { y: 10, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" },
+        0.25,
+      );
+
+      // 0.55 / 0.95 — the two measured headline lines rise behind a clip-path mask
+      [
+        { mask: "#tp-annonce-mask-l1", line: "#tp-annonce-line-1", at: 0.55 },
+        { mask: "#tp-annonce-mask-l2", line: "#tp-annonce-line-2", at: 0.95 },
+      ].forEach(function (part) {
+        tl.fromTo(
+          part.mask,
+          { clipPath: "inset(0% 0% 100% 0%)" },
+          { clipPath: "inset(0% 0% 0% 0%)", duration: 0.8, ease: "power3.out" },
+          part.at,
+        );
+        tl.fromTo(
+          part.line,
+          { yPercent: 18 },
+          { yPercent: 0, duration: 0.8, ease: "power3.out" },
+          part.at,
+        );
+      });
+
+      // 2.00–2.50 — the cobalt rule wipes in under « moitié »
+      tl.fromTo(
+        "#tp-annonce-editorial-rule",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.5, ease: "power2.out" },
+        2.0,
+      );
+
+      // 2.30–3.10 — the ink footer settles (wordmark left, folio right, then the hairline)
+      tl.fromTo(
+        "#tp-annonce-meta",
+        { y: 8, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" },
+        2.3,
+      );
+      tl.fromTo(
+        "#tp-annonce-counter",
+        { y: 8, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" },
+        2.4,
+      );
+      tl.fromTo(
+        "#tp-annonce-footer-rule",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.7, ease: "power2.out" },
+        2.4,
+      );
+
+      window.__timelines["01-annonce"] = tl;
+    })();
+  </script>
+</template>

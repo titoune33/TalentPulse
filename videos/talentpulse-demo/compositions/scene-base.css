@@ -1,0 +1,446 @@
+/* ============================================================================
+   talentpulse-demo — shared scene stylesheet  (the only source of design tokens)
+
+   Each frame links this file so it lints and previews standalone, AND
+   build-index.mjs copies its text into the host page's own style block. That
+   copy is not belt-and-braces: the assembler's CSS scoper does not carry a
+   linked sheet's descendant rules into the composed page, so without it the
+   browser frame collapses to its intrinsic size. Measured, not assumed.
+   If a rule here changes, re-run `npm run build:index` — nothing else to edit.
+
+   NOTE: this comment is injected verbatim into the host page, so it must never
+   contain a literal style open/close tag pair — the HTML parser would read them
+   as real markup and unbalance the head. Describe them in prose instead.
+
+   Frame files may add layout in their own style block but must not redeclare a
+   token, a colour, or the browser-frame geometry.
+
+   Charter (binding, from frame.md):
+     canvas #FAFAF8 · ink #14161A · surface #FFFFFF · sunken #F3F2ED
+     line #E6E4DD · line-strong #D5D2C8
+     cobalt #1A43C4 (the single accent)
+     risk high #B3261E · watch #B9651B · healthy #0B6B4F
+   Forbidden, always: gradient, box-shadow, text-shadow, drop-shadow, glow,
+   neon, emoji, pill chrome, bounce/back/elastic eases.
+   ========================================================================= */
+
+/* --- self-hosted faces: the product's own files --------------------------- */
+
+/* URLs resolve against THIS file (/compositions/scene-base.css), not the page. */
+
+@font-face {
+  font-family: "Inter";
+  src: url("assets/fonts/inter-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("assets/fonts/instrument-serif-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("assets/fonts/instrument-serif-400-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("assets/fonts/ibm-plex-mono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("assets/fonts/ibm-plex-mono-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: block;
+}
+
+/* --- tokens --------------------------------------------------------------- */
+
+:root {
+  --canvas: #fafaf8;
+  --surface: #ffffff;
+  --sunken: #f3f2ed;
+
+  --ink: #14161a;
+  --ink-2: #4b5058;
+  --ink-3: #82868e;
+  --ink-4: #a9adb4;
+
+  --cobalt: #1a43c4;
+
+  --line: #e6e4dd;
+  --line-strong: #d5d2c8;
+
+  --risk-high: #b3261e;
+  --risk-watch: #b9651b;
+  --risk-healthy: #0b6b4f;
+
+  --sans: "Inter", system-ui, -apple-system, sans-serif;
+  --serif: "Instrument Serif", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+
+  --pad-x: 104px;
+  --safe-top: 72px;
+  --safe-bottom: 100px;
+
+  /* the browser-frame geometry — IDENTICAL in frames 02 / 03 / 05.
+     Derived from the real captures (dashboard.png / rapport.png are 2880×1800; their
+     app content area, sidebar excluded, is x 176→1749, y 32→957 at 1×).
+     width 1472 → a 1× dashboard renders at scale 0.511, so 1440 is the natural fit;
+     height 820 keeps the frame inside the safe area and clears the overlay label at
+     y=1000. The viewport is therefore 1472×771, i.e. 71 % of frame height — the
+     capture stays the subject. */
+  --chrome-h: 48px;
+  --frame-x: 224px;
+  --frame-y: 120px;
+  --frame-w: 1472px;
+  --frame-h: 820px;
+}
+
+/* --- scene root ----------------------------------------------------------- */
+/* ============================================================================
+   HARD RULE — never tween GSAP `autoAlpha` inside a frame sub-composition.
+
+   `autoAlpha` is `opacity` AND `visibility`: GSAP writes `visibility: hidden` on
+   the element before the tween's start time, and the seek-based renderer replays
+   frames by seeking rather than by playing, so that `visibility: hidden` is never
+   lifted. The result is an element that simply never appears, with no lint error,
+   no runtime error and no console warning — the first cut of this film shipped a
+   whole missing surimpression because of it, caught only by measuring the pixels
+   of a rendered frame (see README, "Verified, not assumed").
+
+   Use plain `opacity` for every fade. Nothing here ever needs to be taken out of
+   the accessibility tree, and the framework owns clip visibility anyway.
+   ========================================================================= */
+
+/* ROOT SELECTOR RULE — `#root` only, never a class.
+   The runtime scopes each sub-composition by its composition id, and a selector
+   whose leftmost part is the root element's OWN class degrades into a
+   descendant selector that can never match the scoped element itself
+   (lint: subcomposition_root_styled_by_class). So: give the root the id "root"
+   and keep its class attribute EMPTY. */
+
+#root {
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  font-family: var(--sans);
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+/* Full-bleed grounds. These are applied to an `inset:0` CHILD div, never to `#root`:
+   a frame's own root background is clip-gated to the frame's window, so it cannot be
+   relied on as the ground. */
+
+.ground-paper {
+  background: var(--canvas);
+}
+.ground-ink {
+  background: var(--ink);
+  color: #fff;
+}
+
+/* --- type roles ----------------------------------------------------------- */
+
+.t-h1 {
+  font-family: var(--sans);
+  font-weight: 650;
+  font-size: 78px;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+.t-h2 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 46px;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.t-body {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 27px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.t-editorial {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--cobalt);
+}
+
+/* the technical ramp — every figure, percentage, threshold and label */
+.t-mono-label {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.t-mono-small {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  color: var(--ink-4);
+}
+.t-mono-figure {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 42px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+/* --- chrome shared by frames 02–05 --------------------------------------- */
+
+.chrome-rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 64px;
+  height: 1px;
+  background: var(--line);
+}
+.chrome-eyebrow {
+  position: absolute;
+  left: var(--pad-x);
+  top: 28px;
+}
+.chrome-counter {
+  position: absolute;
+  right: var(--pad-x);
+  top: 28px;
+  text-align: right;
+}
+
+/* --- the browser frame (identical geometry on 02 / 03 / 05) -------------- */
+
+/* Explicit stacking order. `.browser-frame` is tweened with `scale`, which gives it
+   a stacking context and would otherwise paint OVER the later siblings (the eyebrow,
+   the counter, the overlay label) — `check` reports that as text_occluded. Pin all
+   three layers instead of relying on document order. */
+.browser-frame {
+  position: absolute;
+  left: var(--frame-x);
+  top: var(--frame-y);
+  width: var(--frame-w);
+  height: var(--frame-h);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 1;
+}
+.chrome-rule,
+.chrome-eyebrow,
+.chrome-counter {
+  z-index: 2;
+}
+.overlay-label,
+.risk-caption,
+.bracket {
+  z-index: 3;
+}
+.browser-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--chrome-h);
+  background: var(--sunken);
+  border-bottom: 1px solid var(--line);
+}
+.browser-dots {
+  position: absolute;
+  left: 20px;
+  top: 19px;
+  height: 10px;
+}
+.browser-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--line-strong);
+  margin-right: 9px;
+}
+.browser-url {
+  position: absolute;
+  left: 96px;
+  top: 15px;
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--ink-4);
+}
+.browser-viewport {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--chrome-h);
+  bottom: 0;
+  overflow: hidden;
+}
+/* the capture itself: never recoloured, never filtered, never blurred */
+.browser-shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* hairline document frame — frame 04 */
+.doc-frame {
+  position: absolute;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* --- the surimpression (overlay label) ----------------------------------- */
+/* bottom-left safe corner, y ≈ 1000px; the cobalt rule above, then the label */
+
+.overlay-label {
+  position: absolute;
+  left: var(--pad-x);
+  top: 1000px;
+}
+.overlay-rule {
+  width: 28px;
+  height: 1px;
+  background: var(--cobalt);
+  margin-bottom: 14px;
+}
+.overlay-text {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.ground-ink .overlay-text {
+  color: #9ba1ab;
+}
+
+/* --- ink-plate footer hairline (frames 01 / 06) -------------------------- */
+
+.ink-footer-rule {
+  position: absolute;
+  left: var(--pad-x);
+  right: var(--pad-x);
+  top: 1032px;
+  height: 1px;
+  background: #2a2e35;
+}
+.ink-footer-meta {
+  position: absolute;
+  left: var(--pad-x);
+  top: 986px;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #82868e;
+}
+
+/* --- risk caption (frame 03 only) ---------------------------------------- */
+/* Sits BELOW the browser frame (y=970), never on it: the real dashboard already
+   renders its own risk legend, so this annotates the threshold in the voice-over's
+   own words instead of duplicating the product's legend. */
+
+.risk-caption {
+  position: absolute;
+  right: var(--pad-x);
+  top: 972px;
+  text-align: right;
+}
+.risk-row {
+  display: inline-block;
+  margin-left: 26px;
+}
+.risk-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 9px;
+  vertical-align: 1px;
+}
+.risk-label {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.risk-high {
+  color: var(--risk-high);
+  background: var(--risk-high);
+}
+.risk-watch {
+  color: var(--risk-watch);
+  background: var(--risk-watch);
+}
+.risk-healthy {
+  color: var(--risk-healthy);
+  background: var(--risk-healthy);
+}
+
+/* --- annotation bracket (frame 03) --------------------------------------- */
+/* Two 1px cobalt rules + a vertical tie. Drawn with scaleX/scaleY so nothing
+   about it pops or fades in; it draws like a pen stroke. */
+
+.bracket {
+  position: absolute;
+  pointer-events: none;
+}
+.bracket-rule {
+  position: absolute;
+  background: var(--cobalt);
+}
+.bracket-v {
+  transform-origin: 50% 0%;
+}
+.bracket-h {
+  transform-origin: 0% 50%;
+}
+
+/* --- wordmark (frame 06) -------------------------------------------------- */
+
+.wordmark {
+  font-family: var(--sans);
+  font-weight: 650;
+  font-size: 78px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: #fff;
+}
+.wordmark .pulse {
+  color: var(--cobalt);
+}

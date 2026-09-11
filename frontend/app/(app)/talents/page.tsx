@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { UserPlus, Search, Sparkles, AlertTriangle, Save, X } from "lucide-react";
+import { UserPlus, Search, Sparkles, AlertTriangle } from "lucide-react";
 import { TalentTable } from "@/components/TalentTable";
 import { Modal } from "@/components/Modal";
 import { Button } from "@/components/Button";
@@ -176,7 +176,7 @@ export default function TalentsPage() {
           onChange={(e) => onChange(Number(e.target.value) / 100)}
           className="w-full cursor-pointer"
         />
-        <div className="flex justify-between text-xs text-slate-400">
+        <div className="flex justify-between font-mono text-micro tracking-normal text-ink-4">
           <span>0%</span>
           <span>50%</span>
           <span>100%</span>
@@ -187,35 +187,37 @@ export default function TalentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-900">Talents</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            {talents.length} collaborateurs suivis
+          <p className="eyebrow">Répertoire</p>
+          <h2 className="mt-2 text-h2 font-semibold">Talents</h2>
+          <p className="mt-1.5 max-w-2xl text-base text-ink-2">
+            {talents.length} collaborateurs suivis — consultez leur risque de départ et lancez une
+            prédiction individuelle.
           </p>
         </div>
         <Button onClick={openCreate}>
           <UserPlus className="h-4 w-4" />
           Ajouter un talent
         </Button>
-      </div>
+      </header>
 
       {notice && (
         <div
-          className={`rounded-lg border px-4 py-3 text-sm ${
+          role="status"
+          className={`border-l-2 bg-surface px-4 py-3 text-small shadow-card ${
             notice.tone === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-              : "border-red-200 bg-red-50 text-red-600"
+              ? "border-l-ok-600 text-ink"
+              : "border-l-danger-600 text-danger-700"
           }`}
         >
           {notice.text}
         </div>
       )}
 
-      {/* Filters premium */}
-      <div className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+      <section className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-4" />
           <Input
             className="pl-9"
             placeholder="Rechercher un nom, un poste, un email…"
@@ -235,7 +237,7 @@ export default function TalentsPage() {
             </option>
           ))}
         </Select>
-      </div>
+      </section>
 
       {loading ? (
         <Spinner />
@@ -246,7 +248,7 @@ export default function TalentsPage() {
           description={error}
         />
       ) : (
-        <div className="card overflow-hidden">
+        <section className="card overflow-hidden">
           <TalentTable
             talents={filtered}
             onEdit={openEdit}
@@ -257,10 +259,9 @@ export default function TalentsPage() {
               setCopilotOpen(true);
             }}
           />
-        </div>
+        </section>
       )}
 
-      {/* Create / Edit modal premium */}
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -278,7 +279,7 @@ export default function TalentsPage() {
         }
       >
         {notice && notice.tone === "error" && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div className="mb-4 border-l-2 border-l-danger-600 bg-danger-50 px-4 py-3 text-small text-danger-700">
             {notice.text}
           </div>
         )}
@@ -350,27 +351,28 @@ export default function TalentsPage() {
           </Field>
         </div>
 
-        {/* Score sliders premium */}
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <ScoreSlider
-            label="Performance"
-            value={form.performance_score ?? 0}
-            onChange={(v) => set("performance_score", v)}
-          />
-          <ScoreSlider
-            label="Engagement"
-            value={form.engagement_score ?? 0}
-            onChange={(v) => set("engagement_score", v)}
-          />
-          <ScoreSlider
-            label="Satisfaction"
-            value={form.satisfaction_score ?? 0}
-            onChange={(v) => set("satisfaction_score", v)}
-          />
+        <div className="mt-5 border-t border-line pt-5">
+          <p className="eyebrow">Scores individuels</p>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <ScoreSlider
+              label="Performance"
+              value={form.performance_score ?? 0}
+              onChange={(v) => set("performance_score", v)}
+            />
+            <ScoreSlider
+              label="Engagement"
+              value={form.engagement_score ?? 0}
+              onChange={(v) => set("engagement_score", v)}
+            />
+            <ScoreSlider
+              label="Satisfaction"
+              value={form.satisfaction_score ?? 0}
+              onChange={(v) => set("satisfaction_score", v)}
+            />
+          </div>
         </div>
       </Modal>
 
-      {/* Delete confirmation modal */}
       <Modal
         open={!!deleting}
         onClose={() => setDeleting(null)}
@@ -386,26 +388,25 @@ export default function TalentsPage() {
           </>
         }
       >
-        <p className="text-sm text-slate-600">
+        <p className="text-small text-ink-2">
           Vous êtes sur le point de supprimer{" "}
-          <strong>
+          <strong className="font-medium text-ink">
             {deleting?.first_name} {deleting?.last_name}
           </strong>
           . Cette action est irréversible.
         </p>
       </Modal>
 
-      {/* Prediction modal */}
       <Modal
         open={!!predicting}
         onClose={() => setPredicting(null)}
         title="Prédiction en cours"
       >
         <div className="flex items-center gap-3">
-          <Sparkles className="h-6 w-6 animate-pulse text-indigo-600" />
-          <p className="text-sm text-slate-600">
+          <Sparkles className="h-5 w-5 animate-pulse text-ink-4" />
+          <p className="text-small text-ink-2">
             Calcul du risque de départ pour{" "}
-            <strong>
+            <strong className="font-medium text-ink">
               {predicting?.first_name} {predicting?.last_name}
             </strong>
             …
@@ -413,7 +414,6 @@ export default function TalentsPage() {
         </div>
       </Modal>
 
-      {/* Retention Copilot Drawer */}
       <RetentionCopilotDrawer
         talent={copilotTalent}
         isOpen={copilotOpen}

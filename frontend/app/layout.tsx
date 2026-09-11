@@ -1,22 +1,46 @@
-import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { fontClassName } from "./fonts";
 import { AuthProvider } from "@/lib/auth";
 
-const sans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
+  metadataBase: new URL("https://talentpulse.app"),
   title: {
-    default: "TalentPulse — Anticipez le turnover de vos talents",
+    default: "TalentPulse — Savez qui va partir avant qu'il ne démissionne",
     template: "%s · TalentPulse",
   },
   description:
-    "La plateforme SaaS qui prédit le turnover de vos collaborateurs grâce au machine learning, pour agir avant qu'il ne soit trop tard.",
-  keywords: ["RH", "turnover", "prédiction", "talent", "SaaS", "machine learning"],
+    "TalentPulse note chaque collaborateur de 0 à 100 % à partir de cinq signaux RH (performance, engagement, satisfaction, ancienneté, rémunération) et transforme ce score en plan d'action pour le manager.",
+  keywords: [
+    "RH",
+    "turnover",
+    "prédiction",
+    "rétention des talents",
+    "SaaS RH",
+    "people analytics",
+    "RandomForest",
+  ],
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "TalentPulse",
+    title: "TalentPulse — Savez qui va partir avant qu'il ne démissionne",
+    description:
+      "Cinq signaux RH, un score de risque par collaborateur, un plan d'action concret pour le manager. Auto-hébergeable, testé de bout en bout.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TalentPulse — Anticipez le turnover",
+    description:
+      "Cinq signaux RH, un score de risque par collaborateur, un plan d'action concret pour le manager.",
+  },
+  robots: { index: true, follow: true },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#FAFAF8",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -25,8 +49,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr">
-      <body className={`${sans.variable} font-sans antialiased`}>
+    <html lang="fr" className={fontClassName}>
+      <body className="font-sans">
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

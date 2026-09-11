@@ -1,0 +1,217 @@
+<template>
+  <link rel="stylesheet" href="compositions/scene-base.css" />
+
+  <style>
+    /* Frame 06 — closing ink.
+       Layout + the one motion origin only. Every token, the ink ground and the
+       overlay/surimpression furniture live in scene-base.css; nothing here
+       redeclares a colour, a face or the browser-frame geometry. */
+
+    /* 1 · the wordmark — one centred line, baseline sits at y=430.
+       Inter's baseline is ≈0.79em down a 78px/1.0 line box, so top = 430 − 78×0.79. */
+    #root .sig-wordmark {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 351px;
+      text-align: center;
+    }
+
+    /* 1b · « Pulse » and the URL — a legibility carve-out on the dark plate ONLY.
+       frame.md locks the one accent to cobalt #1A43C4, which is correct on the
+       paper grounds of frames 02–05. On this frame's ink plate #14161A it measures
+       2.28:1 — under WCAG AA (4.5:1) and under the 3:1 large-text floor too, while
+       these are the two things the viewer must actually read. So both text
+       elements take the product's own cobalt ladder one step lighter, +lightness
+       at the same hue: #7D9AF2 measures 6.71:1 on ink and 7.16:1 after the closing
+       darkening. Scoped exception, not a new token — the pulse STROKE below and
+       the overlay rule stay the charte's #1A43C4, because they are the brand mark
+       and a 28px rule, not text. */
+    #root .sig-wordmark .pulse,
+    #root .overlay-label .overlay-text {
+      color: #7d9af2;
+    }
+
+    /* 2 · the pulse stroke — a wide, deliberately thick cobalt line.
+       The path inside is beat-less (no animation elements), so the one
+       timeline in this frame owns every moving part. */
+    #root .sig-stroke {
+      position: absolute;
+      left: 480px;
+      top: 496px;
+      width: 960px;
+      height: 120px;
+    }
+
+    /* 3 · the one line of Inter body, centred at y=640. */
+    #root .sig-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 640px;
+      text-align: center;
+    }
+
+    /* 4 · the surimpression. This closing one is CENTRED (scene-base anchors it
+       bottom-left), so the frame overrides its `left` and centres the 28×1px
+       cobalt rule instead of leaving it on the left edge. */
+    #root .overlay-label {
+      left: 0;
+      right: 0;
+      text-align: center;
+    }
+    #root .overlay-label .overlay-rule {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* GSAP owns y/scale/opacity on these; hint the compositor only, never a
+       CSS `transform` (that would fight the tweens). No `opacity: 0` anywhere —
+       every entrance is a `fromTo`, so a cold seek restores the visible state. */
+    #root .sig-wordmark,
+    #root .sig-line,
+    #root .overlay-label .overlay-text {
+      will-change: transform, opacity;
+    }
+    #root .overlay-label .overlay-rule {
+      will-change: transform;
+    }
+  </style>
+
+  <div
+    id="root"
+    data-composition-id="06-signature"
+    data-duration="4.9"
+    data-width="1920"
+    data-height="1080"
+  >
+    <!-- The full-bleed ink plate. It is a timed clip on its own layer and the
+         only element the closing darkening touches; the content above it never
+         fades. -->
+    <div
+      id="f6-ground"
+      class="clip ground-ink sig-ground"
+      data-start="0"
+      data-duration="4.9"
+      data-track-index="0"
+      style="position: absolute; inset: 0"
+    ></div>
+
+    <!-- 1 · the wordmark, centred, baseline at y=430 -->
+    <div class="wordmark sig-wordmark">Talent<span class="pulse">Pulse</span></div>
+
+    <!-- 2 · the product's own pulse path, drawn left to right in the charte's
+         cobalt #1A43C4. Scaled 40× (960px / 24 units) with no
+         non-scaling-stroke, so the 3.2u stroke reads as a wide deliberate line.
+         The dash state is written ONLY by the tween below, never by CSS. -->
+    <svg
+      class="sig-stroke"
+      viewBox="0 0 24 24"
+      width="960"
+      height="120"
+      preserveAspectRatio="xMidYMid meet"
+      role="img"
+      aria-label="Le tracé d'activité TalentPulse"
+    >
+      <path
+        class="sig-stroke-path"
+        d="M3 13h3.2l2.1-6.2 3.4 11.4 2.4-7.1 1.6 3.9H21"
+        fill="none"
+        stroke="#1A43C4"
+        stroke-width="3.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+
+    <!-- 3 · the closing line, Inter 400 / 30px / ink-3 -->
+    <div class="sig-line" style="font-family: var(--sans); font-weight: 400; font-size: 30px; line-height: 1.5; color: #82868E">
+      Sachez qui va partir, avant qu'il ne démissionne.
+    </div>
+
+    <!-- 4 · the final surimpression: centred cobalt rule, then the URL -->
+    <div class="overlay-label">
+      <div class="overlay-rule"></div>
+      <div class="overlay-text">talentpulse.app</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      // The product's path, measured on the real element at build time. The path
+      // has a static `d`, so getTotalLength() is a fixed number (no reflow, no
+      // network) — the dash geometry is therefore never guessed.
+      var path = document.querySelector("#root .sig-stroke-path");
+      var LEN = path && typeof path.getTotalLength === "function" ? path.getTotalLength() : 0;
+      if (path && LEN > 0) {
+        path.setAttribute("data-path-length", LEN.toFixed(3));
+        path.style.strokeDasharray = LEN + " " + LEN;
+      }
+      window.__hfPathLengths = window.__hfPathLengths || {};
+      window.__hfPathLengths["06-signature"] = LEN;
+
+      // 0.00–0.60 — the wordmark fades up. Opacity plus a 14px rise, no scale.
+      tl.fromTo(
+        "#root .sig-wordmark",
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" },
+        0,
+      );
+
+      // 0.35–1.55 — the pulse stroke draws left to right. Both dash properties
+      // are set INSIDE the tween, so there is no CSS/GSAP dash conflict.
+      if (LEN > 0) {
+        tl.fromTo(
+          "#root .sig-stroke-path",
+          { strokeDashoffset: LEN },
+          { strokeDashoffset: 0, duration: 1.2, ease: "power2.out" },
+          0.35,
+        );
+      }
+
+      // 1.05–1.60 — the closing line rises as the stroke lands.
+      tl.fromTo(
+        "#root .sig-line",
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" },
+        1.05,
+      );
+
+      // 1.55–2.00 — the centred cobalt rule wipes out from its own centre.
+      tl.fromTo(
+        "#root .overlay-label .overlay-rule",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.45, ease: "power2.out", transformOrigin: "50% 50%" },
+        1.55,
+      );
+
+      // 1.70–2.20 — the URL fades up under the rule.
+      tl.fromTo(
+        "#root .overlay-label .overlay-text",
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
+        1.7,
+      );
+
+      // 2.20–4.55 — absolute stillness. Nothing moves for the whole hold.
+
+      // 4.55–4.90 — the ink plate darkens to graphite-950. The only darkening
+      // in the film: not a fade to black, and the content above it stays put.
+      // This tween also ends exactly at 4.9s, so the scene's own length is the
+      // packet's duration with no filler tween needed.
+      tl.fromTo(
+        "#root .sig-ground",
+        { backgroundColor: "#14161A" },
+        { backgroundColor: "#0C0E11", duration: 0.35, ease: "power1.inOut" },
+        4.55,
+      );
+
+      // Registered last, synchronously — an empty early registration would get
+      // nested empty when this sub-composition mounts.
+      window.__timelines["06-signature"] = tl;
+    })();
+  </script>
+</template>

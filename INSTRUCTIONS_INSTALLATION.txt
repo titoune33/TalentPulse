@@ -1,0 +1,239 @@
+================================================================================
+TALENTPULSE — INSTRUCTIONS D'INSTALLATION
+================================================================================
+SaaS RH prédictif du turnover — FastAPI + Next.js + RandomForest
+Version 2.0 · Licence MIT
+
+Ce document est autoportant : tout ce qui est nécessaire pour lancer le projet
+sur une machine vierge s'y trouve.
+================================================================================
+
+
+1. PRÉREQUIS
+--------------------------------------------------------------------------------
+- Python 3.12 (obligatoire : le projet utilise la syntaxe `X | None`)
+- Node.js 20 ou supérieur + npm
+- 2 Go d'espace disque libre (dépendances Python + Node)
+- Optionnel : `uv` (gestionnaire d'environnements Python, plus rapide que pip)
+
+Aucun compte externe n'est nécessaire pour démarrer : la base SQLite est créée
+automatiquement et le modèle de Machine Learning s'entraîne au premier lancement.
+Stripe est optionnel (voir §6).
+
+
+2. DÉMARRAGE EN 4 COMMANDES
+--------------------------------------------------------------------------------
+Depuis la racine du dossier `TalentPulse/` :
+
+--- Terminal 1 : le backend -----------------------------------------------------
+
+    cd backend
+    python3.12 -m venv .venv
+    .venv/bin/pip install -r requirements.txt
+    cp .env.example .env
+    .venv/bin/python -m uvicorn main:app --reload
+
+Sous Windows, remplacez `.venv/bin/...` par `.venv\Scripts\...`.
+
+Le backend écoute sur http://localhost:8000
+
+    - Documentation interactive : http://localhost:8000/api/docs
+    - Vérification de santé    : http://localhost:8000/api/health
+
+Le premier démarrage :
+    1. crée les tables de la base `backend/talentpulse.db`,
+    2. entraîne le modèle RandomForest et l'enregistre dans `backend/data/ml/`,
+    3. insère les données de démonstration : 14 collaborateurs et 182 prédictions
+       réparties sur 13 semaines.
+
+Comptez environ 30 secondes au tout premier lancement (entraînement du modèle).
+
+--- Terminal 2 : le frontend ----------------------------------------------------
+
+    cd frontend
+    npm install
+    cp .env.example .env
+    npm run dev
+
+Le site est accessible sur http://localhost:3000
+
+
+3. COMPTE DE DÉMONSTRATION
+--------------------------------------------------------------------------------
+    Email         : demo@talentpulse.app
+    Mot de passe  : demo1234
+
+Ce compte est administrateur et voit les 14 collaborateurs de démonstration.
+Le compte est recréé à chaque base vide, c'est-à-dire après suppression de
+`backend/talentpulse.db`.
+
+Le bouton « Explorer la démo » de la page de connexion ouvre ce compte en un clic.
+
+
+4. VÉRIFIER QUE TOUT FONCTIONNE
+--------------------------------------------------------------------------------
+--- Tests de l'API (69 tests) ---------------------------------------------------
+
+    cd backend
+    .venv/bin/python -m pytest
+
+Attendu : `69 passed`. La suite utilise une base temporaire : elle ne modifie ni
+`talentpulse.db` ni le modèle entraîné.
+
+--- Qualité du frontend ---------------------------------------------------------
+
+    cd frontend
+    npx tsc --noEmit        # attendu : aucune sortie
+    npm run lint            # attendu : "No ESLint warnings or errors"
+    npm run build           # attendu : 12 pages statiques générées dans out/
+
+--- Parcours navigateur complets (26 tests) -------------------------------------
+
+    cd frontend
+    npm run build           # les tests servent l'export statique `out/`
+    npm run test:e2e
+
+Attendu : `26 passed`.
+
+Prérequis : le backend doit tourner (les tests le démarrent automatiquement s'il
+est absent) et les navigateurs Playwright doivent être installés :
+
+    npx playwright install chromium
+
+Si votre environnement Python n'est pas `backend/.venv`, indiquez la commande :
+
+    E2E_BACKEND_CMD="cd ../backend && python -m uvicorn main:app --port 8000" npm run test:e2e
+
+
+
+5. CONFIGURATION (backend/.env)
+--------------------------------------------------------------------------------
+    SECRET_KEY                      Clé de signature JWT. À GÉNÉRER en production :
+                                    openssl rand -hex 32
+                                    (vide = clé de développement non sécurisée)
+    DATABASE_URL                    sqlite:///talentpulse.db en local
+                                    postgresql+psycopg2://user:pass@host:5432/db en prod
+    ACCESS_TOKEN_EXPIRE_MINUTES     Durée de vie du token (1440 = 24 h)
+    CORS_ORIGIN                     Origines autorisées, séparées par des virgules.
+                                    ⚠️ L'origine du frontend DOIT y figurer, sinon
+                                    le navigateur bloque tous les appels API.
+    PORT                            Port du backend (8000 par défaut)
+    DEMO_EMAIL / DEMO_PASSWORD      Compte de démonstration créé au seed
+    FRONTEND_URL                    Utilisé pour les redirections Stripe
+
+Frontend (`frontend/.env`) :
+
+    NEXT_PUBLIC_BACKEND_URL         URL de l'API (http://localhost:8000)
+    ⚠️ Cette valeur est FIGÉE AU BUILD (export statique). La modifier impose de
+       relancer `npm run build`.
+
+
+6. ACTIVER LES PAIEMENTS (OPTIONNEL)
+--------------------------------------------------------------------------------
+Sans configuration, l'application reste en MODE DÉMO : cliquer sur un plan
+débloque localement le plan Pro, ce qui permet de présenter tout le produit sans
+compte Stripe.
+
+Pour encaisser réellement :
+
+    1. Renseigner dans `backend/.env` :
+           STRIPE_SECRET_KEY=sk_live_...
+           STRIPE_WEBHOOK_SECRET=whsec_...
+           STRIPE_PRICE_ID_STARTER=price_...
+           STRIPE_PRICE_ID_PRO=price_...
+           STRIPE_PRICE_ID_ENTERPRISE=price_...
+       (Les identifiants de prix sont PUBLICS, la clé secrète ne l'est pas.)
+
+    2. Déclarer le webhook dans le tableau de bord Stripe :
+           URL     : https://VOTRE-API/api/billing/webhook
+           Événements : checkout.session.completed
+                        customer.subscription.updated
+                        customer.subscription.deleted
+                        customer.subscription.paused
+
+    3. Tester avec la CLI Stripe :
+           stripe listen --forward-to localhost:8000/api/billing/webhook
+
+Le plan n'est activé QUE par le webhook : un paiement sans webhook ne débloque
+rien. Les prix envoyés par le navigateur sont validés contre la liste blanche
+serveur, un client ne peut donc pas choisir un tarif arbitraire.
+
+
+7. STRUCTURE DU PROJET
+--------------------------------------------------------------------------------
+    TalentPulse/
+    ├── backend/
+    │   ├── main.py                 Application FastAPI, CORS, middleware
+    │   ├── database.py             Connexion SQLAlchemy + session
+    │   ├── timeutils.py            Horodatage UTC naïf (cohérence SQLite)
+    │   ├── routes/                 auth.py · talents.py · predictions.py · billing.py
+    │   ├── services/               Logique métier (auth, talents, prédictions, seed)
+    │   ├── models/                 Tables SQLAlchemy
+    │   ├── schemas/                Contrats Pydantic
+    │   ├── tests/                  Suite pytest (69 tests)
+    │   └── data/ml/                Modèle entraîné (généré, non versionné)
+    ├── frontend/
+    │   ├── app/                    Pages (App Router, export statique)
+    │   ├── components/             UI réutilisable (Chart, Modal, Sidebar…)
+    │   ├── hooks/                  useTalents, usePredictions
+    │   ├── lib/                    axios, auth, types, formatage FR
+    │   └── e2e/                    Suite Playwright (26 tests)
+    ├── render.yaml                 Blueprint Render
+    ├── netlify.toml                Configuration Netlify
+    └── README.md                   Documentation complète
+
+
+8. DÉPLOIEMENT
+--------------------------------------------------------------------------------
+Le projet contient des configurations prêtes pour :
+
+    - Render   : `render.yaml` (Postgres managé + backend + frontend statique)
+    - Netlify  : `netlify.toml` et `frontend/netlify.toml`
+    - Docker   : `backend/Dockerfile` et `frontend/Dockerfile` (nginx)
+
+Points d'attention :
+
+    1. Générez un `SECRET_KEY` unique par environnement.
+    2. Passez `DATABASE_URL` sur PostgreSQL (SQLite ne supporte pas plusieurs
+       workers simultanés).
+    3. Ajoutez l'URL publique du frontend dans `CORS_ORIGIN`.
+    4. `NEXT_PUBLIC_BACKEND_URL` doit pointer vers l'API publique AVANT le build
+       du frontend.
+    5. Le répertoire `backend/data/ml/` doit être persistant si vous voulez
+       conserver le modèle entre deux déploiements (sinon il est réentraîné).
+
+
+9. DÉPANNAGE
+--------------------------------------------------------------------------------
+« Impossible de contacter le serveur » dans l'interface
+    → Le backend n'est pas démarré, ou `CORS_ORIGIN` ne contient pas l'origine du
+      frontend.
+
+La page de connexion boucle sur elle-même
+    → Le token est expiré ou invalide. Videz le stockage local du navigateur
+      (clés `tp_token` et `tp_user`).
+
+Le modèle met longtemps à répondre au premier appel
+    → Normal : l'entraînement se produit au démarrage ou à la première
+      prédiction si `backend/data/ml/` est vide.
+
+`permission denied` sur `.venv/bin/...`
+    → L'environnement virtuel a été créé sur une autre machine. Supprimez `.venv`
+      et recréez-le.
+
+Erreur « address already in use » au lancement du backend
+    → Un autre processus occupe le port 8000. Changez `PORT` dans `.env` ou
+      libérez le port.
+
+Réinitialiser complètement la démonstration
+    → Arrêtez le backend, supprimez `backend/talentpulse.db` et
+      `backend/data/ml/`, puis relancez : tout est recréé et reseedé.
+
+
+10. SUPPORT
+--------------------------------------------------------------------------------
+    Contact : contact@talentpulse.app
+
+================================================================================
+Fin des instructions.
+================================================================================

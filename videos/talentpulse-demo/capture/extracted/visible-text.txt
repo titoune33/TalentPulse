@@ -1,0 +1,20 @@
+TalentPulse — script verrouillé (voix off française, ~30 s)
+
+0–4 s   « Un départ non anticipé coûte la moitié d'un salaire annuel. »
+4–10 s  « TalentPulse note chaque collaborateur de zéro à cent pour cent, à partir de cinq signaux RH. »
+10–16 s « Les profils critiques remontent en tête, avec l'exposition financière correspondante. »
+16–22 s « Pour chacun : un diagnostic, un guide d'entretien et un simulateur de contre-mesure. »
+22–26 s « Et un rapport prêt pour le comité de direction. »
+26–30 s « TalentPulse. Sachez qui va partir, avant qu'il ne démissionne. »
+
+Surimpressions (IBM Plex Mono, capitales, petit corps, lettrage espacé) :
+  5 SIGNAUX · 1 SCORE
+  CAS CRITIQUES ≥ 70 %
+  PLAN DE RÉTENTION 1-1-1
+  RESTITUTION DIRIGEANT
+  talentpulse.app
+
+Charte : fond papier #FAFAF8, encre #14161A, surfaces #FFFFFF, filets #E6E4DD,
+accent unique cobalt #1A43C4, risque élevé #B3261E, vigilance #B9651B, sain #0B6B4F.
+Inter (courant), Instrument Serif (accents éditoriaux), IBM Plex Mono (chiffres et libellés).
+Interdits : dégradés, halos, ombres colorées, emojis, néons, transitions « bounce ».

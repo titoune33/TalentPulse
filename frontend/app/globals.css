@@ -2,121 +2,252 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 15, 23, 42;
-  --background-rgb: 248, 250, 252;
-  --border-color: 226, 232, 240;
+/* ==========================================================================
+   TalentPulse — base
+   Institutional light: warm paper, near-black ink, one cobalt accent.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    --line: 230 228 221;
+  }
+
+  * {
+    border-color: theme("colors.line.DEFAULT");
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Display type is reserved for editorial moments: hero, pull statements. */
+  .font-display {
+    font-feature-settings: "liga" 1, "kern" 1;
+  }
+
+  /* Figures line up in tables and KPI blocks. */
+  .nums,
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    @apply bg-accent-100 text-accent-900;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent-500/35 ring-offset-2 ring-offset-paper;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-ink;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
 }
 
-* {
-  border-color: theme('colors.slate.200');
-}
+/* ==========================================================================
+   Components
+   ========================================================================== */
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* ===== Composants personnalisés ===== */
 @layer components {
   .container-page {
-    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-shell px-5 sm:px-8;
   }
 
+  /* --- Section rhythm ------------------------------------------------- */
+  .section {
+    @apply py-20 sm:py-28;
+  }
+
+  .hairline {
+    @apply h-px w-full bg-line;
+  }
+
+  /* Small uppercase label that opens a section. */
+  .eyebrow {
+    @apply inline-flex items-center gap-2.5 font-mono text-micro font-medium uppercase text-ink-3;
+  }
+
+  .eyebrow::before {
+    content: "";
+    @apply block h-px w-6 bg-line-strong;
+  }
+
+  /* --- Buttons -------------------------------------------------------- */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.99];
+    @apply inline-flex select-none items-center justify-center gap-2 rounded-md text-small font-medium
+           transition-[background-color,border-color,color,box-shadow,transform] duration-150
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/35 focus-visible:ring-offset-2
+           disabled:pointer-events-none disabled:opacity-45 active:translate-y-px;
   }
 
+  /* Primary = ink. The accent is reserved for links and data. */
   .btn-primary {
-    @apply btn bg-slate-900 text-white shadow-sm hover:bg-slate-850 hover:shadow hover:text-white border border-slate-800;
+    @apply btn bg-ink text-white shadow-card hover:bg-graphite-700;
   }
 
   .btn-accent {
-    @apply btn bg-primary-600 text-white shadow-sm hover:bg-primary-700 hover:shadow-glow;
+    @apply btn bg-accent-600 text-white shadow-card hover:bg-accent-700;
   }
 
   .btn-secondary {
-    @apply btn border border-slate-200/90 bg-white text-slate-700 shadow-subtle hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900;
+    @apply btn border border-line-strong bg-surface text-ink-2 shadow-card hover:border-ink-4 hover:text-ink;
   }
 
   .btn-ghost {
-    @apply btn text-slate-600 hover:bg-slate-100/80 hover:text-slate-900;
+    @apply btn text-ink-2 hover:bg-sunken hover:text-ink;
   }
 
   .btn-danger {
-    @apply btn bg-rose-600 text-white hover:bg-rose-700 shadow-sm;
+    @apply btn bg-danger-600 text-white shadow-card hover:bg-danger-700;
   }
 
+  /* --- Form controls -------------------------------------------------- */
   .input {
-    @apply w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 shadow-subtle transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15;
+    @apply w-full rounded-md border border-line-strong bg-surface px-3.5 py-2.5 text-small text-ink
+           shadow-[inset_0_1px_1px_rgba(20,22,26,0.03)] transition
+           placeholder:text-ink-4
+           focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/15;
   }
 
   .label {
-    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-600;
+    @apply mb-1.5 block text-micro font-medium uppercase tracking-[0.08em] text-ink-2;
   }
 
+  /* --- Surfaces ------------------------------------------------------- */
   .card {
-    @apply rounded-xl border border-slate-200/80 bg-white shadow-card transition-all duration-200;
+    @apply rounded-xl border border-line bg-surface shadow-card;
   }
 
   .card-hover {
-    @apply hover:border-slate-300 hover:shadow-lift;
+    @apply transition duration-200 hover:border-line-strong hover:shadow-lift;
   }
 
+  /* Flat panel for dense data areas inside a page. */
+  .panel {
+    @apply rounded-lg border border-line bg-surface;
+  }
+
+  /* --- Badges --------------------------------------------------------- */
   .badge {
-    @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium tracking-tight;
+    @apply inline-flex items-center gap-1 rounded border px-1.5 py-0.5 font-mono text-[11px] font-medium leading-tight;
+  }
+
+  .badge-neutral {
+    @apply badge border-line bg-sunken text-ink-2;
   }
 
   .badge-risk-high {
-    @apply bg-rose-50 text-rose-700 border border-rose-200/80;
+    @apply badge border-danger-100 bg-danger-50 text-danger-700;
   }
 
   .badge-risk-medium {
-    @apply bg-amber-50 text-amber-700 border border-amber-200/80;
+    @apply badge border-warn-100 bg-warn-50 text-warn-700;
   }
 
   .badge-risk-low {
-    @apply bg-emerald-50 text-emerald-700 border border-emerald-200/80;
+    @apply badge border-ok-100 bg-ok-50 text-ok-700;
   }
 
-  /* Range slider styling */
-  input[type=range] {
-    @apply accent-primary-600 h-2 bg-slate-200 rounded-lg cursor-pointer;
+  /* --- Numeric display ------------------------------------------------ */
+  .figure {
+    @apply font-mono font-medium tracking-[-0.02em] text-ink nums;
   }
 
-  /* Reduced motion support */
+  /* --- Range inputs --------------------------------------------------- */
+  input[type="range"] {
+    @apply h-1.5 w-full cursor-pointer appearance-none rounded-full bg-line-strong accent-accent-600;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    @apply h-4 w-4 appearance-none rounded-full border-2 border-white bg-accent-600 shadow-card;
+  }
+
+  /* --- Browser / device frame used around real screenshots ------------ */
+  .frame {
+    @apply overflow-hidden rounded-xl border border-line bg-surface shadow-frame;
+  }
+
+  .frame-bar {
+    @apply flex items-center gap-2 border-b border-line bg-sunken px-3.5 py-2.5;
+  }
+
+  .frame-dot {
+    @apply h-2.5 w-2.5 rounded-full bg-line-strong;
+  }
+
+  /* --- Motion preferences --------------------------------------------- */
   @media (prefers-reduced-motion: reduce) {
-    .btn,
-    .card {
-      transform: none !important;
-      transition: none !important;
+    html {
+      scroll-behavior: auto;
     }
-    .animate-fadeUp,
-    .animate-fadeIn,
-    .animate-slideInRight {
-      animation: none !important;
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
     }
   }
 }
 
-/* ===== Custom scrollbar ===== */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+@layer utilities {
+  /* Faint grid used behind hero sections — printing-paper feel. */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(20, 22, 26, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(20, 22, 26, 0.035) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+
+  .mask-fade-b {
+    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
 }
+
+/* ==========================================================================
+   Scrollbar
+   ========================================================================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: theme('colors.slate.300');
-  border-radius: 8px;
+  background: theme("colors.line.strong");
+  border: 3px solid theme("colors.paper");
+  border-radius: 999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: theme('colors.slate.400');
+  background: theme("colors.ink.4");
 }

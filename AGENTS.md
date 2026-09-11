@@ -11,6 +11,10 @@ Monorepo with two real applications:
 
 Git remote: `https://github.com/titoune33/TalentPulse.git`.
 
+> **Read `frontend/DESIGN.md` before touching any UI.** It is the design system:
+> institutional light register, warm paper neutrals, a single cobalt accent, self-hosted
+> type scale. The marketing page and the app must keep looking like the same product.
+
 ## Structure du projet
 
 Le projet est isolé dans ce dossier (`TalentPulse/`) qui constitue un dépôt Git autonome.
@@ -178,11 +182,24 @@ backend (FastAPI)  /api/auth  /api/talents  /api/predictions  /api/billing
   formatted via `Intl.DateTimeFormat("fr-FR")`). Backend error `detail` strings are French too —
   keep them consistent when adding endpoints.
 - Frontend path alias: `@/*` → `frontend/*` (`tsconfig.json`).
-- Reusable Tailwind component classes are defined in `app/globals.css` (`@layer components`):
-  `container-page`, `btn`, `btn-primary`, `btn-secondary`, `btn-ghost`, `btn-danger`, `input`,
-  `label`, `card`, `badge`.
-- Custom design tokens (in `tailwind.config.ts`): `primary` (indigo scale), `surface`, `ink`,
-  shadows `card`/`lift`, animation `fadeUp`.
+- **Design system**: `frontend/DESIGN.md` is the source of truth. Reusable classes live in
+  `app/globals.css` (`@layer components`): `container-page`, `section`, `eyebrow`, `hairline`,
+  `btn-*`, `input`, `label`, `card`, `panel`, `badge-*`, `figure`, `frame`.
+- **Tokens** (`tailwind.config.ts`): warm neutrals (`paper`, `surface`, `sunken`, `line`),
+  `ink` / `ink-2` / `ink-3` / `ink-4` for text, a single `accent` cobalt scale (also aliased as
+  `primary` for legacy markup), deep semantics (`danger`, `warn`, `ok`) and `graphite-*` for the
+  dark bands. **Never reintroduce the default Tailwind palettes** (`slate-*`, `indigo-*`, `rose-*`,
+  `emerald-*`, `amber-*`, `blue-*`, `violet-*`): they are what made the product look generic.
+- **Typography is self-hosted** in `app/fonts/` and wired through `app/fonts.ts`: Inter (`font-sans`),
+  Instrument Serif (`font-display`, editorial accents only), IBM Plex Mono (`font-mono`, figures and
+  micro labels). Do not switch to `next/font/google` — that would make the build depend on network.
+- **Screenshots of the real product** power the landing page. Regenerate them with:
+  ```bash
+  cd frontend && npm run build
+  node e2e/static-server.mjs &            # serves out/ on :3000
+  node scripts/capture-screenshots.mjs    # writes public/product/*.png + public/og.png
+  ```
+  Marketing pages must show these captures, never an invented mockup.
 - Components live flat in `frontend/components/`. Shared formatting helpers in
   `frontend/lib/format.ts` (`pct`, `eur`, `dateFR`, `riskLabel`, …) — use them rather than inlining.
 - Backend services are plain classes exposing a module-level singleton

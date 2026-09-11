@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FileText, Download, Printer, AlertTriangle, Send, CheckCircle2 } from "lucide-react";
+import { FileText, Download, Printer, Send, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Badge, riskTone } from "@/components/Badge";
 import { Spinner } from "@/components/Spinner";
@@ -31,7 +31,7 @@ export default function ReportsPage() {
 
   if (!report) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-600">
+      <div className="rounded-lg border border-danger-100 bg-danger-50 p-6 text-small text-danger-700">
         Impossible de générer le rapport : aucune donnée disponible.
       </div>
     );
@@ -129,15 +129,16 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="space-y-7">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-900">Rapports</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Générez un rapport exécutif du risque de turnover de vos équipes.
+          <p className="eyebrow">Pilotage du risque</p>
+          <h2 className="mt-2 text-h2 font-semibold">Rapports</h2>
+          <p className="mt-1.5 max-w-2xl text-base text-ink-2">
+            Produisez la note de direction du risque de turnover et transmettez-la au Comex.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="secondary" onClick={() => window.print()}>
             <Printer className="h-4 w-4" />
             Imprimer / PDF
@@ -147,92 +148,103 @@ export default function ReportsPage() {
             Télécharger (.txt)
           </Button>
         </div>
-      </div>
+      </header>
 
       {!generated ? (
-        <div className="card flex flex-col items-center gap-4 p-10 text-center">
-          <div className="rounded-2xl bg-indigo-50 p-4">
-            <FileText className="h-10 w-10 text-indigo-600" />
+        <div className="card flex flex-col items-start gap-5 p-8 sm:p-10">
+          <div className="flex items-center gap-3">
+            <FileText className="h-5 w-5 shrink-0 text-ink-3" aria-hidden="true" />
+            <h3 className="text-title font-semibold">Rapport de risque de turnover</h3>
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-slate-900">
-              Rapport de risque de turnover
-            </h3>
-            <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
-              Synthèse de {stats?.total} collaborateurs, {predictions.length} prédictions et {report.atRisk.length} talents prioritaires.
-            </p>
-          </div>
+          <p className="max-w-xl text-base text-ink-2">
+            Synthèse de {stats?.total} collaborateurs, {predictions.length} prédictions et{" "}
+            {report.atRisk.length} talents prioritaires. Le document est daté, exportable et
+            imprimable tel quel.
+          </p>
           <Button onClick={() => setGenerated(true)}>
-            <FileText className="h-4 w-4" />
+            <FileText className="h-4 w-4" aria-hidden="true" />
             Générer le rapport
           </Button>
         </div>
       ) : (
-        <div className="card space-y-6 p-6 sm:p-8" id="print-area">
-          {/* Header premium */}
-          <div className="border-b border-slate-200 pb-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600">
+        <article className="card space-y-8 p-6 sm:p-8" id="print-area">
+          {/* En-tête typographique : la page doit se lire comme une note, pas comme un écran. */}
+          <header className="border-b border-line pb-6">
+            <p className="font-mono text-micro font-medium uppercase text-accent-700">
               TalentPulse · Rapport exécutif
             </p>
-            <h3 className="mt-1 text-2xl font-extrabold text-slate-900">
-              Rapport de risque de turnover
-            </h3>
-            <p className="mt-1 text-sm text-slate-500">
+            <h3 className="mt-3 text-h3 font-semibold">Rapport de risque de turnover</h3>
+            <p className="mt-2 font-mono text-small tracking-[0.01em] text-ink-3">
               Généré le {new Date().toLocaleDateString("fr-FR")} ·{" "}
               {new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
             </p>
-          </div>
+          </header>
 
-          {/* KPIs premium */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {/* KPI alignés en colonnes, sans ornement. */}
+          <div className="grid grid-cols-2 border-y border-line sm:grid-cols-4">
             {[
-              { label: "Effectif", value: String(stats?.total ?? 0), icon: <FileText className="h-4 w-4 text-slate-400" /> },
-              { label: "Risque moyen", value: pct(report.avgRisk), icon: <AlertTriangle className="h-4 w-4 text-slate-400" /> },
-              { label: "À risque élevé", value: String(report.atRisk.length), icon: <AlertTriangle className="h-4 w-4 text-red-500" /> },
-              { label: "Prédictions", value: String(predictions.length), icon: <FileText className="h-4 w-4 text-slate-400" /> },
+              { label: "Effectif", value: String(stats?.total ?? 0) },
+              { label: "Risque moyen", value: pct(report.avgRisk) },
+              { label: "À risque élevé", value: String(report.atRisk.length) },
+              { label: "Prédictions", value: String(predictions.length) },
             ].map((kpi) => (
-              <div key={kpi.label} className="rounded-xl bg-slate-50 p-4 text-center">
-                <div className="mb-1 flex justify-center">{kpi.icon}</div>
-                <p className="text-xs font-medium text-slate-500">{kpi.label}</p>
-                <p className="mt-1 text-xl font-extrabold text-slate-900">{kpi.value}</p>
+              <div
+                key={kpi.label}
+                className="border-line px-1 py-5 sm:border-r sm:px-5 sm:last:border-r-0"
+              >
+                <p className="font-mono text-micro font-medium uppercase text-ink-3">
+                  {kpi.label}
+                </p>
+                <p className="figure mt-2 text-h2">{kpi.value}</p>
               </div>
             ))}
           </div>
 
-          {/* Priority talents */}
-          <div>
-            <div className="mb-3 flex items-center justify-between">
-              <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900">
-                <AlertTriangle className="h-4 w-4 text-red-500" />
+          {/* Talents prioritaires — tableau dense à filets horizontaux. */}
+          <section>
+            <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+              <h4 className="text-title font-semibold">
                 Talents prioritaires ({report.atRisk.length})
               </h4>
               <Button variant="ghost" size="sm" onClick={downloadCsv}>
-                <Download className="h-3.5 w-3.5" />
+                <Download className="h-3.5 w-3.5" aria-hidden="true" />
                 Exporter tout en CSV
               </Button>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table className="w-full text-left text-small">
                 <thead>
-                  <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-400">
-                    <th className="py-2 pr-4 font-semibold">#</th>
-                    <th className="py-2 pr-4 font-semibold">Collaborateur</th>
-                    <th className="py-2 pr-4 font-semibold">Poste</th>
-                    <th className="py-2 pr-4 font-semibold">Département</th>
-                    <th className="py-2 pr-4 font-semibold">Embauche</th>
-                    <th className="py-2 font-semibold">Risque</th>
+                  <tr className="border-b border-line-strong">
+                    <th className="py-2.5 pr-4 font-mono text-micro font-medium uppercase text-ink-3">
+                      #
+                    </th>
+                    <th className="py-2.5 pr-4 font-mono text-micro font-medium uppercase text-ink-3">
+                      Collaborateur
+                    </th>
+                    <th className="py-2.5 pr-4 font-mono text-micro font-medium uppercase text-ink-3">
+                      Poste
+                    </th>
+                    <th className="py-2.5 pr-4 font-mono text-micro font-medium uppercase text-ink-3">
+                      Département
+                    </th>
+                    <th className="py-2.5 pr-4 font-mono text-micro font-medium uppercase text-ink-3">
+                      Embauche
+                    </th>
+                    <th className="py-2.5 font-mono text-micro font-medium uppercase text-ink-3">
+                      Risque
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {report.atRisk.map((t, i) => (
-                    <tr key={t.id} className="border-b border-slate-100 last:border-0">
-                      <td className="py-2.5 pr-4 font-bold text-slate-400">{i + 1}</td>
-                      <td className="py-2.5 pr-4 font-semibold text-slate-800">
+                    <tr key={t.id} className="border-b border-line last:border-0">
+                      <td className="py-2.5 pr-4 font-mono text-ink-4">{i + 1}</td>
+                      <td className="py-2.5 pr-4 font-medium text-ink">
                         {t.first_name} {t.last_name}
                       </td>
-                      <td className="py-2.5 pr-4 text-slate-600">{t.position ?? "—"}</td>
-                      <td className="py-2.5 pr-4 text-slate-600">{t.department ?? "—"}</td>
-                      <td className="py-2.5 pr-4 text-slate-600">{dateFR(t.hire_date)}</td>
+                      <td className="py-2.5 pr-4 text-ink-2">{t.position ?? "—"}</td>
+                      <td className="py-2.5 pr-4 text-ink-2">{t.department ?? "—"}</td>
+                      <td className="py-2.5 pr-4 text-ink-2">{dateFR(t.hire_date)}</td>
                       <td className="py-2.5">
                         <Badge tone={riskTone(t.turnover_risk)}>{pct(t.turnover_risk)}</Badge>
                       </td>
@@ -241,48 +253,50 @@ export default function ReportsPage() {
                 </tbody>
               </table>
             </div>
-          </div>
+          </section>
 
-          {/* Summary */}
-          <div>
-            <h4 className="mb-2 text-sm font-bold text-slate-900">Synthèse</h4>
-            <div className="rounded-xl bg-indigo-50 p-4 text-sm leading-relaxed text-slate-700">
-              {report.atRisk.length > 0 ? (
-                <>
-                  {report.atRisk.length} talent{report.atRisk.length > 1 ? "s" : ""} présente
-                  {report.atRisk.length > 1 ? "nt" : ""} un risque de départ supérieur à 70%.
-                  Le risque moyen de l'équipe est de {pct(report.avgRisk)}. Nous recommandons
-                  un entretien individuel sous 15 jours pour{" "}
-                  <strong>
-                    {report.atRisk[0].first_name} {report.atRisk[0].last_name}
-                  </strong>{" "}
-                  ({pct(report.atRisk[0].turnover_risk)} de risque), en priorité absolue.
-                </>
-              ) : (
-                "Aucun talent ne présente un risque critique. Poursuivez les pratiques actuelles de fidélisation."
-              )}
+          {/* Synthèse — encart sobre, filet latéral cobalt. */}
+          <section>
+            <h4 className="mb-3 text-title font-semibold">Synthèse</h4>
+            <div className="border-l-2 border-accent-600 bg-sunken px-5 py-4">
+              <p className="text-base leading-relaxed text-ink-2">
+                {report.atRisk.length > 0 ? (
+                  <>
+                    {report.atRisk.length} talent{report.atRisk.length > 1 ? "s" : ""} présente
+                    {report.atRisk.length > 1 ? "nt" : ""} un risque de départ supérieur à 70%.
+                    Le risque moyen de l&apos;équipe est de {pct(report.avgRisk)}. Nous recommandons
+                    un entretien individuel sous 15 jours pour{" "}
+                    <strong className="font-semibold text-ink">
+                      {report.atRisk[0].first_name} {report.atRisk[0].last_name}
+                    </strong>{" "}
+                    ({pct(report.atRisk[0].turnover_risk)} de risque), en priorité absolue.
+                  </>
+                ) : (
+                  "Aucun talent ne présente un risque critique. Poursuivez les pratiques actuelles de fidélisation."
+                )}
+              </p>
             </div>
-          </div>
+          </section>
 
-          {/* Share with the executive committee */}
-          <div className="border-t border-slate-200 pt-5">
+          {/* Diffusion au comité de direction */}
+          <footer className="border-t border-line pt-6">
             <Button variant="secondary" onClick={sendToDirection}>
-              <Send className="h-4 w-4" />
+              <Send className="h-4 w-4" aria-hidden="true" />
               Envoyer à la direction
             </Button>
             {sent ? (
-              <p className="mt-2 text-xs text-emerald-600 flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3" />
+              <p className="mt-2.5 flex items-center gap-1.5 text-small text-ok-700">
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                 Votre logiciel de messagerie s&apos;est ouvert avec le rapport pré-rempli.
               </p>
             ) : (
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2.5 max-w-2xl text-small text-ink-3">
                 Ouvre votre messagerie avec la synthèse prête à envoyer. Pour joindre une pièce,
                 téléchargez d&apos;abord le rapport.
               </p>
             )}
-          </div>
-        </div>
+          </footer>
+        </article>
       )}
     </div>
   );

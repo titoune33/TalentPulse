@@ -82,7 +82,7 @@ test.describe("Executive dashboard", () => {
     await expect(drawer.getByText(/\+20%/)).toBeVisible();
     await expect(simulated).not.toHaveText(before ?? "");
 
-    await drawer.getByRole("button", { name: "Fermer" }).click();
+    await drawer.getByRole("button", { name: "Fermer", exact: true }).click();
     await expect(drawer).toBeHidden();
   });
 });

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Users, AlertTriangle, Gauge, TrendingUp, Sparkles, ArrowRight, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { Users, AlertTriangle, Gauge, TrendingUp, Sparkles, ArrowRight, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { StatsCard } from "@/components/StatsCard";
-import { Chart } from "@/components/Chart";
+import { Chart, chartPalette } from "@/components/Chart";
 import { TalentTable } from "@/components/TalentTable";
 import { Spinner } from "@/components/Spinner";
 import { RetentionCopilotDrawer } from "@/components/RetentionCopilotDrawer";
@@ -26,7 +26,7 @@ export default function DashboardPage() {
 
   if (error || !stats) {
     return (
-      <div className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-700">
+      <div className="card border-danger-100 bg-danger-50 p-6 text-small text-danger-700">
         {error ?? "Impossible de charger les données."} Vérifiez que le backend
         est démarré, puis rechargez la page.
       </div>
@@ -43,9 +43,10 @@ export default function DashboardPage() {
           talents.filter((t) => t.turnover_risk >= 0.4 && t.turnover_risk < 0.7).length,
           talents.filter((t) => t.turnover_risk >= 0.7).length,
         ],
-        backgroundColor: ["#10b981", "#f59e0b", "#f43f5e"],
-        borderWidth: 0,
-        hoverOffset: 6,
+        backgroundColor: [chartPalette.ok, chartPalette.warn, chartPalette.danger],
+        borderColor: chartPalette.grid,
+        borderWidth: 2,
+        hoverOffset: 2,
       },
     ],
   };
@@ -69,30 +70,26 @@ export default function DashboardPage() {
   const financialRiskEstimate = Math.round(atRiskCount * (avgSalary * 0.5));
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* Header exécutif */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+    <div className="space-y-6 animate-fadeIn">
+      {/* En-tête de page — cf. DESIGN.md §5 */}
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
         <div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">
-            Tableau de Bord Exécutif
-          </h2>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Surveillance continue du turnover et diagnostic des risques de départs.
+          <p className="eyebrow">Pilotage du risque</p>
+          <h2 className="mt-2 text-h2 font-semibold">Tableau de Bord Exécutif</h2>
+          <p className="mt-1.5 max-w-2xl text-base text-ink-2">
+            Arbitrez où concentrer les entretiens de rétention ce mois-ci.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/predictions"
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-subtle hover:bg-slate-50 transition"
-          >
-            <Sparkles className="h-4 w-4 text-primary-600" />
+          <Link href="/predictions" className="btn-secondary">
+            <Sparkles className="h-3.5 w-3.5 text-accent-600" />
             Lancer un audit prédictif
           </Link>
         </div>
-      </div>
+      </header>
 
-      {/* KPI Cards Bento */}
+      {/* Bandeau de KPI */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatsCard
           title="Talents surveillés"
@@ -123,24 +120,22 @@ export default function DashboardPage() {
           title="Score de risque moyen"
           value={pct(avgRisk)}
           icon={<TrendingUp className="h-5 w-5" />}
-          tone="violet"
+          tone="slate"
           sub="Cohorte globale"
         />
       </div>
 
-      {/* Alertes & Bannière d'Action IA */}
+      {/* Alerte critique + déclenchement du plan d'action */}
       {atRiskCount > 0 && (
-        <div className="rounded-xl border border-rose-200 bg-gradient-to-r from-rose-50 to-orange-50/50 p-5 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="card border-l-2 border-l-danger-600 p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3.5">
-              <div className="rounded-lg bg-rose-100 p-2 text-rose-700">
-                <ShieldAlert className="h-5 w-5" />
-              </div>
+              <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-danger-600" aria-hidden />
               <div>
-                <p className="font-bold text-rose-900 text-sm">
+                <p className="text-small font-semibold text-ink">
                   {atRiskCount} collaborateur{atRiskCount > 1 ? "s" : ""} identifié{atRiskCount > 1 ? "s" : ""} en risque critique de départ
                 </p>
-                <p className="mt-0.5 text-xs text-rose-700">
+                <p className="mt-0.5 text-small text-ink-2">
                   Des entretiens 1-to-1 ciblés sont recommandés sous 15 jours pour éviter un départ non planifié.
                 </p>
               </div>
@@ -149,9 +144,9 @@ export default function DashboardPage() {
             {topRiskTalents.length > 0 && (
               <button
                 onClick={() => handleOpenCopilot(topRiskTalents[0])}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow hover:bg-slate-800 transition shrink-0"
+                className="btn-primary shrink-0"
               >
-                <Sparkles className="h-3.5 w-3.5 text-primary-400" />
+                <Sparkles className="h-3.5 w-3.5" />
                 Ouvrir le plan d'action ({topRiskTalents[0].first_name})
               </button>
             )}
@@ -159,123 +154,128 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Visualisations & Top Talents */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-        {/* Doughnut Chart */}
-        <div className="card p-6 lg:col-span-2 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-slate-900">
-                Répartition des Niveaux de Risque
-              </h3>
-              <span className="text-xs text-slate-400 font-mono">Modèle ML</span>
-            </div>
+      {/* Répartition du risque & priorités de rétention */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+        <section className="card p-5 lg:col-span-2">
+          <h3 className="text-title font-semibold">Répartition des Niveaux de Risque</h3>
+
+          <div className="mt-4">
             <Chart type="doughnut" data={riskDistribution} height={220} />
           </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-100 flex justify-between text-xs text-slate-500">
+          <div className="mt-5 flex items-center justify-between border-t border-line pt-4 text-small text-ink-3">
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" /> Stable
+              <span className="h-1.5 w-1.5 rounded-full bg-ok-600" aria-hidden /> Stable
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-amber-500" /> Modéré
+              <span className="h-1.5 w-1.5 rounded-full bg-warn-500" aria-hidden /> Modéré
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-rose-500" /> Critique
+              <span className="h-1.5 w-1.5 rounded-full bg-danger-600" aria-hidden /> Critique
             </span>
           </div>
-        </div>
+        </section>
 
-        {/* Top Risk Talents List */}
-        <div className="card p-6 lg:col-span-3">
-          <div className="mb-4 flex items-center justify-between">
+        <section className="card p-5 lg:col-span-3">
+          <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">
+              <h3 className="text-title font-semibold">
                 Top 5 des Talents Prioritaires à Retenir
               </h3>
-              <p className="text-xs text-slate-400">Cliquez sur un profil pour ouvrir son plan de rétention IA</p>
+              <p className="mt-0.5 text-small text-ink-3">
+                Ouvrez un profil pour construire son plan de rétention.
+              </p>
             </div>
             <Link
               href="/talents"
-              className="text-xs font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1"
+              className="inline-flex items-center gap-1.5 text-small font-medium text-accent-600 hover:text-accent-700"
             >
               Voir tous ({talents.length})
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
-          <div className="space-y-2.5">
+          <ul className="mt-3 divide-y divide-line">
             {topRiskTalents.map((t: Talent, i: number) => (
-              <div
-                key={t.id}
-                onClick={() => handleOpenCopilot(t)}
-                className="group flex items-center gap-3.5 rounded-lg border border-slate-100 p-3 hover:border-slate-300 hover:bg-slate-50/80 cursor-pointer transition"
-              >
-                <span className="w-5 text-center text-xs font-bold text-slate-400">
-                  #{i + 1}
-                </span>
+              <li key={t.id}>
+                <button
+                  type="button"
+                  onClick={() => handleOpenCopilot(t)}
+                  aria-label={`Ouvrir le plan de rétention de ${t.first_name} ${t.last_name}`}
+                  className="group -mx-2 flex w-full items-center gap-3.5 rounded px-2 py-2.5 text-left transition-colors hover:bg-sunken"
+                >
+                  <span className="figure w-5 shrink-0 text-right text-small text-ink-3">
+                    {i + 1}
+                  </span>
 
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white shadow-sm">
-                  {t.first_name[0]}
-                  {t.last_name[0]}
-                </div>
+                  <span
+                    aria-hidden
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-line bg-sunken font-mono text-micro font-medium text-ink-2"
+                  >
+                    {t.first_name[0]}
+                    {t.last_name[0]}
+                  </span>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p className="truncate text-sm font-semibold text-slate-900 group-hover:text-primary-600 transition">
-                      {t.first_name} {t.last_name}
-                    </p>
-                    <span
-                      className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${
-                        t.turnover_risk >= 0.7
-                          ? "bg-rose-50 text-rose-700 border border-rose-200/60"
-                          : t.turnover_risk >= 0.4
-                          ? "bg-amber-50 text-amber-700 border border-amber-200/60"
-                          : "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
-                      }`}
-                    >
-                      {pct(t.turnover_risk)}
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-baseline justify-between gap-2">
+                      <span className="truncate text-small font-medium text-ink group-hover:text-accent-600">
+                        {t.first_name} {t.last_name}
+                      </span>
+                      <span
+                        className={`figure shrink-0 text-small ${
+                          t.turnover_risk >= 0.7
+                            ? "text-danger-600"
+                            : t.turnover_risk >= 0.4
+                            ? "text-warn-600"
+                            : "text-ok-600"
+                        }`}
+                      >
+                        {pct(t.turnover_risk)}
+                      </span>
                     </span>
-                  </div>
 
-                  <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
-                    <span>{t.position ?? "—"}</span>
-                    <span>·</span>
-                    <span>{t.department ?? "—"}</span>
-                    {t.salary && <span>· {eur(t.salary)}</span>}
-                  </div>
-                </div>
+                    <span className="mt-0.5 flex items-center gap-2 text-small text-ink-3">
+                      <span className="truncate">{t.position ?? "—"}</span>
+                      <span aria-hidden>·</span>
+                      <span>{t.department ?? "—"}</span>
+                      {t.salary && <span className="figure">· {eur(t.salary)}</span>}
+                    </span>
+                  </span>
 
-                <div className="text-slate-400 group-hover:text-primary-600 transition">
-                  <Sparkles className="h-4 w-4" />
-                </div>
-              </div>
+                  <Sparkles
+                    className="h-4 w-4 shrink-0 text-ink-4 transition-colors group-hover:text-accent-600"
+                    aria-hidden
+                  />
+                </button>
+              </li>
             ))}
-          </div>
-        </div>
+          </ul>
+        </section>
       </div>
 
-      {/* Table complète des talents */}
-      <div className="card overflow-hidden">
-        <div className="flex items-center justify-between border-b border-slate-200/80 px-6 py-4">
+      {/* Registre détaillé des talents prioritaires */}
+      <section className="panel overflow-hidden">
+        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line px-5 py-4">
           <div>
-            <h3 className="text-sm font-bold text-slate-900">
-              Registre des Collaborateurs
-            </h3>
-            <p className="text-xs text-slate-400">Scores prédictifs et historique</p>
+            <p className="eyebrow">Détail</p>
+            <h3 className="mt-1.5 text-title font-semibold">Registre des Collaborateurs</h3>
+            <p className="mt-0.5 text-small text-ink-3">
+              Scores prédictifs, statut et leviers d'action des profils prioritaires.
+            </p>
           </div>
           <Link
             href="/talents"
-            className="flex items-center gap-1 text-xs font-semibold text-primary-600 hover:text-primary-700"
+            className="inline-flex items-center gap-1.5 text-small font-medium text-accent-600 hover:text-accent-700"
           >
-            Accéder à la gestion complète →
+            Accéder à la gestion complète
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
         <TalentTable
           talents={topRiskTalents}
           onOpenCopilot={handleOpenCopilot}
         />
-      </div>
+      </section>
 
       {/* Drawer Retention Copilot IA */}
       <RetentionCopilotDrawer

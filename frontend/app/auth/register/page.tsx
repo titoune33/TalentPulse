@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Zap, UserPlus } from "lucide-react";
+import { AlertCircle, UserPlus } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Field, Input } from "@/components/Field";
 import { useAuth } from "@/lib/auth";
@@ -41,26 +41,45 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white">
-          <Zap className="h-5 w-5" />
-        </div>
-        <span className="text-lg font-extrabold text-slate-900">TalentPulse</span>
-      </div>
+    <div>
+      {/* Wordmark — the left rail carries it from lg up. */}
+      <Link
+        href="/"
+        className="mb-10 inline-flex w-fit items-center gap-2.5 rounded lg:hidden"
+      >
+        <span className="flex h-8 w-8 items-center justify-center rounded-md bg-ink text-white">
+          <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
+            <path
+              d="M3 13h3.2l2.1-6.2 3.4 11.4 2.4-7.1 1.6 3.9H21"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+        <span className="text-[15px] font-semibold tracking-[-0.01em] text-ink">
+          Talent<span className="text-ink-3">Pulse</span>
+        </span>
+      </Link>
 
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900">
-          Créer votre compte
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Commencez à protéger vos talents dès aujourd'hui.
+      <header className="border-b border-line pb-5">
+        <p className="eyebrow">Nouveau workspace</p>
+        <h1 className="mt-2 text-h3 font-semibold">Créer votre compte</h1>
+        <p className="mt-1.5 text-small text-ink-2">
+          Vous devenez propriétaire du workspace et accédez immédiatement au tableau
+          de bord.
         </p>
-      </div>
+      </header>
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-          {error}
+        <div
+          role="alert"
+          className="mt-6 flex items-start gap-2.5 rounded-md border border-danger-100 bg-danger-50 px-3.5 py-3 text-small text-danger-700"
+        >
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+          <span>{error}</span>
         </div>
       )}
 
@@ -101,11 +120,11 @@ export default function RegisterPage() {
         </Button>
       </form>
 
-      <p className="mt-8 text-center text-sm text-slate-500">
+      <p className="mt-8 text-center text-small text-ink-2">
         Déjà inscrit ?{" "}
         <Link
           href="/auth/login"
-          className="font-semibold text-indigo-600 hover:text-indigo-700"
+          className="font-medium text-accent-600 underline underline-offset-4 transition-colors hover:text-accent-700"
         >
           Se connecter
         </Link>

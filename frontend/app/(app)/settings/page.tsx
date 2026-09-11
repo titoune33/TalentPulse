@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserRound, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Field, Input } from "@/components/Field";
 import { useAuth } from "@/lib/auth";
@@ -64,39 +64,33 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h2 className="text-2xl font-extrabold text-slate-900">Paramètres</h2>
-        <p className="mt-1 text-sm text-slate-500">
+    <div className="max-w-[720px]">
+      <header className="border-b border-line pb-5">
+        <p className="eyebrow">Pilotage du risque</p>
+        <h2 className="mt-2 text-h2 font-semibold">Paramètres</h2>
+        <p className="mt-1.5 max-w-2xl text-base text-ink-2">
           Gérez votre profil et la sécurité de votre compte.
         </p>
-      </div>
+      </header>
 
-      {/* Profile premium */}
-      <div className="card p-6">
-        <div className="mb-5 flex items-center gap-3">
-          <div className="rounded-xl bg-indigo-50 p-2.5">
-            <UserRound className="h-5 w-5 text-indigo-600" />
-          </div>
-          <div>
-            <h3 className="font-bold text-slate-900">Profil</h3>
-            <p className="text-xs text-slate-500">Vos informations personnelles</p>
-          </div>
-        </div>
+      {/* Profil — première section du formulaire. */}
+      <section className="border-b border-line py-8">
+        <h3 className="text-title font-semibold">Profil</h3>
+        <p className="mt-1 text-small text-ink-3">Vos informations personnelles.</p>
 
         {profileMsg && (
           <div
-            className={`mb-4 rounded-lg border px-4 py-3 text-sm ${
+            className={`mt-5 border-l-2 px-4 py-3 text-small ${
               profileMsg.tone === "success"
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                : "border-red-200 bg-red-50 text-red-600"
+                ? "border-ok-600 bg-ok-50 text-ok-700"
+                : "border-danger-600 bg-danger-50 text-danger-700"
             }`}
           >
             {profileMsg.text}
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Nom complet">
             <Input value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
@@ -108,39 +102,32 @@ export default function SettingsPage() {
             />
           </Field>
         </div>
-        <div className="mt-5 flex justify-end">
+        <div className="mt-6 flex justify-end">
           <Button onClick={saveProfile} loading={saving}>
-            <CheckCircle2 className="h-4 w-4" />
+            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
             Enregistrer
           </Button>
         </div>
-      </div>
+      </section>
 
-      {/* Security premium */}
-      <div className="card p-6">
-        <div className="mb-5 flex items-center gap-3">
-          <div className="rounded-xl bg-violet-50 p-2.5">
-            <ShieldCheck className="h-5 w-5 text-violet-600" />
-          </div>
-          <div>
-            <h3 className="font-bold text-slate-900">Sécurité</h3>
-            <p className="text-xs text-slate-500">Modifier votre mot de passe</p>
-          </div>
-        </div>
+      {/* Sécurité — deuxième section, séparée par le filet de la première. */}
+      <section className="py-8">
+        <h3 className="text-title font-semibold">Sécurité</h3>
+        <p className="mt-1 text-small text-ink-3">Modifier votre mot de passe.</p>
 
         {pwdMsg && (
           <div
-            className={`mb-4 rounded-lg border px-4 py-3 text-sm ${
+            className={`mt-5 border-l-2 px-4 py-3 text-small ${
               pwdMsg.tone === "success"
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                : "border-red-200 bg-red-50 text-red-600"
+                ? "border-ok-600 bg-ok-50 text-ok-700"
+                : "border-danger-600 bg-danger-50 text-danger-700"
             }`}
           >
             {pwdMsg.text}
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className="mt-6 space-y-4">
           <Field label="Mot de passe actuel">
             <Input
               type="password"
@@ -168,12 +155,12 @@ export default function SettingsPage() {
             </Field>
           </div>
         </div>
-        <div className="mt-5 flex justify-end">
+        <div className="mt-6 flex justify-end">
           <Button onClick={changePassword} loading={changing}>
             Mettre à jour le mot de passe
           </Button>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
