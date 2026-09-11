@@ -6,8 +6,8 @@ arc: Hook (cost) → Mechanism (score) → Evidence (critical cases) → Remedy 
 audience: DRH, DG et comités de direction (SaaS RH français)
 mode: autonomous
 music: none
-voice: "ElevenLabs · Daniel (Steady Broadcaster) · eleven_multilingual_v2"
-captions: skipped
+voice: none (removed)
+captions: burned-in French subtitles (six lines, one per scene)
 ---
 
 # Video direction
@@ -35,6 +35,18 @@ the top edge of the safe area, a mono eyebrow at its left, a mono counter at its
 IBM Plex Mono uppercase 0.20em. Positioned at **y ≈ 1000px**, in the safe margin below the capture,
 so it never covers a product figure. Enters with a 0.5s ease-out mask/rise, holds, exits on the cut.
 
+**Sous-titres.** Burned in, one line per scene, on the bottom band. They are **host-level clips**:
+`build-index.mjs` emits one `.tp-subtitle` per line as a direct child of `#root` on track 2, and a
+single root GSAP timeline fades each one in and out over 200 ms. The scenes know nothing about
+them. The strip's block is a fixed 1500px parked at x = 380 → its content box runs x 380→1824, so
+the line centres on **x ≈ 1102** and even the longest caption (1392px of glyphs, line 2) begins
+57px to the right of the surimpression column — that reserve is what keeps "no collision, ever"
+true at every timestamp. Scenes 01 and 06 (ink) take `#FAFAF8` text; scenes 02–05 (paper) take
+`#14161A`. There is **no backing plate**: the strip sits on plain ground, where the text already
+measures 16.3:1 / 16.1:1, and a plate wide enough to hold a caption could not clear the
+surimpression. Frame 06's centred `talentpulse.app` label is raised to y 966 for the same reason,
+and the ink frames' footer hairline moves from y 1032 to y 954.
+
 **Motion doctrine.** Calm, precise, ease-out only. `power2.out` / `power3.out` for entrances,
 `none`/`power1.inOut` for the continuous push-ins and the document scroll. Durations 0.5–1.1s
 entrances, then **hold** — every scene must be still for its last 40 % so the eye can read the
@@ -57,8 +69,10 @@ product stays crisp.
 - poster: 2.8s
 - transition_in: cut
 - status: animated
-- voiceover: "Un départ non anticipé coûte la moitié d'un salaire annuel."
-- voice_start: 0.0
+- caption: "Un départ non anticipé coûte la moitié d'un salaire annuel."
+- caption_start: 0.0
+- caption_end: 3.576
+- caption_variant: ink
 - src: compositions/frames/01-annonce.html
 
 Ground: full-bleed `ink`, with a single vertical hairline (`#2A2E35`, 1px, at x = 1488) rising
@@ -77,7 +91,8 @@ Ground: full-bleed `ink`, with a single vertical hairline (`#2A2E35`, 1px, at x 
   Inter-white. The three parts sit on two measured lines so the italic word reads as a correction,
   not decoration.
 - **2.30–3.10s** — Bottom-left minimal: `TALENTPULSE` in IBM Plex Mono 500, 0.20em, `#82868E`
-  (y=986). Bottom hairline at y=1032 in `#2A2E35`. Right side of the hairline carries `01 / 06`.
+  (y=908). Bottom hairline at y=954 in `#2A2E35`. Right side of the hairline carries `01 / 06`.
+  Both were raised 78px for the subtitle build, which owns the y 1020→1058 band.
 - **2.8–4.0s** — Full hold. Nothing moves. The plate is 62 % empty.
 
 ## Frame 2 — Le score (product in browser)
@@ -87,8 +102,10 @@ Ground: full-bleed `ink`, with a single vertical hairline (`#2A2E35`, 1px, at x 
 - poster: 5.5s
 - transition_in: cut
 - status: animated
-- voiceover: "TalentPulse note chaque collaborateur de zéro à cent pour cent, à partir de cinq signaux RH."
-- voice_start: 4.35
+- caption: "TalentPulse note chaque collaborateur de zéro à cent pour cent, à partir de cinq signaux RH."
+- caption_start: 4.35
+- caption_end: 9.25
+- caption_variant: paper
 - src: compositions/frames/02-score.html
 - asset_candidates: assets/product/dashboard.png
 
@@ -117,8 +134,10 @@ The capture occupies y=120→940 (820px = **76 % of frame height**), centred, in
 - poster: 4.4s
 - transition_in: cut
 - status: animated
-- voiceover: "Les profils critiques remontent en tête, avec l'exposition financière correspondante."
-- voice_start: 11.6
+- caption: "Les profils critiques remontent en tête, avec l'exposition financière correspondante."
+- caption_start: 10.85
+- caption_end: 15.7
+- caption_variant: paper
 - src: compositions/frames/03-cas-critiques.html
 - asset_candidates: assets/product/dashboard.png
 - handoff_in: same product surface as frame 2 — browser-frame chrome identical (white, 1px #D5D2C8, 4px radius, 48px #F3F2ED bar, three 9px #E6E4DD dots); only the inner crop differs, so the cut reads as a reframe, not a new object.
@@ -135,8 +154,9 @@ the applied crop, not from deriving it.
   continuity). The inner capture settles `scale 1.34 → 1.30` with `x/y` easing toward its crop
   (`power2.out`), so the reframe lands rather than cuts twice.
 - **0.45–1.10s** — Surimpression `CAS CRITIQUES ≥ 70 %` rises into place at x=104, y=1000.
-- **0.70–1.60s** — A small risk legend pinned bottom-right inside the safe area: three rows, each a
-  7px dot + mono label — `≥ 70 %` in `risk-high`, `40–69 %` in `risk-watch`, `< 40 %` in
+- **0.70–1.60s** — A small risk legend pinned bottom-right inside the safe area (y 972→990; its row
+  gap tightens from 26px to 18px in the subtitle build so its left edge stays clear of the caption):
+  three rows, each a 7px dot + mono label — `≥ 70 %` in `risk-high`, `40–69 %` in `risk-watch`, `< 40 %` in
   `risk-healthy`, with the three rows staggering 0.08s and fading up. This is the only place the
   semantic ladder appears as chrome.
 - **1.30–2.30s** — A thin cobalt bracket (two 1px rules + a 24px vertical tie) draws over the
@@ -153,8 +173,10 @@ the applied crop, not from deriving it.
 - poster: 4.8s
 - transition_in: cut
 - status: animated
-- voiceover: "Pour chacun : un diagnostic, un guide d'entretien et un simulateur de contre-mesure."
-- voice_start: 17.4
+- caption: "Pour chacun : un diagnostic, un guide d'entretien et un simulateur de contre-mesure."
+- caption_start: 16.35
+- caption_end: 21.6
+- caption_variant: paper
 - src: compositions/frames/04-plan-retention.html
 - asset_candidates: assets/product/plan-retention.png
 
@@ -183,8 +205,10 @@ Ground: `canvas`. Chrome: hairline y=64, eyebrow `LE PLAN`, counter `04 / 06`.
 - poster: 3.2s
 - transition_in: cut
 - status: animated
-- voiceover: "Et un rapport prêt pour le comité de direction."
-- voice_start: 23.2
+- caption: "Et un rapport prêt pour le comité de direction."
+- caption_start: 22.25
+- caption_end: 25.55
+- caption_variant: paper
 - src: compositions/frames/05-restitution.html
 - asset_candidates: assets/product/rapport.png
 
@@ -196,9 +220,11 @@ browser-frame geometry as frames 2/3 (y=120→940), at scale 1.0, so the report 
 - **0.30–4.1s** — Very slow push-in `scale 1.0 → 1.035`, `power1.inOut`, so the last product frame
   is still moving gently as the voice finishes.
 - **0.50–1.10s** — Surimpression `RESTITUTION DIRIGEANT` rises into place at x=104, y=1000.
-- **0.85–1.65s** — A hairline plate fades in at the top-right safe corner (x=1560→1816, y=112→196)
-  carrying one pulled figure in IBM Plex Mono 500 at 2.2cqw with a mono label above it. The figure
-  is `1 PAGE` / `COMEX` — sourced from the script's own claim, never invented.
+- **0.85–1.65s** — A hairline plate fades in at the bottom-right safe corner (x=1608→1816,
+  y=974→1026) carrying one pulled figure in IBM Plex Mono 500 with a mono label above it. The
+  figure is `1 PAGE` / `SORTIE COMEX` — sourced from the script's own claim, never invented. It was
+  256×84 at y=962 before the subtitle build; it is shortened to 208×52 and nudged right so it stays
+  clear of the caption strip, which is the only reason those numbers changed.
 - **1.65–4.1s** — Hold.
 
 ## Frame 6 — La signature (closing ink)
@@ -208,8 +234,10 @@ browser-frame geometry as frames 2/3 (y=120→940), at scale 1.0, so the report 
 - poster: 3.8s
 - transition_in: cut
 - status: animated
-- voiceover: "TalentPulse. Sachez qui va partir, avant qu'il ne démissionne."
-- voice_start: 26.1
+- caption: "TalentPulse. Sachez qui va partir, avant qu'il ne démissionne."
+- caption_start: 26.3
+- caption_end: 29.3
+- caption_variant: ink
 - src: compositions/frames/06-signature.html
 
 Ground: full-bleed `ink`. The paper of scenes 2–5 is gone — the bookend closes.
@@ -225,13 +253,20 @@ Ground: full-bleed `ink`. The paper of scenes 2–5 is gone — the bookend clos
 - **1.05–1.75s** — One line of Inter 400 at ≈1.6cqw in `#82868E` centred at y=560:
   « Sachez qui va partir, avant qu'il ne démissionne. » Fades up 12px as the stroke lands.
 - **1.55–2.25s** — Surimpression finale `talentpulse.app` in IBM Plex Mono 500, 0.20em, cobalt,
-  centred at y=880, under a centred 28×1px cobalt rule.
+  centred, under a centred 28×1px cobalt rule. **Raised to y=966 for the subtitle build**: this label
+  is centred on the same axis as the caption, so unlike the bottom-left surimpressions it cannot
+  dodge it sideways, and the caption strip owns y 1020→1058. Rule at y 966, text at y 980, box ends
+  ≈ 999 — 21px of clear air above the caption.
 - **2.25–3.40s** — Hold, fully still.
 - **4.55–4.9s** — A 0.35s fade of the whole ink plate to `#0C0E11` — the site's `graphite-950`,
   the only darkening in the film. No fade to black.
 
 ## Handoff notes
 
+- **The caption strip is a host-level layer, not scene furniture.** It is emitted by
+  `build-index.mjs` from `captions.json`, styled by `scene-base.css`, and sits on `#root` at
+  z-index 4 so it paints over every scene layer. A scene must never reposition it; if a scene's own
+  bottom furniture moves, the reserve it must respect is **x 380→1824, y 1020→1058**.
 - **Frames 2 → 3 → 5 share one browser-frame component geometry** (outer x=224→1696, y=120→940,
   4px radius, 1px `#D5D2C8`, 48px `#F3F2ED` bar, three 9px `#E6E4DD` dots at 20/38/56px from the
   bar's left). Each frame re-declares it identically; do not vary the numbers.

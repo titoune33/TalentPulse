@@ -180,13 +180,62 @@ le dashboard, le CRUD talents, les prédictions, les analytics, les rapports et 
 
 ## Déploiement
 
-- `render.yaml` — blueprint Render (Postgres + backend + frontend statique)
-- `netlify.toml`, `frontend/netlify.toml` — builds Netlify du frontend
-- `backend/Dockerfile` — image `python:3.12-slim`
-- `frontend/Dockerfile` — export statique servi par nginx
+Architecture retenue : **frontend sur Vercel**, **API + base PostgreSQL sur Render**.
 
-⚠️ `NEXT_PUBLIC_BACKEND_URL` est figé **au build** : changer d'API impose de reconstruire le
-frontend. Pensez aussi à ajouter l'origine du frontend dans `CORS_ORIGIN` côté backend.
+### Frontend — Vercel (en ligne, auto-déployé)
+
+| | |
+|---|---|
+| **URL de production** | https://talentpulse-inky.vercel.app |
+| **Projet** | `talentpulse` (équipe `titouwajds-projects`) |
+| **Déploiement** | automatique à chaque `git push` sur `main` |
+
+Le dépôt est un monorepo : la racine ne contient pas de `package.json`. Le `vercel.json`
+de la racine décrit donc explicitement le build (`cd frontend && npm run build`,
+sortie `frontend/out`) et active `cleanUrls`, indispensable pour que `/auth/login`
+serve `auth/login.html` au lieu d'une 404.
+
+Variable d'environnement requise (Production) :
+
+```
+NEXT_PUBLIC_BACKEND_URL = https://talentpulse-backend.onrender.com
+```
+
+> ⚠️ Cette valeur est **figée au build**. Changer d'API impose de redéployer le frontend.
+
+### Backend — Render (blueprint, un clic)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/titoune33/TalentPulse)
+
+Le lien ouvre le blueprint `render.yaml`, qui crée :
+
+- `talentpulse-db` — PostgreSQL managé
+- `talentpulse-backend` — l'API FastAPI (`rootDir: backend`)
+
+Tout est pré-rempli, y compris `CORS_ORIGIN` et `FRONTEND_URL` avec l'URL Vercel.
+Il n'y a **rien à saisir**.
+
+> [!warning] Pièges déjà résolus dans le blueprint, ne pas les réintroduire
+> - **`gunicorn` doit utiliser `uvicorn.workers.UvicornWorker`.** FastAPI est une application
+>   ASGI ; le worker `sync` par défaut lève
+>   `TypeError: FastAPI.__call__() missing 1 required positional argument: 'send'` et
+>   **tous les endpoints répondent 500**. C'est vérifiable en local :
+>   `python -m gunicorn main:app --bind 127.0.0.1:8101` → 500, avec `--worker-class
+>   uvicorn.workers.UvicornWorker` → 200.
+> - **Un seul worker** : le modèle ML s'entraîne et s'écrit sur disque au démarrage ;
+>   deux workers se marcheraient dessus au premier boot.
+> - **`PYTHON_VERSION=3.12`** est épinglé : le code utilise la syntaxe `X | None` (PEP 604).
+
+Plan gratuit Render : l'API s'endort après 15 min d'inactivité (premier appel ~30 s) et la
+base gratuite **expire au bout de 30 jours**. Pour une démonstration client, passez la base
+en `starter`.
+
+### Autres cibles
+
+- `netlify.toml`, `frontend/netlify.toml` — builds Netlify du frontend
+- `backend/Dockerfile` — image `python:3.12-slim` (utilisable sur Railway, Fly.io, un VPS…)
+- `frontend/Dockerfile` — export statique servi par nginx
+- `backend/vercel.json` — API en fonction serverless Vercel (nécessite une base externe)
 
 ---
 

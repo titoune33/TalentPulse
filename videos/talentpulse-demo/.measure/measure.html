@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1920, height=1080" />
     <style>
+      /* The real product face. Without this the harness fell back to a system sans whose
+         metrics are ~5% narrower than Inter's, and every width it reported was wrong. */
+      @font-face {
+        font-family: "Inter";
+        src: url("../assets/fonts/inter-latin.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: block;
+      }
       /* copy of compositions/scene-base.css (authoritative for this measurement) */
       __SHARED_CSS__
       * { margin: 0; padding: 0; box-sizing: border-box; }

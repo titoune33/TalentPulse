@@ -83,7 +83,7 @@ for (const [i, c] of caps.entries()) {
   const html = tpl
     .replace("__SHARED_CSS__", shared)
     .replace("__TEXT__", c.text.replace(/&/g, "&amp;").replace(/</g, "&lt;"))
-    .replace("</body>", '<script>document.getElementById("cap").style.opacity="1";</script>\n</body>');
+    .replace("</body>", '<script>document.getElementById("cap").style.opacity="1";document.getElementById("captext").style.background="#00FFFF";</script>\n</body>');
   writeFileSync(join(HERE, "run.html"), html);
   const png = join(HERE, "shot.png");
   execFileSync(
@@ -106,6 +106,7 @@ for (const [i, c] of caps.entries()) {
   // ink glyphs inside it are unambiguous against the sentinel: a pixel is "plate" when it
   // is neither magenta nor ink.
   const magenta = (r, g, b) => r > 200 && g < 60 && b > 200;
+  const cyan = (r, g, b) => r < 60 && g > 200 && b > 200;
   let minX = 1e9,
     maxX = -1,
     minY = 1e9,
@@ -116,7 +117,7 @@ for (const [i, c] of caps.entries()) {
       const r = data[o],
         g = data[o + 1],
         b = data[o + 2];
-      if (magenta(r, g, b) || inkish(r, g, b)) continue;
+      if (!cyan(r, g, b)) continue;
       if (x < minX) minX = x;
       if (x > maxX) maxX = x;
       if (y < minY) minY = y;

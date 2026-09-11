@@ -6,11 +6,15 @@
  * lands around 4.5 MB. `+faststart` moves the moov atom up front so the
  * browser can start playing before the whole file arrives.
  *
+ * `-an` keeps the delivery silent: this film has no voice-over (it was replaced
+ * by burned-in French subtitles) and no music. Without it, ffmpeg would happily
+ * carry through any audio stream the source happened to have.
+ *
  * Run after every render: `npm run render:publish`
  */
 
 import { execFileSync } from "node:child_process";
-import { mkdirSync, copyFileSync, statSync } from "node:fs";
+import { mkdirSync, statSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -18,8 +22,13 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "../..");
 const DEST_DIR = resolve(REPO, "frontend/public/product");
 
-/** Newest output of the last render. */
-const candidates = ["out/talentpulse-demo.mp4", "renders/talentpulse-demo.mp4", "out/video.mp4"];
+/** Newest output of the last render. `render.mjs` writes renders/video.mp4. */
+const candidates = [
+  "renders/video.mp4",
+  "out/talentpulse-demo.mp4",
+  "renders/talentpulse-demo.mp4",
+  "out/video.mp4",
+];
 let source = null;
 for (const candidate of candidates) {
   try {
@@ -45,12 +54,12 @@ execFileSync(
     "-i", source,
     "-c:v", "libx264", "-preset", "slow", "-crf", "21",
     "-pix_fmt", "yuv420p",
+    "-an",
     "-movflags", "+faststart",
-    "-c:a", "aac", "-b:a", "128k",
     target,
   ],
   { stdio: "inherit" }
 );
 
 const mb = (statSync(target).size / 1048576).toFixed(2);
-console.log(`✓ ${target} (${mb} Mo, faststart, CRF 21)`);
+console.log(`✓ ${target} (${mb} Mo, faststart, CRF 21, sans audio)`);

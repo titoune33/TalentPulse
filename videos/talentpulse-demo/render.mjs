@@ -2,11 +2,15 @@
 // render.mjs — Step 6 delivery for talentpulse-demo.
 //
 // 1. render the assembled composition at high quality
-// 2. MUX/VALIDATE the delivery file: the targets are 1920×1080 H.264 yuv420p + AAC with the
-//    moov atom first, so the <video> on the product page can start before the whole file lands.
-//    We never blindly re-encode: the picture is checked first and only the container/audio is
+// 2. MUX/VALIDATE the delivery file: the targets are 1920×1080 H.264 yuv420p with the moov
+//    atom first, so the <video> on the product page can start before the whole file lands.
+//    We never blindly re-encode: the picture is checked first and only the container is
 //    touched when it already conforms.
-// 3. extract the poster at 5.0s, then VERIFY it is not a black/empty frame.
+//    THIS BUILD IS SILENT. The voice-over was removed and replaced by burned-in French
+//    subtitles, so the delivery must carry NO audio stream at all — a leftover AAC track
+//    would be either silence or, worse, a stale voice. The check below fails on any audio
+//    stream, and both ffmpeg passes strip one with `-an`.
+// 3. extract the poster at 6.2s, then VERIFY it is not a black/empty frame.
 //
 // Usage: node render.mjs [--skip-render]
 
@@ -24,8 +28,9 @@ const DEST = join(DEST_DIR, "demo.mp4");
 const POSTER = join(DEST_DIR, "demo-poster.jpg");
 // Mid-scene-2. NOT 5.0s: scene 2 runs 4.0→10.5s and its surimpression only lands at local
 // 1.65s, i.e. video 5.65s — a poster grabbed at exactly 5.0s came out with the label still
-// invisible (verified by measuring the band, not by eye). 6.2s is local 2.2s: dashboard settled,
-// label in place, push-in still breathing.
+// invisible (verified by measuring the band, not by eye). 6.2s is local 2.2s: dashboard
+// settled, label in place, push-in still breathing, and the second subtitle (4.35→9.25s)
+// fully faded in, so the poster shows the product WITH its caption.
 const POSTER_AT = 6.2;
 
 const CLI = "hyperframes@0.8.34";
@@ -87,7 +92,12 @@ console.log(
     `${info.video?.pix_fmt} \u00b7 audio ${info.audio?.codec_name ?? "NONE"} \u00b7 ${r3(info.duration)}s ` +
     `\u00b7 ${(info.size / 1e6).toFixed(1)} MB`,
 );
-if (!info.audio) die("the render has NO audio track — the voice-over did not reach the mixer");
+if (info.audio)
+  die(
+    `the render carries an ${info.audio.codec_name} audio track — this film has no voice-over ` +
+      `and no music, so the delivery must be silent. Remove the <audio> element from the ` +
+      `composition; do not just mute it.`,
+  );
 if (info.video?.codec_name !== "h264" || info.video?.pix_fmt !== "yuv420p")
   die(
     `the render is ${info.video?.codec_name}/${info.video?.pix_fmt}; the delivery contract is ` +
@@ -98,7 +108,9 @@ if (info.video?.width !== 1920 || info.video?.height !== 1080)
 
 // ---------- 2b. container pass: moov atom must lead ----------
 // `+faststart` is a container operation. With -c copy it rewrites the sample tables only, so the
-// H.264 and AAC bitstreams stay identical to the render — no generational quality loss.
+// H.264 bitstream stays identical to the render — no generational quality loss. `-an` is
+// belt-and-braces on top of the no-audio contract above: if a stray stream ever appeared it is
+// dropped here rather than shipped.
 //
 // NOTE for anyone editing this: the first version of this file remuxed `RAW` to a temporary
 // `video.faststart.mp4` and then ran a SECOND `-c copy` from that temp to DEST. That second pass
@@ -136,6 +148,7 @@ let status = run("ffmpeg", [
   "-y", "-v", "error",
   "-i", RAW,
   "-c", "copy",
+  "-an",
   "-movflags", "+faststart",
   DEST,
 ]);
@@ -150,7 +163,7 @@ if (status !== 0 || !faststartOk(DEST)) {
     "-i", RAW,
     "-c:v", "libx264", "-preset", "slow", "-crf", "17",
     "-pix_fmt", "yuv420p", "-profile:v", "high", "-level", "4.1",
-    "-c:a", "aac", "-b:a", "192k",
+    "-an",
     "-movflags", "+faststart",
     DEST,
   ]);
@@ -164,12 +177,13 @@ if (!faststartOk(DEST))
 info = probe(DEST);
 console.log(
   `\u2713 ${DEST}\n  ${info.video?.codec_name} ${info.video?.width}\u00d7${info.video?.height} ` +
-    `${info.video?.pix_fmt} \u00b7 audio ${info.audio?.codec_name} \u00b7 ${r3(info.duration)}s`,
+    `${info.video?.pix_fmt} \u00b7 audio ${info.audio?.codec_name ?? "NONE"} \u00b7 ${r3(info.duration)}s`,
 );
+if (info.audio) die(`the delivered file still carries an audio stream (${info.audio.codec_name})`);
 
 // ---------- 3. poster ----------
-// Taken at 5.0s: scene 2's dashboard is fully settled, its overlay label has landed, and the
-// product fills the frame — never the black plate of scene 1.
+// Taken at 6.2s: scene 2's dashboard is fully settled, its overlay label has landed, the second
+// subtitle is fully faded in, and the product fills the frame — never the ink plate of scene 1.
 console.log(`\u25b8 poster at ${POSTER_AT}s…`);
 status = run("ffmpeg", [
   "-y", "-v", "error",

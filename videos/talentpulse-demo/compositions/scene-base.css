@@ -122,17 +122,30 @@
   --frame-h: 820px;
 
   /* --- subtitles (burned-in, French) --------------------------------------- */
-  /* The strip is anchored to the BOTTOM of the frame, centred, and its opaque
-     plate is the ground colour, so a caption never sits on a hairline or on the
-     product captures. */
-  --sub-bottom: 22px; /* plate bottom edge -> frame bottom */
-  --sub-plate-pad-x: 30px;
-  --sub-plate-pad-top: 12px;
-  --sub-plate-pad-bottom: 13px;
-  --sub-plate-radius: 4px;
-  --sub-font-size: 34px;
-  --sub-line-height: 1.35; /* 46px box */
-  --sub-max-width: 1440px; /* one line for every caption in this script */
+  /* The strip is anchored to the BOTTOM of the frame and CENTRED ON THE FRAME.
+
+     The left column is RESERVED for the surimpression. The brief's "no collision
+     with the bottom surimpression, ever" is what sizes this box. Measured, with
+     the real Inter face loaded (an earlier pass measured a system fallback, which
+     is ~5 % narrower and produced a caption that wrapped):
+
+       surimpression label ...... x 104 → 345   y 1015 → 1033
+       longest caption line ..... 1392px of glyphs (caption 2)
+       all six captions ......... 626 → 1392px
+
+     The caption block is therefore fixed at 1500px and the strip's content box is
+     x 380 → 1824, so the line is centred on x = 1102 and even the longest caption
+     starts at x 402 — 57px clear of the label — while the shortest is centred in
+     the same block, so all six share one centre and read as one subtitle track.
+
+     The block is a FIXED width rather than `fit-content` for exactly that reason:
+     with fit-content, short captions would centre differently from long ones. */
+  --sub-bottom: 22px; /* glyph box bottom -> frame bottom */
+  --sub-font-size: 32px;
+  --sub-line-height: 1.2; /* 38.4px line box */
+  --sub-max-width: 1500px; /* > the 1392px longest line, so nothing ever wraps */
+  --sub-strip-left: 380px; /* reserves the surimpression's column */
+  --sub-strip-right: 96px; /* free zone ends at x 1824 */
   /* The ink frames raise their footer hairline to make room for the strip; the
      paper frames keep the shared y=1032. Declared here so the change is one line
      per frame, never a redeclared geometry. */
@@ -504,36 +517,42 @@
      paper        scenes 02–05 (ground #FAFAF8) → text  ink    #14161A
      ink          scenes 01 / 06 (ground #14161A) → text  paper #FAFAF8
 
-   Contrast, both ≥ WCAG AA for body text:
+   Contrast, both ≥ WCAG AA for body text (AA needs 4.5:1 at this size):
      #14161A on #FAFAF8 = 16.35:1      #FAFAF8 on #14161A = 16.05:1
      (and 18.66:1 on the closing #0C0E11 plate of scene 06)
+   `npx hyperframes check`'s contrast audit reports 0 findings for the six
+   subtitle lines — they are the only text in the film that is not either a
+   surimpression, a piece of product chrome, or pixels inside a capture.
 
-   THE BACKING PLATE IS OPAQUE GROUND COLOUR, ON PURPOSE.
-   The brief allows a translucent plate — `rgba(250,250,248,0.86)` on paper,
-   `rgba(20,22,26,0.86)` on ink — and a translucent plate would composite to
-   `#F6F6F4` / `#1F2126` here, because there is nothing but ground behind the
-   strip. An opaque plate of the ground colour is the same pixels, but it is a
-   *measured* background instead of a composited one, so `hyperframes check`'s
-   contrast audit resolves the plate itself and reports the numbers above
-   rather than sampling whatever happens to sit behind the alpha. It is also
-   what guarantees no capture or hairline can ever show through a subtitle.
-
-   The plate is sized to its text (inline-flex), never full-bleed: it is the
-   caption's own measure, with 4px corners. There is no full-width band.
+   NO BACKING PLATE. The brief allows one ("si un fond de lisibilité est
+   nécessaire") but does not require it, and it is not necessary here: the
+   strip sits in the bottom margin on plain ground, so the text already carries
+   the ratios above. A plate was built and measured first — it could not be
+   fitted without covering the surimpression, because the caption line is
+   ~1320px of glyphs and the surimpression owns y 1015→1033 at x 104→345.
+   `check` reported exactly that as text_occluded on four captions. The options
+   were a smaller caption, moving the surimpressions off the bottom edge, or
+   text on its ground; the third was chosen because it changes nothing else in
+   the film. Details and the measured numbers are in README.md.
 
    FADE. Each caption is a timed clip, so the framework owns whether it is in
    the DOM; the root GSAP timeline (see build-index.mjs) fades `opacity`
    only — 200ms in, 200ms out. Never `autoAlpha`: see the hard rule at the
    top of this sheet. `.tp-subtitle` itself is the positioning wrapper and is
    never animated; `.tp-subtitle__text` is the animated box.
+
+   STACKING. The strip carries z-index 4 (declared next to the scene layer
+   order above) so a caption always paints over a scene's own furniture. On the
+   ink plates the caption is `#FAFAF8` and the scene 06 URL label is `#7D9AF2`;
+   without the z-index bump the `check` occlusion audit samples the wrong
+   colour pair for the two elements whose boxes cross.
    ========================================================================== */
 
 .tp-subtitle {
   position: absolute;
-  left: 0;
-  right: 0;
-  /* the strip's own box: bottom edge 22px off the frame, plate drawn from
-     y = 988 to y = 1058 for the 34px/1.35 caption ramp */
+  left: var(--sub-strip-left);
+  right: var(--sub-strip-right);
+  /* the strip's own box: glyph box bottom edge 22px off the frame bottom */
   bottom: var(--sub-bottom);
   display: flex;
   justify-content: center;
@@ -542,17 +561,14 @@
 }
 
 .tp-subtitle__text {
-  /* Shrink-wrap. MEASURED, not assumed: as a plain block child of the flex strip
-     this element stretched to the strip's full 1920px and its 12/13px padding then
-     made a 71px-tall plate whose box (y 987→1058) swallowed the surimpression text
-     at y 1015→1033 — `check` reported it as text_occluded on four captions. With
-     `width: fit-content` the plate IS the text box, so the strip can be parked just
-     under the overlay text instead of fighting it. */
-  display: inline-block;
-  width: fit-content;
-  max-width: var(--sub-max-width);
-  padding: var(--sub-plate-pad-top) var(--sub-plate-pad-x) var(--sub-plate-pad-bottom);
-  border-radius: var(--sub-plate-radius);
+  /* FIXED measure, not fit-content: see the note on --sub-max-width. The line is
+     centred inside the block, so all six captions share one centre and the block's
+     left edge can be parked clear of the surimpression's column. */
+  display: block;
+  width: var(--sub-max-width);
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
   font-family: var(--sans);
   font-weight: 500;
   font-style: normal;
@@ -564,14 +580,12 @@
   will-change: opacity;
 }
 
-/* paper plate — scenes 02–05 */
+/* paper ground — scenes 02–05: ink text, no plate */
 .tp-subtitle--paper .tp-subtitle__text {
-  background: var(--canvas);
   color: var(--ink);
 }
 
-/* ink plate — scenes 01 / 06 */
+/* ink ground — scenes 01 / 06: paper text, no plate */
 .tp-subtitle--ink .tp-subtitle__text {
-  background: var(--ink);
   color: var(--canvas);
 }

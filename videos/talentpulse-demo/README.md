@@ -1,7 +1,7 @@
 # talentpulse-demo — sources de la vidéo de démonstration produit
 
-Vidéo de démonstration produit de **30 s**, en français, avec voix off, pour le SaaS
-**TalentPulse**. Ce dossier vit **hors du build Next.js** : rien ici n'est importé par
+Vidéo de démonstration produit de **30 s**, en français, **sans voix off**, avec **sous-titres
+français incrustés**, pour le SaaS **TalentPulse**. Ce dossier vit **hors du build Next.js** : rien ici n'est importé par
 `frontend/app/` ou `frontend/components/`. Les seuls fichiers que la vidéo dépose dans
 l'application sont ses deux livrables, dans `frontend/public/product/`.
 
@@ -9,14 +9,14 @@ l'application sont ses deux livrables, dans `frontend/public/product/`.
 
 | Fichier | Ce que c'est |
 | --- | --- |
-| `frontend/public/product/demo.mp4` | 1920×1080, H.264 / yuv420p, AAC, ~30 s, `moov` en tête |
-| `frontend/public/product/demo-poster.jpg` | affiche 1920×1080 tirée de la scène 2 (produit visible) |
+| `frontend/public/product/demo.mp4` | 1920×1080, H.264 / yuv420p, **aucune piste audio**, ~30 s, `moov` en tête |
+| `frontend/public/product/demo-poster.jpg` | affiche 1920×1080 tirée de la scène 2 (produit visible, sous-titre affiché) |
 
 ## Reproduire
 
 ```bash
 cd videos/talentpulse-demo
-npm run build:index     # STORYBOARD.md + audio_meta.json → index.html
+npm run build:index     # STORYBOARD.md + captions.json → index.html
 npm run lint            # npx hyperframes@0.8.34 lint
 npm run check           # lint + runtime + layout + motion + contrast
 npm run snapshot        # planche contact des images clés
@@ -24,10 +24,11 @@ npm run render          # rendu + conteneur faststart + affiche + vérifications
 ```
 
 `npm run render` appelle `render.mjs`, qui : rend la composition en qualité haute, **vérifie**
-que la sortie est bien `h264`/`yuv420p`/1920×1080 avec une piste audio, réécrit le conteneur en
-`-c copy -movflags +faststart` (aucune perte de génération : les flux sont copiés), extrait
-l'affiche à **5,0 s**, et **mesure la luminance moyenne de l'affiche** pour refuser une image
-noire.
+que la sortie est bien `h264`/`yuv420p`/1920×1080 **et qu'elle ne porte aucune piste audio**
+(une piste résiduelle ferait échouer le script — ce film est muet), réécrit le conteneur en
+`-c copy -an -movflags +faststart` (aucune perte de génération : les flux sont copiés), extrait
+l'affiche à **6,2 s** (sous-titre 2 complètement installé), et **mesure la luminance moyenne de
+l'affiche** pour refuser une image noire.
 
 Version du CLI : **hyperframes 0.8.34**, épinglée dans `package.json`. Le projet a été créé avec
 `npx hyperframes init … --skill=product-launch-video` ; la route de composition est
@@ -38,9 +39,9 @@ Version du CLI : **hyperframes 0.8.34**, épinglée dans `package.json`. Le proj
 ```
 BRIEF.md              l'intention verrouillée (charte, voix, musique, mode, livrables)
 frame.md              le design system à l'échelle de l'image (frontmatter = normatif)
-SCRIPT.md             la voix off verrouillée, ligne par ligne, avec la grille de placement
+SCRIPT.md             le script verrouillé, ligne par ligne, avec la grille des sous-titres
 STORYBOARD.md         6 scènes, chacune avec sa séquence plan par plan et ses timecodes
-audio_meta.json       les 6 lignes de voix : fichier, début absolu, durée, texte
+captions.json         les 6 sous-titres : texte, début, durée, variante de couleur
 build-index.mjs       assemble index.html (voir « Deux écarts assumés » ci-dessous)
 render.mjs            rendu, conteneur, affiche, vérifications
 compositions/
@@ -49,12 +50,12 @@ compositions/
 assets/
   product/            les 7 captures réelles du produit (copiées de frontend/public/product/)
   fonts/              Inter, Instrument Serif, IBM Plex Mono (copiées de frontend/app/fonts/)
-  voice/01.mp3 … 06.mp3   la voix off ElevenLabs, une ligne par fichier
+  voice/01.mp3 … 06.mp3   l'ANCIENNE voix off ElevenLabs — plus référencée par rien
   brand/talentpulse-pulse.svg   le tracé « pulse » du produit, copié verbatim
 capture/extracted/    tokens.json / visible-text.txt (mode sans capture : écrits à la main)
 .hyperframes/
   frame-packets/      les paquets de travail par scène (traçabilité de la construction)
-  caption-skin.html   la peau de sous-titres du preset (non utilisée : pas de sous-titres)
+  caption-skin.html   la peau de sous-titres du preset (non utilisée : la nôtre vit dans scene-base.css)
 renders/              la sortie brute du CLI avant habillage
 ```
 
