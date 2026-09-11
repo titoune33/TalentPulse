@@ -2,7 +2,7 @@
   "name": "talentpulse-demo",
   "private": true,
   "type": "module",
-  "description": "Sources reproductibles de la vidéo de démonstration produit TalentPulse (30 s, FR, voix off). Hors du build Next.js.",
+  "description": "Sources reproductibles de la vidéo de démonstration produit TalentPulse (30 s, FR, sous-titres incrustés, sans voix off ni piste audio). Hors du build Next.js.",
   "scripts": {
     "build:index": "node build-index.mjs --hyperframes .",
     "dev": "npx --yes hyperframes@0.8.34 preview",

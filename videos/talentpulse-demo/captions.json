@@ -1,6 +1,6 @@
 {
   "total_duration_s": 30.9,
-  "note": "The six French subtitle lines, burned in. Replaces audio_meta.json: this build has NO voice-over at all (no <audio> element, no AAC stream in the delivery). The placement grid is deliberately NOT the old voice grid — the speech ran 29.21s across 30.9s of scenes, while a subtitle only has to be readable inside its own scene. Each window therefore starts just after its scene's cut and ends shortly before the next one, so no caption ever straddles a cut. Text is verbatim from SCRIPT.md and is not rewritten. `variant` picks the colour pair from the scene ground: `ink` for the ink plates (scenes 01 / 06), `paper` for the paper plates (scenes 02–05).",
+  "note": "The French subtitle lines, burned in. Replaces audio_meta.json: this build has NO voice-over at all (no <audio> element, no AAC stream in the delivery). The placement grid is deliberately NOT the old voice grid — the speech ran 29.21s across 30.9s of scenes, while a subtitle only has to be readable inside its own scene. Each window therefore starts just after its scene's cut and ends shortly before the next one, so no caption ever straddles a cut. Text is verbatim from SCRIPT.md and is not rewritten. `variant` picks the colour pair from the scene ground: `ink` for the ink plates, `paper` for the paper plates (scenes 02-05). SCENE 06 CARRIES NO CAPTION ON PURPOSE: its line is already on screen as the signature line drawn by 06-signature.html ('Sachez qui va partir, avant qu'il ne demissionne.'), and burning the identical sentence underneath it for the last three seconds read as a duplicate rather than as a subtitle. The line is therefore withheld, not lost — the closing scene keeps its wordmark, pulse stroke and talentpulse.app label, and the film's last 4.9s breathe without a caption. Do not add a sixth entry back without a reason.",
   "fade_s": 0.2,
   "captions": [
     {
@@ -42,14 +42,6 @@
       "start_s": 22.25,
       "duration_s": 3.3,
       "text": "Et un rapport prêt pour le comité de direction."
-    },
-    {
-      "frame": 6,
-      "scene": "06-signature",
-      "variant": "ink",
-      "start_s": 26.3,
-      "duration_s": 3.0,
-      "text": "TalentPulse. Sachez qui va partir, avant qu'il ne démissionne."
     }
   ]
 }

@@ -455,7 +455,6 @@ export default function LandingPage() {
                   <span className="frame-dot" />
                   <span className="ml-3 font-mono text-[11px] text-ink-3">demo — 0:30</span>
                 </div>
-                {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                 <video
                   className="h-auto w-full bg-graphite-900"
                   controls
@@ -471,7 +470,7 @@ export default function LandingPage() {
 
               <div className="mt-6 flex flex-col items-center justify-between gap-3 sm:flex-row">
                 <p className="font-mono text-micro uppercase text-ink-3">
-                  Muet par défaut · Voix off française
+                  Sans son · Sous-titres français incrustés
                 </p>
                 <Link
                   href="/auth/login"

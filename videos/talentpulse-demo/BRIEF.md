@@ -24,6 +24,8 @@ screens are the video's main visuals** — no invented mock-ups.
 
 ## Customizations
 
+- **Subtitles replace the voice-over** (see `## Captions`) — the one change that supersedes the
+  original brief below.
 - **Feature the captured screens as the assets.** Every product frame uses a real screenshot.
 - **Style preset:** `blue-professional` (consulting-grade restraint, single accent, no shadow) —
   chosen because it is the closest shipped preset to the requester's locked charte. Its palette
@@ -37,42 +39,64 @@ screens are the video's main visuals** — no invented mock-ups.
   transitions. Motion must be calm and precise on soft ease-out.
 - **Layout constraint:** the main capture never drops below ~55 % of frame height.
 - **Surimpressions:** IBM Plex Mono, uppercase, very small, tracked — like the site's own labels.
-- **Captions:** none. The French voice-over carries comprehension; see `## Captions`.
-- **Deliverables:** `frontend/public/product/demo.mp4` (1920×1080, H.264, yuv420p, AAC, ~30 s,
-  `moov` atom first) and `frontend/public/product/demo-poster.jpg`.
+- **Captions:** burned-in French subtitles for scenes 01–05 (see `## Captions`). Scene 06 carries
+  no caption — its line is already set by the frame as the signature line. The voice-over that
+  originally carried comprehension has been **removed**.
+- **Deliverables:** `frontend/public/product/demo.mp4` (1920×1080, H.264, yuv420p,
+  **no audio stream**, ~30 s, `moov` atom first) and `frontend/public/product/demo-poster.jpg`.
 
 ## Captions
 
-`captions: skipped (brief explicitly rules out burned-in subtitles; the voice-over suffices)`.
+`captions: burned-in French subtitles (five lines, scenes 01-05; scene 06 carries its line as artwork)` — this **supersedes** the original
+brief, which read `captions: skipped (brief explicitly rules out burned-in subtitles; the
+voice-over suffices)`. The follow-up request removed the voice-over entirely and asked for the same
+six sentences as burned-in subtitles, with the constraints below. The grid lives in
+`captions.json`; the skin lives in `compositions/scene-base.css`; `README.md` documents how it was
+measured.
+
+- **Type:** Inter only (already in `assets/fonts/`), weight 500, no italic.
+- **Scene 06 has no caption on purpose**: it is the only scene whose own artwork already sets the
+  script line in full, so a caption there duplicated it verbatim on the closing card.
+- **Colour:** ink `#14161A` on the paper scenes (02–05), paper `#FAFAF8` on the ink scenes (01/06) —
+  both ≥ 16:1, i.e. comfortably past AA.
+- **No full-width opaque band.** No backing plate at all: the strip sits on plain ground, and a
+  plate wide enough to hold the longest line (1392px) could not clear the bottom-left
+  surimpression. Measured, not assumed.
+- **No collision with the bottom surimpression, ever.** The caption block reserves the
+  surimpression's column (anchored at x 380), and the two elements that could not move out of its
+  way — frame 06's centred `talentpulse.app` label, and the ink frames' footer hairline — were
+  raised instead.
+- **Fade:** 200 ms in, 200 ms out, opacity only.
+- **Breathing room:** nothing on screen during the first 0.5 s or the last 1.5 s.
 
 ## Voice
 
-- **Provider:** ElevenLabs, reached through the Zapier MCP app (`elevenlabs_convert_text_to_speech`).
-  HyperFrames' own path was unavailable: `hyperframes auth status` reports *not signed in to
-  HeyGen*, and the `heygen` CLI is not installed, so `media-use`'s BGM/voice resolver has no
-  provider. ElevenLabs was the reliable path and it is the one the requester named.
-- **Voice:** Daniel — *Steady Broadcaster* (`onwK4e9ZLuTAKqWW03F9`), model `eleven_multilingual_v2`,
-  output `mp3_44100_128`. Chosen for a calm, posed, executive register (not advertising-bright).
-- **Per-line files:** `assets/voice/01.mp3` … `06.mp3`, one per scene, generated separately so each
-  line could be placed at its own timecode rather than inheriting a container's padding.
-- **Measured durations (s):** 3.576 · 6.873 · 5.619 · 6.316 · 2.461 · 4.365 → **29.21 s of speech**.
+**Removed.** The film carries no audio stream at all — no voice-over, no music, no SFX. The original
+build's narration (ElevenLabs *Daniel — Steady Broadcaster*, `eleven_multilingual_v2`, one
+`assets/voice/NN.mp3` per scene) is preserved on disk but is no longer referenced by anything:
+`audio_meta.json` was deleted and replaced by `captions.json`, `build-index.mjs` emits no `<audio>`
+element, and both `render.mjs` and `publish.mjs` strip audio and **fail** if a stream is present.
+The original measured speech durations were 3.576 · 6.873 · 5.619 · 6.316 · 2.461 · 4.365 s
+(29.21 s); the subtitle windows are a different, tighter grid because a caption only has to be
+readable inside its own scene — see `SCRIPT.md`.
 
-## Timing policy (locked script, adjusted silences)
+## Timing policy (locked script, locked scene grid, new caption grid)
 
-The script text is untouched. The requester authorised shortening **silences** rather than speeding
-the voice up, and the delivered line table's windows sum to exactly 30 s while the speech itself
-runs 29.21 s — so the scene boundaries were nudged, never the words. Scene boundaries and voice
-starts therefore differ. Full table in `STORYBOARD.md` / `SCRIPT.md`; `audio_meta.json` carries the
-authoritative per-line start.
+The script text is untouched and the six scene windows are unchanged (30.9 s total). The caption
+starts are **not** the old voice starts: each window opens just after its scene's cut and closes
+just before the next one, so no caption straddles a cut, and the first 0.5 s and last 1.5 s of the
+film stay empty. Full table in `SCRIPT.md`; `captions.json` carries the authoritative per-line
+start and duration.
 
 ## Music
 
-- **Provider:** none available. HeyGen is signed out, the `heygen` CLI is absent, so `media-use`'s
-  BGM resolver has no catalogue; ElevenLabs via Zapier exposes text-to-speech only (no music
-  generation). No royalty-free track could be **obtained and licensed** in this run.
-- **Decision:** ship **voice alone, clean** — the explicit fallback the brief allows ("sinon, voix
-  seule et propre"). No improvised synthesiser bed: a synthetic drone under an executive voice-over
-  would read as cheap and would risk the calm register.
+- **Provider:** none available. HeyGen is signed out and the `heygen` CLI is absent, so
+  `media-use`'s BGM resolver has no catalogue. No royalty-free track could be **obtained and
+  licensed** in this run.
+- **Decision:** the film is **entirely silent**. With the narration gone, a music bed would be the
+  only sound in the piece, which changes its register rather than supporting it; the original brief
+  allowed "voix seule et propre", and the honest extension of that fallback to a caption-only cut is
+  no bed at all. No improvised synthesiser drone.
 - `music: none` in `STORYBOARD.md`; there are no SFX cues either.
 
 ## Run shape

@@ -7,7 +7,7 @@ audience: DRH, DG et comités de direction (SaaS RH français)
 mode: autonomous
 music: none
 voice: none (removed)
-captions: burned-in French subtitles (six lines, one per scene)
+captions: burned-in French subtitles (five lines, scenes 01-05; scene 06 carries its line as artwork)
 ---
 
 # Video direction
@@ -35,13 +35,15 @@ the top edge of the safe area, a mono eyebrow at its left, a mono counter at its
 IBM Plex Mono uppercase 0.20em. Positioned at **y ≈ 1000px**, in the safe margin below the capture,
 so it never covers a product figure. Enters with a 0.5s ease-out mask/rise, holds, exits on the cut.
 
-**Sous-titres.** Burned in, one line per scene, on the bottom band. They are **host-level clips**:
-`build-index.mjs` emits one `.tp-subtitle` per line as a direct child of `#root` on track 2, and a
-single root GSAP timeline fades each one in and out over 200 ms. The scenes know nothing about
-them. The strip's block is a fixed 1500px parked at x = 380 → its content box runs x 380→1824, so
+**Sous-titres.** Burned in for scenes 01–05 (one line each), on the bottom band. They are
+**host-level clips**: `build-index.mjs` emits one `.tp-subtitle` per line as a direct child of
+`#root` on track 2, and a single root GSAP timeline fades each one in and out over 200 ms. The
+scenes know nothing about them. **Scene 06 has no caption**: its line is already on screen as that
+frame's own signature line, so burning the same sentence underneath it was a verbatim duplicate on
+the closing card — the one image that stays in the mind. The line is withheld, not lost. The strip's block is a fixed 1500px parked at x = 380 → its content box runs x 380→1824, so
 the line centres on **x ≈ 1102** and even the longest caption (1392px of glyphs, line 2) begins
 57px to the right of the surimpression column — that reserve is what keeps "no collision, ever"
-true at every timestamp. Scenes 01 and 06 (ink) take `#FAFAF8` text; scenes 02–05 (paper) take
+true at every timestamp. Scene 01 (ink) takes `#FAFAF8` text; scenes 02–05 (paper) take
 `#14161A`. There is **no backing plate**: the strip sits on plain ground, where the text already
 measures 16.3:1 / 16.1:1, and a plate wide enough to hold a caption could not clear the
 surimpression. Frame 06's centred `talentpulse.app` label is raised to y 966 for the same reason,
@@ -234,10 +236,11 @@ browser-frame geometry as frames 2/3 (y=120→940), at scale 1.0, so the report 
 - poster: 3.8s
 - transition_in: cut
 - status: animated
-- caption: "TalentPulse. Sachez qui va partir, avant qu'il ne démissionne."
-- caption_start: 26.3
-- caption_end: 29.3
-- caption_variant: ink
+- caption: none — scene 06's line is already set by the frame itself as the signature line; a
+  burned-in subtitle would duplicate it verbatim on the same screen for the last three seconds
+- caption_start: null
+- caption_end: null
+- caption_variant: none
 - src: compositions/frames/06-signature.html
 
 Ground: full-bleed `ink`. The paper of scenes 2–5 is gone — the bookend closes.
@@ -266,7 +269,10 @@ Ground: full-bleed `ink`. The paper of scenes 2–5 is gone — the bookend clos
 - **The caption strip is a host-level layer, not scene furniture.** It is emitted by
   `build-index.mjs` from `captions.json`, styled by `scene-base.css`, and sits on `#root` at
   z-index 4 so it paints over every scene layer. A scene must never reposition it; if a scene's own
-  bottom furniture moves, the reserve it must respect is **x 380→1824, y 1020→1058**.
+  bottom furniture moves, the reserve it must respect is **x 380→1824, y 1020→1058**. Note that
+  scene 06 declares no caption, so that reserve is unused there — its `talentpulse.app` label was
+  nonetheless left raised at y 966, because the film must stay correct if a caption is ever added
+  back.
 - **Frames 2 → 3 → 5 share one browser-frame component geometry** (outer x=224→1696, y=120→940,
   4px radius, 1px `#D5D2C8`, 48px `#F3F2ED` bar, three 9px `#E6E4DD` dots at 20/38/56px from the
   bar's left). Each frame re-declares it identically; do not vary the numbers.

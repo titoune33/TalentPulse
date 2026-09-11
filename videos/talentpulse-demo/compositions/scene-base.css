@@ -101,19 +101,19 @@
      y=1000. The viewport is therefore 1472×771, i.e. 71 % of frame height — the
      capture stays the subject. */
 
-  /* BOTTOM-BAND BUDGET (subtitle build). The burned-in subtitle strip owns
-     y 1000→1058 and x 240→1680, so every other piece of bottom furniture has to
-     stay out of that box:
-       · surimpression (bottom-left) .... y 1000→1018, x 104→~990   (in the box, left
-                                                                     of the centred text)
-       · ink footer hairline (01 / 06) .. y 954                    (raised from 1032)
-       · f5 "SORTIE COMEX" plate ........ x 1608→1816, h 52        (shortened + pushed
-                                                                     right of the text)
-       · f2 / f3 bottom-right captions .. y 1000, left edge ≥ 1470 (risk rows tightened
-                                                                     from 26px to 18px)
-       · subtitle text ................... y 1002→1044
-     The subtitle's own backing plate is drawn at y 988→1058 so its padding frames
-     that text. Measured from rendered frames, not assumed. */
+  /* BOTTOM-BAND BUDGET (subtitle build). Every piece of bottom furniture, read off
+     the rendered frame with the .measure/ harness — the subtitle block is anchored at
+     x 380 and does NOT cross the surimpression's column:
+       · subtitle line ............ x 402→1772  y 1020→1058   (the strip's own band)
+       · surimpression rule ....... x 104→132   y 1000→1001
+       · surimpression label ...... x 104→345   y 1015→1033   (60px left of the text)
+       · ink footer hairline ...... x 104→1816  y 954         (raised from 1032)
+       · f2 bottom-right caption .. x 1547→1816 y 1000→1016
+       · f3 risk legend ........... x 1508→1816 y  972→990    (rows tightened 26→18px)
+       · f5 figure plate .......... x 1608→1816 y  974→1026   (shortened 84→52px,
+                                                                nudged right 1560→1608)
+     No pair paints over another; `hyperframes check` reports zero layout findings for
+     the subtitles. Re-measure with `.measure/` if any of these offsets move. */
 
   --chrome-h: 48px;
   --frame-x: 224px;
@@ -122,7 +122,8 @@
   --frame-h: 820px;
 
   /* --- subtitles (burned-in, French) --------------------------------------- */
-  /* The strip is anchored to the BOTTOM of the frame and CENTRED ON THE FRAME.
+  /* The strip is anchored to the BOTTOM of the frame, and the CAPTION is centred
+     inside it — on x = 1102 rather than on the frame's 960, for the reason below.
 
      The left column is RESERVED for the surimpression. The brief's "no collision
      with the bottom surimpression, ever" is what sizes this box. Measured, with
@@ -146,9 +147,9 @@
   --sub-max-width: 1500px; /* > the 1392px longest line, so nothing ever wraps */
   --sub-strip-left: 380px; /* reserves the surimpression's column */
   --sub-strip-right: 96px; /* free zone ends at x 1824 */
-  /* The ink frames raise their footer hairline to make room for the strip; the
-     paper frames keep the shared y=1032. Declared here so the change is one line
-     per frame, never a redeclared geometry. */
+  /* Frames 01 and 06 raise their footer hairline to make room for the strip;
+     frames 02–05 do not use these. Declared here so a frame changes one line, never
+     a geometry. */
   --ink-footer-rule-top: 954px;
   --ink-footer-meta-top: 908px;
 }
